@@ -29,6 +29,10 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
   final _title = TextEditingController();
   final _drafts = <SeriesDraft>[];
 
+  /// Index of the currently expanded series card (-1 = all collapsed). Only one
+  /// is open at a time to keep the list short.
+  int _expanded = 0;
+
   @override
   void initState() {
     super.initState();
@@ -45,9 +49,18 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
   SeriesDraft _newDraft() =>
       SeriesDraft(color: kChartPalette[_drafts.length % kChartPalette.length]);
 
-  void _addSeries() => setState(() => _drafts.add(_newDraft()));
+  void _addSeries() => setState(() {
+        _drafts.add(_newDraft());
+        _expanded = _drafts.length - 1; // open the new one
+      });
 
-  void _removeSeries(int index) => setState(() => _drafts.removeAt(index));
+  void _removeSeries(int index) => setState(() {
+        _drafts.removeAt(index);
+        if (_expanded >= _drafts.length) _expanded = _drafts.length - 1;
+      });
+
+  void _toggle(int index) =>
+      setState(() => _expanded = _expanded == index ? -1 : index);
 
   bool get _canSave => _drafts.any((d) => d.metricId != null);
 
@@ -76,81 +89,111 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
     final l = AppLocalizations.of(context);
     final metrics = ref.watch(metricsProvider(widget.brokerId));
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.7,
-        minChildSize: 0.4,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) => metrics.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('$e')),
-          data: (list) {
-            return ListView(
-              controller: scrollController,
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              children: [
-                SheetHeader(title: l.addCurve),
-                const SizedBox(height: AppSpacing.lg),
-                // 1) Chart title comes first.
-                TextField(
-                  controller: _title,
-                  decoration: InputDecoration(labelText: l.chartTitle),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                if (list.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                    child: Text(l.noMetrics),
-                  )
-                else ...[
-                  // 2) One or more metric series.
-                  for (var i = 0; i < _drafts.length; i++)
-                    ChartSeriesEditor(
-                      key: ValueKey(_drafts[i]),
-                      metrics: list,
-                      draft: _drafts[i],
-                      onChanged: () => setState(() {}),
-                      onRemove:
-                          _drafts.length > 1 ? () => _removeSeries(i) : null,
-                    ),
-                  const SizedBox(height: AppSpacing.sm),
-                  OutlinedButton.icon(
-                    onPressed: _addSeries,
-                    icon: const Icon(Icons.add),
-                    label: Text(l.addMetricSeries),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      minimumSize: const Size(0, 48),
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.button),
+    return metrics.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('$e')),
+      data: (list) {
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                0,
+              ),
+              child: SheetHeader(title: l.addCurve),
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                children: [
+                  // 1) Chart title comes first.
+                  TextField(
+                    controller: _title,
+                    decoration: InputDecoration(labelText: l.chartTitle),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  if (list.isEmpty)
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                      child: Text(l.noMetrics),
+                    )
+                  else ...[
+                    // 2) One or more metric series (collapsible, one open).
+                    for (var i = 0; i < _drafts.length; i++)
+                      ChartSeriesEditor(
+                        key: ValueKey(_drafts[i]),
+                        metrics: list,
+                        draft: _drafts[i],
+                        expanded: _expanded == i,
+                        onToggle: () => _toggle(i),
+                        onChanged: () => setState(() {}),
+                        onRemove:
+                            _drafts.length > 1 ? () => _removeSeries(i) : null,
+                      ),
+                    const SizedBox(height: AppSpacing.sm),
+                    OutlinedButton.icon(
+                      onPressed: _addSeries,
+                      icon: const Icon(Icons.add),
+                      label: Text(l.addMetricSeries),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        minimumSize: const Size(0, 48),
+                        side: const BorderSide(color: AppColors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.button),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(l.cancel),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    FilledButton(
-                      onPressed: _canSave ? _save : null,
-                      child: Text(l.save),
-                    ),
                   ],
-                ),
-              ],
-            );
-          },
-        ),
+                ],
+              ),
+            ),
+            // Sticky action bar pinned above the keyboard.
+            _ActionBar(
+              onCancel: () => Navigator.pop(context),
+              onSave: _canSave ? _save : null,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Pinned Cancel / Save bar at the bottom of the sheet.
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({required this.onCancel, this.onSave});
+
+  final VoidCallback onCancel;
+  final VoidCallback? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.card,
+        border: Border(top: BorderSide(color: AppColors.divider)),
+      ),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextButton(onPressed: onCancel, child: Text(l.cancel)),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: FilledButton(onPressed: onSave, child: Text(l.save)),
+          ),
+        ],
       ),
     );
   }
@@ -164,7 +207,15 @@ Future<void> showAddCurveSheet(
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    builder: (_) =>
-        AddCurveSheet(brokerId: brokerId, dashboardId: dashboardId),
+    useSafeArea: true,
+    builder: (context) => Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: FractionallySizedBox(
+        heightFactor: 1,
+        child: AddCurveSheet(brokerId: brokerId, dashboardId: dashboardId),
+      ),
+    ),
   );
 }
