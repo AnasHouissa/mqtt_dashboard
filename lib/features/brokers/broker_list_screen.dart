@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/confirm_dialog.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/entity_card.dart';
 import '../home/broker_home_screen.dart';
 import 'broker_form.dart';
 
@@ -25,16 +28,22 @@ class BrokerListScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('$e')),
         data: (list) {
           if (list.isEmpty) {
-            return Center(child: Text(l.noBrokers));
+            return EmptyState(
+              icon: Icons.dns_outlined,
+              message: l.noBrokers,
+              actionLabel: l.addBroker,
+              onAction: () => showBrokerForm(context),
+            );
           }
           return ListView.builder(
+            padding: const EdgeInsets.only(top: AppSpacing.lg, bottom: 96),
             itemCount: list.length,
             itemBuilder: (context, i) {
               final broker = list[i];
-              return ListTile(
-                leading: const Icon(Icons.dns),
-                title: Text(broker.name),
-                subtitle: Text('${broker.address}:${broker.port}'),
+              return EntityCard(
+                icon: Icons.dns_outlined,
+                title: broker.name,
+                subtitle: '${broker.address}:${broker.port}',
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -42,6 +51,7 @@ class BrokerListScreen extends ConsumerWidget {
                   ),
                 ),
                 trailing: PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
                   onSelected: (value) async {
                     if (value == 'edit') {
                       await showBrokerForm(context, broker: broker);

@@ -5,6 +5,8 @@ import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../services/mqtt_service.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/status_pill.dart';
 import '../dashboards/dashboard_list_view.dart';
 import '../metrics/metric_list_view.dart';
 
@@ -93,22 +95,15 @@ class _ConnectionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final (Color color, String label) = switch (status) {
-      MqttStatus.connected => (Colors.green, l.connected),
-      MqttStatus.connecting => (Colors.orange, l.connecting),
-      MqttStatus.failed => (Colors.red, l.connectionFailed),
-      MqttStatus.disconnected => (Colors.grey, l.disconnected),
+      MqttStatus.connected => (AppColors.success, l.connected),
+      MqttStatus.connecting => (AppColors.warning, l.connecting),
+      MqttStatus.failed => (AppColors.danger, l.connectionFailed),
+      MqttStatus.disconnected => (AppColors.textMuted, l.disconnected),
     };
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.circle, size: 12, color: color),
-            const SizedBox(width: 4),
-            Text(label, style: const TextStyle(fontSize: 12)),
-          ],
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: StatusPill(color: color, label: label),
       ),
     );
   }
