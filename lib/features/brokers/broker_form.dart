@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/sheet_header.dart';
 
 /// Bottom-sheet form to create or edit a broker.
 class BrokerForm extends ConsumerStatefulWidget {
@@ -85,24 +87,26 @@ class _BrokerFormState extends ConsumerState<BrokerForm> {
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              widget.broker == null ? l.addBroker : l.editBroker,
-              style: Theme.of(context).textTheme.titleLarge,
+            SheetHeader(
+              title: widget.broker == null ? l.addBroker : l.editBroker,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.lg),
             TextFormField(
               controller: _name,
               decoration: InputDecoration(labelText: l.brokerName),
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? l.fieldRequired : null,
             ),
+            const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _address,
               decoration: InputDecoration(labelText: l.brokerAddress),
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? l.fieldRequired : null,
             ),
+            const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _port,
               decoration: InputDecoration(labelText: l.brokerPort),
@@ -112,16 +116,18 @@ class _BrokerFormState extends ConsumerState<BrokerForm> {
                 return (p == null || p < 1 || p > 65535) ? l.invalidPort : null;
               },
             ),
+            const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _username,
               decoration: InputDecoration(labelText: l.username),
             ),
+            const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _password,
               decoration: InputDecoration(labelText: l.password),
               obscureText: true,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.xl),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -129,7 +135,7 @@ class _BrokerFormState extends ConsumerState<BrokerForm> {
                   onPressed: () => Navigator.pop(context),
                   child: Text(l.cancel),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 FilledButton(onPressed: _save, child: Text(l.save)),
               ],
             ),

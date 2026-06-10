@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/sheet_header.dart';
 
 /// "Ajouter courbe": pick a metric, chart type and optional title.
 class AddCurveSheet extends ConsumerStatefulWidget {
@@ -62,8 +64,8 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l.addCurve, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 12),
+          SheetHeader(title: l.addCurve),
+          const SizedBox(height: AppSpacing.lg),
           metrics.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Text('$e'),

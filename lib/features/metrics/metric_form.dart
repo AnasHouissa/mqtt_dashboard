@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/sheet_header.dart';
 
 /// Bottom-sheet form to create or edit a metric.
 class MetricForm extends ConsumerStatefulWidget {
@@ -98,24 +100,26 @@ class _MetricFormState extends ConsumerState<MetricForm> {
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              widget.metric == null ? l.addMetric : l.editMetric,
-              style: Theme.of(context).textTheme.titleLarge,
+            SheetHeader(
+              title: widget.metric == null ? l.addMetric : l.editMetric,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.lg),
             TextFormField(
               controller: _name,
               decoration: InputDecoration(labelText: l.metricName),
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? l.fieldRequired : null,
             ),
+            const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _topic,
               decoration: InputDecoration(labelText: l.topic),
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? l.fieldRequired : null,
             ),
+            const SizedBox(height: AppSpacing.md),
             Row(
               children: [
                 Expanded(
@@ -141,11 +145,12 @@ class _MetricFormState extends ConsumerState<MetricForm> {
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
+              activeThumbColor: AppColors.primary,
               title: Text(l.enablePublishing),
               value: _publishEnabled,
               onChanged: (v) => setState(() => _publishEnabled = v),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -153,7 +158,7 @@ class _MetricFormState extends ConsumerState<MetricForm> {
                   onPressed: () => Navigator.pop(context),
                   child: Text(l.cancel),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 FilledButton(onPressed: _save, child: Text(l.save)),
               ],
             ),

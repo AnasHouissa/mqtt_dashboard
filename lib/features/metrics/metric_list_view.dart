@@ -5,7 +5,10 @@ import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../services/mqtt_service.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/confirm_dialog.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/entity_card.dart';
 import 'metric_console_screen.dart';
 import 'metric_form.dart';
 
@@ -24,15 +27,23 @@ class MetricListView extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (list) {
-          if (list.isEmpty) return Center(child: Text(l.noMetrics));
+          if (list.isEmpty) {
+            return EmptyState(
+              icon: Icons.sensors_outlined,
+              message: l.noMetrics,
+              actionLabel: l.addMetric,
+              onAction: () => showMetricForm(context, brokerId: broker.id),
+            );
+          }
           return ListView.builder(
+            padding: const EdgeInsets.only(top: AppSpacing.lg, bottom: 96),
             itemCount: list.length,
             itemBuilder: (context, i) {
               final metric = list[i];
-              return ListTile(
-                leading: const Icon(Icons.sensors),
-                title: Text(metric.name),
-                subtitle: Text(metric.topic),
+              return EntityCard(
+                icon: Icons.sensors,
+                title: metric.name,
+                subtitle: metric.topic,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => MetricConsoleScreen(metric: metric),
@@ -43,11 +54,13 @@ class MetricListView extends ConsumerWidget {
                   children: [
                     if (metric.publishEnabled)
                       IconButton(
-                        icon: const Icon(Icons.upload),
+                        icon: const Icon(Icons.upload_outlined),
                         tooltip: l.publish,
                         onPressed: () => _showPublishDialog(context, ref, metric),
                       ),
                     PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert,
+                          color: AppColors.textMuted),
                       onSelected: (value) async {
                         if (value == 'edit') {
                           await showMetricForm(context,
