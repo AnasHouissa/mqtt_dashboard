@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../data/db/database.dart';
+import '../../data/repositories/dashboard_repository.dart';
 import '../../l10n/app_localizations.dart';
 import 'chart_view.dart';
 import 'time_filter.dart';
@@ -10,14 +11,12 @@ import 'time_filter.dart';
 class ChartFullscreenScreen extends StatefulWidget {
   const ChartFullscreenScreen({
     super.key,
-    required this.metric,
-    required this.type,
+    required this.series,
     required this.initialBucket,
     this.title,
   });
 
-  final Metric metric;
-  final ChartType type;
+  final List<ChartSeriesWithMetric> series;
   final TimeBucket initialBucket;
   final String? title;
 
@@ -51,7 +50,7 @@ class _ChartFullscreenScreenState extends State<ChartFullscreenScreen> {
     final l = AppLocalizations.of(context);
     final title = widget.title?.isNotEmpty == true
         ? widget.title!
-        : widget.metric.name;
+        : widget.series.map((s) => s.metric.name).join(', ');
 
     return Scaffold(
       body: SafeArea(
@@ -80,11 +79,7 @@ class _ChartFullscreenScreenState extends State<ChartFullscreenScreen> {
               ),
               const SizedBox(height: 8),
               Expanded(
-                child: MetricChart(
-                  metric: widget.metric,
-                  type: widget.type,
-                  bucket: _bucket,
-                ),
+                child: MetricChart(series: widget.series, bucket: _bucket),
               ),
             ],
           ),

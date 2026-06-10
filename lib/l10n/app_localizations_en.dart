@@ -144,10 +144,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chartType => 'Chart type';
 
   @override
-  String get curve => 'Curve';
+  String get curve => 'Line';
 
   @override
   String get histogram => 'Histogram';
+
+  @override
+  String get spline => 'Spline';
+
+  @override
+  String get area => 'Area';
+
+  @override
+  String get scatter => 'Scatter';
+
+  @override
+  String get color => 'Color';
+
+  @override
+  String get showInChart => 'Show in chart';
+
+  @override
+  String get addMetricSeries => 'Add metric';
 
   @override
   String get selectMetric => 'Select a metric';

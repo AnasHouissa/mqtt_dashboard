@@ -1200,29 +1200,6 @@ class $ChartsTable extends Charts with TableInfo<$ChartsTable, ChartConfig> {
       'REFERENCES dashboards (id) ON DELETE CASCADE',
     ),
   );
-  static const VerificationMeta _metricIdMeta = const VerificationMeta(
-    'metricId',
-  );
-  @override
-  late final GeneratedColumn<int> metricId = GeneratedColumn<int>(
-    'metric_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES metrics (id) ON DELETE CASCADE',
-    ),
-  );
-  @override
-  late final GeneratedColumnWithTypeConverter<ChartType, int> type =
-      GeneratedColumn<int>(
-        'type',
-        aliasedName,
-        false,
-        type: DriftSqlType.int,
-        requiredDuringInsert: true,
-      ).withConverter<ChartType>($ChartsTable.$convertertype);
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
@@ -1233,13 +1210,7 @@ class $ChartsTable extends Charts with TableInfo<$ChartsTable, ChartConfig> {
     requiredDuringInsert: false,
   );
   @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    dashboardId,
-    metricId,
-    type,
-    title,
-  ];
+  List<GeneratedColumn> get $columns => [id, dashboardId, title];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1266,14 +1237,6 @@ class $ChartsTable extends Charts with TableInfo<$ChartsTable, ChartConfig> {
     } else if (isInserting) {
       context.missing(_dashboardIdMeta);
     }
-    if (data.containsKey('metric_id')) {
-      context.handle(
-        _metricIdMeta,
-        metricId.isAcceptableOrUnknown(data['metric_id']!, _metricIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_metricIdMeta);
-    }
     if (data.containsKey('title')) {
       context.handle(
         _titleMeta,
@@ -1297,16 +1260,6 @@ class $ChartsTable extends Charts with TableInfo<$ChartsTable, ChartConfig> {
         DriftSqlType.int,
         data['${effectivePrefix}dashboard_id'],
       )!,
-      metricId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}metric_id'],
-      )!,
-      type: $ChartsTable.$convertertype.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.int,
-          data['${effectivePrefix}type'],
-        )!,
-      ),
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}title'],
@@ -1318,33 +1271,18 @@ class $ChartsTable extends Charts with TableInfo<$ChartsTable, ChartConfig> {
   $ChartsTable createAlias(String alias) {
     return $ChartsTable(attachedDatabase, alias);
   }
-
-  static JsonTypeConverter2<ChartType, int, int> $convertertype =
-      const EnumIndexConverter<ChartType>(ChartType.values);
 }
 
 class ChartConfig extends DataClass implements Insertable<ChartConfig> {
   final int id;
   final int dashboardId;
-  final int metricId;
-  final ChartType type;
   final String? title;
-  const ChartConfig({
-    required this.id,
-    required this.dashboardId,
-    required this.metricId,
-    required this.type,
-    this.title,
-  });
+  const ChartConfig({required this.id, required this.dashboardId, this.title});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['dashboard_id'] = Variable<int>(dashboardId);
-    map['metric_id'] = Variable<int>(metricId);
-    {
-      map['type'] = Variable<int>($ChartsTable.$convertertype.toSql(type));
-    }
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
     }
@@ -1355,8 +1293,6 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
     return ChartsCompanion(
       id: Value(id),
       dashboardId: Value(dashboardId),
-      metricId: Value(metricId),
-      type: Value(type),
       title: title == null && nullToAbsent
           ? const Value.absent()
           : Value(title),
@@ -1371,10 +1307,6 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
     return ChartConfig(
       id: serializer.fromJson<int>(json['id']),
       dashboardId: serializer.fromJson<int>(json['dashboardId']),
-      metricId: serializer.fromJson<int>(json['metricId']),
-      type: $ChartsTable.$convertertype.fromJson(
-        serializer.fromJson<int>(json['type']),
-      ),
       title: serializer.fromJson<String?>(json['title']),
     );
   }
@@ -1384,8 +1316,6 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'dashboardId': serializer.toJson<int>(dashboardId),
-      'metricId': serializer.toJson<int>(metricId),
-      'type': serializer.toJson<int>($ChartsTable.$convertertype.toJson(type)),
       'title': serializer.toJson<String?>(title),
     };
   }
@@ -1393,14 +1323,10 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
   ChartConfig copyWith({
     int? id,
     int? dashboardId,
-    int? metricId,
-    ChartType? type,
     Value<String?> title = const Value.absent(),
   }) => ChartConfig(
     id: id ?? this.id,
     dashboardId: dashboardId ?? this.dashboardId,
-    metricId: metricId ?? this.metricId,
-    type: type ?? this.type,
     title: title.present ? title.value : this.title,
   );
   ChartConfig copyWithCompanion(ChartsCompanion data) {
@@ -1409,8 +1335,6 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
       dashboardId: data.dashboardId.present
           ? data.dashboardId.value
           : this.dashboardId,
-      metricId: data.metricId.present ? data.metricId.value : this.metricId,
-      type: data.type.present ? data.type.value : this.type,
       title: data.title.present ? data.title.value : this.title,
     );
   }
@@ -1420,60 +1344,44 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
     return (StringBuffer('ChartConfig(')
           ..write('id: $id, ')
           ..write('dashboardId: $dashboardId, ')
-          ..write('metricId: $metricId, ')
-          ..write('type: $type, ')
           ..write('title: $title')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, dashboardId, metricId, type, title);
+  int get hashCode => Object.hash(id, dashboardId, title);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ChartConfig &&
           other.id == this.id &&
           other.dashboardId == this.dashboardId &&
-          other.metricId == this.metricId &&
-          other.type == this.type &&
           other.title == this.title);
 }
 
 class ChartsCompanion extends UpdateCompanion<ChartConfig> {
   final Value<int> id;
   final Value<int> dashboardId;
-  final Value<int> metricId;
-  final Value<ChartType> type;
   final Value<String?> title;
   const ChartsCompanion({
     this.id = const Value.absent(),
     this.dashboardId = const Value.absent(),
-    this.metricId = const Value.absent(),
-    this.type = const Value.absent(),
     this.title = const Value.absent(),
   });
   ChartsCompanion.insert({
     this.id = const Value.absent(),
     required int dashboardId,
-    required int metricId,
-    required ChartType type,
     this.title = const Value.absent(),
-  }) : dashboardId = Value(dashboardId),
-       metricId = Value(metricId),
-       type = Value(type);
+  }) : dashboardId = Value(dashboardId);
   static Insertable<ChartConfig> custom({
     Expression<int>? id,
     Expression<int>? dashboardId,
-    Expression<int>? metricId,
-    Expression<int>? type,
     Expression<String>? title,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (dashboardId != null) 'dashboard_id': dashboardId,
-      if (metricId != null) 'metric_id': metricId,
-      if (type != null) 'type': type,
       if (title != null) 'title': title,
     });
   }
@@ -1481,15 +1389,11 @@ class ChartsCompanion extends UpdateCompanion<ChartConfig> {
   ChartsCompanion copyWith({
     Value<int>? id,
     Value<int>? dashboardId,
-    Value<int>? metricId,
-    Value<ChartType>? type,
     Value<String?>? title,
   }) {
     return ChartsCompanion(
       id: id ?? this.id,
       dashboardId: dashboardId ?? this.dashboardId,
-      metricId: metricId ?? this.metricId,
-      type: type ?? this.type,
       title: title ?? this.title,
     );
   }
@@ -1503,14 +1407,6 @@ class ChartsCompanion extends UpdateCompanion<ChartConfig> {
     if (dashboardId.present) {
       map['dashboard_id'] = Variable<int>(dashboardId.value);
     }
-    if (metricId.present) {
-      map['metric_id'] = Variable<int>(metricId.value);
-    }
-    if (type.present) {
-      map['type'] = Variable<int>(
-        $ChartsTable.$convertertype.toSql(type.value),
-      );
-    }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
     }
@@ -1522,9 +1418,464 @@ class ChartsCompanion extends UpdateCompanion<ChartConfig> {
     return (StringBuffer('ChartsCompanion(')
           ..write('id: $id, ')
           ..write('dashboardId: $dashboardId, ')
+          ..write('title: $title')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChartSeriesTable extends ChartSeries
+    with TableInfo<$ChartSeriesTable, ChartSeriesRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChartSeriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _chartIdMeta = const VerificationMeta(
+    'chartId',
+  );
+  @override
+  late final GeneratedColumn<int> chartId = GeneratedColumn<int>(
+    'chart_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES charts (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _metricIdMeta = const VerificationMeta(
+    'metricId',
+  );
+  @override
+  late final GeneratedColumn<int> metricId = GeneratedColumn<int>(
+    'metric_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES metrics (id) ON DELETE CASCADE',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ChartType, int> type =
+      GeneratedColumn<int>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<ChartType>($ChartSeriesTable.$convertertype);
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<int> color = GeneratedColumn<int>(
+    'color',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _visibleMeta = const VerificationMeta(
+    'visible',
+  );
+  @override
+  late final GeneratedColumn<bool> visible = GeneratedColumn<bool>(
+    'visible',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("visible" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    chartId,
+    metricId,
+    type,
+    color,
+    visible,
+    position,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'chart_series';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChartSeriesRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('chart_id')) {
+      context.handle(
+        _chartIdMeta,
+        chartId.isAcceptableOrUnknown(data['chart_id']!, _chartIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_chartIdMeta);
+    }
+    if (data.containsKey('metric_id')) {
+      context.handle(
+        _metricIdMeta,
+        metricId.isAcceptableOrUnknown(data['metric_id']!, _metricIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_metricIdMeta);
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_colorMeta);
+    }
+    if (data.containsKey('visible')) {
+      context.handle(
+        _visibleMeta,
+        visible.isAcceptableOrUnknown(data['visible']!, _visibleMeta),
+      );
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChartSeriesRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChartSeriesRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      chartId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}chart_id'],
+      )!,
+      metricId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}metric_id'],
+      )!,
+      type: $ChartSeriesTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}color'],
+      )!,
+      visible: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}visible'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+    );
+  }
+
+  @override
+  $ChartSeriesTable createAlias(String alias) {
+    return $ChartSeriesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<ChartType, int, int> $convertertype =
+      const EnumIndexConverter<ChartType>(ChartType.values);
+}
+
+class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
+  final int id;
+  final int chartId;
+  final int metricId;
+  final ChartType type;
+
+  /// ARGB color value used to draw the series.
+  final int color;
+  final bool visible;
+
+  /// Display order within the chart.
+  final int position;
+  const ChartSeriesRow({
+    required this.id,
+    required this.chartId,
+    required this.metricId,
+    required this.type,
+    required this.color,
+    required this.visible,
+    required this.position,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['chart_id'] = Variable<int>(chartId);
+    map['metric_id'] = Variable<int>(metricId);
+    {
+      map['type'] = Variable<int>($ChartSeriesTable.$convertertype.toSql(type));
+    }
+    map['color'] = Variable<int>(color);
+    map['visible'] = Variable<bool>(visible);
+    map['position'] = Variable<int>(position);
+    return map;
+  }
+
+  ChartSeriesCompanion toCompanion(bool nullToAbsent) {
+    return ChartSeriesCompanion(
+      id: Value(id),
+      chartId: Value(chartId),
+      metricId: Value(metricId),
+      type: Value(type),
+      color: Value(color),
+      visible: Value(visible),
+      position: Value(position),
+    );
+  }
+
+  factory ChartSeriesRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChartSeriesRow(
+      id: serializer.fromJson<int>(json['id']),
+      chartId: serializer.fromJson<int>(json['chartId']),
+      metricId: serializer.fromJson<int>(json['metricId']),
+      type: $ChartSeriesTable.$convertertype.fromJson(
+        serializer.fromJson<int>(json['type']),
+      ),
+      color: serializer.fromJson<int>(json['color']),
+      visible: serializer.fromJson<bool>(json['visible']),
+      position: serializer.fromJson<int>(json['position']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'chartId': serializer.toJson<int>(chartId),
+      'metricId': serializer.toJson<int>(metricId),
+      'type': serializer.toJson<int>(
+        $ChartSeriesTable.$convertertype.toJson(type),
+      ),
+      'color': serializer.toJson<int>(color),
+      'visible': serializer.toJson<bool>(visible),
+      'position': serializer.toJson<int>(position),
+    };
+  }
+
+  ChartSeriesRow copyWith({
+    int? id,
+    int? chartId,
+    int? metricId,
+    ChartType? type,
+    int? color,
+    bool? visible,
+    int? position,
+  }) => ChartSeriesRow(
+    id: id ?? this.id,
+    chartId: chartId ?? this.chartId,
+    metricId: metricId ?? this.metricId,
+    type: type ?? this.type,
+    color: color ?? this.color,
+    visible: visible ?? this.visible,
+    position: position ?? this.position,
+  );
+  ChartSeriesRow copyWithCompanion(ChartSeriesCompanion data) {
+    return ChartSeriesRow(
+      id: data.id.present ? data.id.value : this.id,
+      chartId: data.chartId.present ? data.chartId.value : this.chartId,
+      metricId: data.metricId.present ? data.metricId.value : this.metricId,
+      type: data.type.present ? data.type.value : this.type,
+      color: data.color.present ? data.color.value : this.color,
+      visible: data.visible.present ? data.visible.value : this.visible,
+      position: data.position.present ? data.position.value : this.position,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChartSeriesRow(')
+          ..write('id: $id, ')
+          ..write('chartId: $chartId, ')
           ..write('metricId: $metricId, ')
           ..write('type: $type, ')
-          ..write('title: $title')
+          ..write('color: $color, ')
+          ..write('visible: $visible, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, chartId, metricId, type, color, visible, position);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChartSeriesRow &&
+          other.id == this.id &&
+          other.chartId == this.chartId &&
+          other.metricId == this.metricId &&
+          other.type == this.type &&
+          other.color == this.color &&
+          other.visible == this.visible &&
+          other.position == this.position);
+}
+
+class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
+  final Value<int> id;
+  final Value<int> chartId;
+  final Value<int> metricId;
+  final Value<ChartType> type;
+  final Value<int> color;
+  final Value<bool> visible;
+  final Value<int> position;
+  const ChartSeriesCompanion({
+    this.id = const Value.absent(),
+    this.chartId = const Value.absent(),
+    this.metricId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.color = const Value.absent(),
+    this.visible = const Value.absent(),
+    this.position = const Value.absent(),
+  });
+  ChartSeriesCompanion.insert({
+    this.id = const Value.absent(),
+    required int chartId,
+    required int metricId,
+    required ChartType type,
+    required int color,
+    this.visible = const Value.absent(),
+    this.position = const Value.absent(),
+  }) : chartId = Value(chartId),
+       metricId = Value(metricId),
+       type = Value(type),
+       color = Value(color);
+  static Insertable<ChartSeriesRow> custom({
+    Expression<int>? id,
+    Expression<int>? chartId,
+    Expression<int>? metricId,
+    Expression<int>? type,
+    Expression<int>? color,
+    Expression<bool>? visible,
+    Expression<int>? position,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (chartId != null) 'chart_id': chartId,
+      if (metricId != null) 'metric_id': metricId,
+      if (type != null) 'type': type,
+      if (color != null) 'color': color,
+      if (visible != null) 'visible': visible,
+      if (position != null) 'position': position,
+    });
+  }
+
+  ChartSeriesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? chartId,
+    Value<int>? metricId,
+    Value<ChartType>? type,
+    Value<int>? color,
+    Value<bool>? visible,
+    Value<int>? position,
+  }) {
+    return ChartSeriesCompanion(
+      id: id ?? this.id,
+      chartId: chartId ?? this.chartId,
+      metricId: metricId ?? this.metricId,
+      type: type ?? this.type,
+      color: color ?? this.color,
+      visible: visible ?? this.visible,
+      position: position ?? this.position,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (chartId.present) {
+      map['chart_id'] = Variable<int>(chartId.value);
+    }
+    if (metricId.present) {
+      map['metric_id'] = Variable<int>(metricId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<int>(
+        $ChartSeriesTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (color.present) {
+      map['color'] = Variable<int>(color.value);
+    }
+    if (visible.present) {
+      map['visible'] = Variable<bool>(visible.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChartSeriesCompanion(')
+          ..write('id: $id, ')
+          ..write('chartId: $chartId, ')
+          ..write('metricId: $metricId, ')
+          ..write('type: $type, ')
+          ..write('color: $color, ')
+          ..write('visible: $visible, ')
+          ..write('position: $position')
           ..write(')'))
         .toString();
   }
@@ -1837,6 +2188,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $MetricsTable metrics = $MetricsTable(this);
   late final $DashboardsTable dashboards = $DashboardsTable(this);
   late final $ChartsTable charts = $ChartsTable(this);
+  late final $ChartSeriesTable chartSeries = $ChartSeriesTable(this);
   late final $ReadingsTable readings = $ReadingsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -1847,6 +2199,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     metrics,
     dashboards,
     charts,
+    chartSeries,
     readings,
   ];
   @override
@@ -1874,10 +2227,17 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
+        'charts',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('chart_series', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
         'metrics',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [TableUpdate('charts', kind: UpdateKind.delete)],
+      result: [TableUpdate('chart_series', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -2360,20 +2720,19 @@ final class $$MetricsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$ChartsTable, List<ChartConfig>> _chartsRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
-    db.charts,
-    aliasName: $_aliasNameGenerator(db.metrics.id, db.charts.metricId),
+  static MultiTypedResultKey<$ChartSeriesTable, List<ChartSeriesRow>>
+  _chartSeriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.chartSeries,
+    aliasName: $_aliasNameGenerator(db.metrics.id, db.chartSeries.metricId),
   );
 
-  $$ChartsTableProcessedTableManager get chartsRefs {
-    final manager = $$ChartsTableTableManager(
+  $$ChartSeriesTableProcessedTableManager get chartSeriesRefs {
+    final manager = $$ChartSeriesTableTableManager(
       $_db,
-      $_db.charts,
+      $_db.chartSeries,
     ).filter((f) => f.metricId.id.sqlEquals($_itemColumn<int>('id')!));
 
-    final cache = $_typedResult.readTableOrNull(_chartsRefsTable($_db));
+    final cache = $_typedResult.readTableOrNull(_chartSeriesRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2461,22 +2820,22 @@ class $$MetricsTableFilterComposer
     return composer;
   }
 
-  Expression<bool> chartsRefs(
-    Expression<bool> Function($$ChartsTableFilterComposer f) f,
+  Expression<bool> chartSeriesRefs(
+    Expression<bool> Function($$ChartSeriesTableFilterComposer f) f,
   ) {
-    final $$ChartsTableFilterComposer composer = $composerBuilder(
+    final $$ChartSeriesTableFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: $db.charts,
+      referencedTable: $db.chartSeries,
       getReferencedColumn: (t) => t.metricId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$ChartsTableFilterComposer(
+          }) => $$ChartSeriesTableFilterComposer(
             $db: $db,
-            $table: $db.charts,
+            $table: $db.chartSeries,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2627,22 +2986,22 @@ class $$MetricsTableAnnotationComposer
     return composer;
   }
 
-  Expression<T> chartsRefs<T extends Object>(
-    Expression<T> Function($$ChartsTableAnnotationComposer a) f,
+  Expression<T> chartSeriesRefs<T extends Object>(
+    Expression<T> Function($$ChartSeriesTableAnnotationComposer a) f,
   ) {
-    final $$ChartsTableAnnotationComposer composer = $composerBuilder(
+    final $$ChartSeriesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: $db.charts,
+      referencedTable: $db.chartSeries,
       getReferencedColumn: (t) => t.metricId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$ChartsTableAnnotationComposer(
+          }) => $$ChartSeriesTableAnnotationComposer(
             $db: $db,
-            $table: $db.charts,
+            $table: $db.chartSeries,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2693,7 +3052,7 @@ class $$MetricsTableTableManager
           Metric,
           PrefetchHooks Function({
             bool brokerId,
-            bool chartsRefs,
+            bool chartSeriesRefs,
             bool readingsRefs,
           })
         > {
@@ -2753,11 +3112,15 @@ class $$MetricsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({brokerId = false, chartsRefs = false, readingsRefs = false}) {
+              ({
+                brokerId = false,
+                chartSeriesRefs = false,
+                readingsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
-                    if (chartsRefs) db.charts,
+                    if (chartSeriesRefs) db.chartSeries,
                     if (readingsRefs) db.readings,
                   ],
                   addJoins:
@@ -2794,21 +3157,21 @@ class $$MetricsTableTableManager
                       },
                   getPrefetchedDataCallback: (items) async {
                     return [
-                      if (chartsRefs)
+                      if (chartSeriesRefs)
                         await $_getPrefetchedData<
                           Metric,
                           $MetricsTable,
-                          ChartConfig
+                          ChartSeriesRow
                         >(
                           currentTable: table,
                           referencedTable: $$MetricsTableReferences
-                              ._chartsRefsTable(db),
+                              ._chartSeriesRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$MetricsTableReferences(
                                 db,
                                 table,
                                 p0,
-                              ).chartsRefs,
+                              ).chartSeriesRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.metricId == item.id,
@@ -2858,7 +3221,7 @@ typedef $$MetricsTableProcessedTableManager =
       Metric,
       PrefetchHooks Function({
         bool brokerId,
-        bool chartsRefs,
+        bool chartSeriesRefs,
         bool readingsRefs,
       })
     >;
@@ -3222,16 +3585,12 @@ typedef $$ChartsTableCreateCompanionBuilder =
     ChartsCompanion Function({
       Value<int> id,
       required int dashboardId,
-      required int metricId,
-      required ChartType type,
       Value<String?> title,
     });
 typedef $$ChartsTableUpdateCompanionBuilder =
     ChartsCompanion Function({
       Value<int> id,
       Value<int> dashboardId,
-      Value<int> metricId,
-      Value<ChartType> type,
       Value<String?> title,
     });
 
@@ -3258,20 +3617,21 @@ final class $$ChartsTableReferences
     );
   }
 
-  static $MetricsTable _metricIdTable(_$AppDatabase db) => db.metrics
-      .createAlias($_aliasNameGenerator(db.charts.metricId, db.metrics.id));
+  static MultiTypedResultKey<$ChartSeriesTable, List<ChartSeriesRow>>
+  _chartSeriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.chartSeries,
+    aliasName: $_aliasNameGenerator(db.charts.id, db.chartSeries.chartId),
+  );
 
-  $$MetricsTableProcessedTableManager get metricId {
-    final $_column = $_itemColumn<int>('metric_id')!;
-
-    final manager = $$MetricsTableTableManager(
+  $$ChartSeriesTableProcessedTableManager get chartSeriesRefs {
+    final manager = $$ChartSeriesTableTableManager(
       $_db,
-      $_db.metrics,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_metricIdTable($_db));
-    if (item == null) return manager;
+      $_db.chartSeries,
+    ).filter((f) => f.chartId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_chartSeriesRefsTable($_db));
     return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -3289,12 +3649,6 @@ class $$ChartsTableFilterComposer
     column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
-
-  ColumnWithTypeConverterFilters<ChartType, ChartType, int> get type =>
-      $composableBuilder(
-        column: $table.type,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
 
   ColumnFilters<String> get title => $composableBuilder(
     column: $table.title,
@@ -3315,6 +3669,396 @@ class $$ChartsTableFilterComposer
           }) => $$DashboardsTableFilterComposer(
             $db: $db,
             $table: $db.dashboards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> chartSeriesRefs(
+    Expression<bool> Function($$ChartSeriesTableFilterComposer f) f,
+  ) {
+    final $$ChartSeriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.chartSeries,
+      getReferencedColumn: (t) => t.chartId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChartSeriesTableFilterComposer(
+            $db: $db,
+            $table: $db.chartSeries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ChartsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChartsTable> {
+  $$ChartsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DashboardsTableOrderingComposer get dashboardId {
+    final $$DashboardsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dashboardId,
+      referencedTable: $db.dashboards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DashboardsTableOrderingComposer(
+            $db: $db,
+            $table: $db.dashboards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChartsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChartsTable> {
+  $$ChartsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  $$DashboardsTableAnnotationComposer get dashboardId {
+    final $$DashboardsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dashboardId,
+      referencedTable: $db.dashboards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DashboardsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dashboards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> chartSeriesRefs<T extends Object>(
+    Expression<T> Function($$ChartSeriesTableAnnotationComposer a) f,
+  ) {
+    final $$ChartSeriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.chartSeries,
+      getReferencedColumn: (t) => t.chartId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChartSeriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.chartSeries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ChartsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ChartsTable,
+          ChartConfig,
+          $$ChartsTableFilterComposer,
+          $$ChartsTableOrderingComposer,
+          $$ChartsTableAnnotationComposer,
+          $$ChartsTableCreateCompanionBuilder,
+          $$ChartsTableUpdateCompanionBuilder,
+          (ChartConfig, $$ChartsTableReferences),
+          ChartConfig,
+          PrefetchHooks Function({bool dashboardId, bool chartSeriesRefs})
+        > {
+  $$ChartsTableTableManager(_$AppDatabase db, $ChartsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChartsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChartsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChartsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> dashboardId = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+              }) => ChartsCompanion(
+                id: id,
+                dashboardId: dashboardId,
+                title: title,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int dashboardId,
+                Value<String?> title = const Value.absent(),
+              }) => ChartsCompanion.insert(
+                id: id,
+                dashboardId: dashboardId,
+                title: title,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) =>
+                    (e.readTable(table), $$ChartsTableReferences(db, table, e)),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({dashboardId = false, chartSeriesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (chartSeriesRefs) db.chartSeries,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (dashboardId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.dashboardId,
+                                    referencedTable: $$ChartsTableReferences
+                                        ._dashboardIdTable(db),
+                                    referencedColumn: $$ChartsTableReferences
+                                        ._dashboardIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (chartSeriesRefs)
+                        await $_getPrefetchedData<
+                          ChartConfig,
+                          $ChartsTable,
+                          ChartSeriesRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ChartsTableReferences
+                              ._chartSeriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ChartsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).chartSeriesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.chartId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ChartsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ChartsTable,
+      ChartConfig,
+      $$ChartsTableFilterComposer,
+      $$ChartsTableOrderingComposer,
+      $$ChartsTableAnnotationComposer,
+      $$ChartsTableCreateCompanionBuilder,
+      $$ChartsTableUpdateCompanionBuilder,
+      (ChartConfig, $$ChartsTableReferences),
+      ChartConfig,
+      PrefetchHooks Function({bool dashboardId, bool chartSeriesRefs})
+    >;
+typedef $$ChartSeriesTableCreateCompanionBuilder =
+    ChartSeriesCompanion Function({
+      Value<int> id,
+      required int chartId,
+      required int metricId,
+      required ChartType type,
+      required int color,
+      Value<bool> visible,
+      Value<int> position,
+    });
+typedef $$ChartSeriesTableUpdateCompanionBuilder =
+    ChartSeriesCompanion Function({
+      Value<int> id,
+      Value<int> chartId,
+      Value<int> metricId,
+      Value<ChartType> type,
+      Value<int> color,
+      Value<bool> visible,
+      Value<int> position,
+    });
+
+final class $$ChartSeriesTableReferences
+    extends BaseReferences<_$AppDatabase, $ChartSeriesTable, ChartSeriesRow> {
+  $$ChartSeriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ChartsTable _chartIdTable(_$AppDatabase db) => db.charts.createAlias(
+    $_aliasNameGenerator(db.chartSeries.chartId, db.charts.id),
+  );
+
+  $$ChartsTableProcessedTableManager get chartId {
+    final $_column = $_itemColumn<int>('chart_id')!;
+
+    final manager = $$ChartsTableTableManager(
+      $_db,
+      $_db.charts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_chartIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MetricsTable _metricIdTable(_$AppDatabase db) =>
+      db.metrics.createAlias(
+        $_aliasNameGenerator(db.chartSeries.metricId, db.metrics.id),
+      );
+
+  $$MetricsTableProcessedTableManager get metricId {
+    final $_column = $_itemColumn<int>('metric_id')!;
+
+    final manager = $$MetricsTableTableManager(
+      $_db,
+      $_db.metrics,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_metricIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ChartSeriesTableFilterComposer
+    extends Composer<_$AppDatabase, $ChartSeriesTable> {
+  $$ChartSeriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ChartType, ChartType, int> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get visible => $composableBuilder(
+    column: $table.visible,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ChartsTableFilterComposer get chartId {
+    final $$ChartsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.chartId,
+      referencedTable: $db.charts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChartsTableFilterComposer(
+            $db: $db,
+            $table: $db.charts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3348,9 +4092,9 @@ class $$ChartsTableFilterComposer
   }
 }
 
-class $$ChartsTableOrderingComposer
-    extends Composer<_$AppDatabase, $ChartsTable> {
-  $$ChartsTableOrderingComposer({
+class $$ChartSeriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChartSeriesTable> {
+  $$ChartSeriesTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -3367,25 +4111,35 @@ class $$ChartsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get title => $composableBuilder(
-    column: $table.title,
+  ColumnOrderings<int> get color => $composableBuilder(
+    column: $table.color,
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$DashboardsTableOrderingComposer get dashboardId {
-    final $$DashboardsTableOrderingComposer composer = $composerBuilder(
+  ColumnOrderings<bool> get visible => $composableBuilder(
+    column: $table.visible,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ChartsTableOrderingComposer get chartId {
+    final $$ChartsTableOrderingComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.dashboardId,
-      referencedTable: $db.dashboards,
+      getCurrentColumn: (t) => t.chartId,
+      referencedTable: $db.charts,
       getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$DashboardsTableOrderingComposer(
+          }) => $$ChartsTableOrderingComposer(
             $db: $db,
-            $table: $db.dashboards,
+            $table: $db.charts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3419,9 +4173,9 @@ class $$ChartsTableOrderingComposer
   }
 }
 
-class $$ChartsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ChartsTable> {
-  $$ChartsTableAnnotationComposer({
+class $$ChartSeriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChartSeriesTable> {
+  $$ChartSeriesTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -3434,23 +4188,29 @@ class $$ChartsTableAnnotationComposer
   GeneratedColumnWithTypeConverter<ChartType, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => column);
+  GeneratedColumn<int> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
 
-  $$DashboardsTableAnnotationComposer get dashboardId {
-    final $$DashboardsTableAnnotationComposer composer = $composerBuilder(
+  GeneratedColumn<bool> get visible =>
+      $composableBuilder(column: $table.visible, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  $$ChartsTableAnnotationComposer get chartId {
+    final $$ChartsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.dashboardId,
-      referencedTable: $db.dashboards,
+      getCurrentColumn: (t) => t.chartId,
+      referencedTable: $db.charts,
       getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$DashboardsTableAnnotationComposer(
+          }) => $$ChartsTableAnnotationComposer(
             $db: $db,
-            $table: $db.dashboards,
+            $table: $db.charts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3484,67 +4244,77 @@ class $$ChartsTableAnnotationComposer
   }
 }
 
-class $$ChartsTableTableManager
+class $$ChartSeriesTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $ChartsTable,
-          ChartConfig,
-          $$ChartsTableFilterComposer,
-          $$ChartsTableOrderingComposer,
-          $$ChartsTableAnnotationComposer,
-          $$ChartsTableCreateCompanionBuilder,
-          $$ChartsTableUpdateCompanionBuilder,
-          (ChartConfig, $$ChartsTableReferences),
-          ChartConfig,
-          PrefetchHooks Function({bool dashboardId, bool metricId})
+          $ChartSeriesTable,
+          ChartSeriesRow,
+          $$ChartSeriesTableFilterComposer,
+          $$ChartSeriesTableOrderingComposer,
+          $$ChartSeriesTableAnnotationComposer,
+          $$ChartSeriesTableCreateCompanionBuilder,
+          $$ChartSeriesTableUpdateCompanionBuilder,
+          (ChartSeriesRow, $$ChartSeriesTableReferences),
+          ChartSeriesRow,
+          PrefetchHooks Function({bool chartId, bool metricId})
         > {
-  $$ChartsTableTableManager(_$AppDatabase db, $ChartsTable table)
+  $$ChartSeriesTableTableManager(_$AppDatabase db, $ChartSeriesTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$ChartsTableFilterComposer($db: db, $table: table),
+              $$ChartSeriesTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$ChartsTableOrderingComposer($db: db, $table: table),
+              $$ChartSeriesTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$ChartsTableAnnotationComposer($db: db, $table: table),
+              $$ChartSeriesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<int> dashboardId = const Value.absent(),
+                Value<int> chartId = const Value.absent(),
                 Value<int> metricId = const Value.absent(),
                 Value<ChartType> type = const Value.absent(),
-                Value<String?> title = const Value.absent(),
-              }) => ChartsCompanion(
+                Value<int> color = const Value.absent(),
+                Value<bool> visible = const Value.absent(),
+                Value<int> position = const Value.absent(),
+              }) => ChartSeriesCompanion(
                 id: id,
-                dashboardId: dashboardId,
+                chartId: chartId,
                 metricId: metricId,
                 type: type,
-                title: title,
+                color: color,
+                visible: visible,
+                position: position,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required int dashboardId,
+                required int chartId,
                 required int metricId,
                 required ChartType type,
-                Value<String?> title = const Value.absent(),
-              }) => ChartsCompanion.insert(
+                required int color,
+                Value<bool> visible = const Value.absent(),
+                Value<int> position = const Value.absent(),
+              }) => ChartSeriesCompanion.insert(
                 id: id,
-                dashboardId: dashboardId,
+                chartId: chartId,
                 metricId: metricId,
                 type: type,
-                title: title,
+                color: color,
+                visible: visible,
+                position: position,
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$ChartsTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable(table),
+                  $$ChartSeriesTableReferences(db, table, e),
+                ),
               )
               .toList(),
-          prefetchHooksCallback: ({dashboardId = false, metricId = false}) {
+          prefetchHooksCallback: ({chartId = false, metricId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -3564,15 +4334,15 @@ class $$ChartsTableTableManager
                       dynamic
                     >
                   >(state) {
-                    if (dashboardId) {
+                    if (chartId) {
                       state =
                           state.withJoin(
                                 currentTable: table,
-                                currentColumn: table.dashboardId,
-                                referencedTable: $$ChartsTableReferences
-                                    ._dashboardIdTable(db),
-                                referencedColumn: $$ChartsTableReferences
-                                    ._dashboardIdTable(db)
+                                currentColumn: table.chartId,
+                                referencedTable: $$ChartSeriesTableReferences
+                                    ._chartIdTable(db),
+                                referencedColumn: $$ChartSeriesTableReferences
+                                    ._chartIdTable(db)
                                     .id,
                               )
                               as T;
@@ -3582,9 +4352,9 @@ class $$ChartsTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.metricId,
-                                referencedTable: $$ChartsTableReferences
+                                referencedTable: $$ChartSeriesTableReferences
                                     ._metricIdTable(db),
-                                referencedColumn: $$ChartsTableReferences
+                                referencedColumn: $$ChartSeriesTableReferences
                                     ._metricIdTable(db)
                                     .id,
                               )
@@ -3602,19 +4372,19 @@ class $$ChartsTableTableManager
       );
 }
 
-typedef $$ChartsTableProcessedTableManager =
+typedef $$ChartSeriesTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $ChartsTable,
-      ChartConfig,
-      $$ChartsTableFilterComposer,
-      $$ChartsTableOrderingComposer,
-      $$ChartsTableAnnotationComposer,
-      $$ChartsTableCreateCompanionBuilder,
-      $$ChartsTableUpdateCompanionBuilder,
-      (ChartConfig, $$ChartsTableReferences),
-      ChartConfig,
-      PrefetchHooks Function({bool dashboardId, bool metricId})
+      $ChartSeriesTable,
+      ChartSeriesRow,
+      $$ChartSeriesTableFilterComposer,
+      $$ChartSeriesTableOrderingComposer,
+      $$ChartSeriesTableAnnotationComposer,
+      $$ChartSeriesTableCreateCompanionBuilder,
+      $$ChartSeriesTableUpdateCompanionBuilder,
+      (ChartSeriesRow, $$ChartSeriesTableReferences),
+      ChartSeriesRow,
+      PrefetchHooks Function({bool chartId, bool metricId})
     >;
 typedef $$ReadingsTableCreateCompanionBuilder =
     ReadingsCompanion Function({
@@ -3920,6 +4690,8 @@ class $AppDatabaseManager {
       $$DashboardsTableTableManager(_db, _db.dashboards);
   $$ChartsTableTableManager get charts =>
       $$ChartsTableTableManager(_db, _db.charts);
+  $$ChartSeriesTableTableManager get chartSeries =>
+      $$ChartSeriesTableTableManager(_db, _db.chartSeries);
   $$ReadingsTableTableManager get readings =>
       $$ReadingsTableTableManager(_db, _db.readings);
 }

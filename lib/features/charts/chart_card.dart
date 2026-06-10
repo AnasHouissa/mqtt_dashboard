@@ -10,6 +10,7 @@ import '../../widgets/app_card.dart';
 import '../../widgets/circle_icon.dart';
 import '../../widgets/confirm_dialog.dart';
 import 'chart_fullscreen.dart';
+import 'chart_type_ui.dart';
 import 'chart_view.dart';
 import 'time_filter.dart';
 
@@ -17,7 +18,7 @@ import 'time_filter.dart';
 class ChartCard extends ConsumerStatefulWidget {
   const ChartCard({super.key, required this.item});
 
-  final ChartWithMetric item;
+  final ChartWithSeries item;
 
   @override
   ConsumerState<ChartCard> createState() => _ChartCardState();
@@ -26,35 +27,62 @@ class ChartCard extends ConsumerStatefulWidget {
 class _ChartCardState extends ConsumerState<ChartCard> {
   TimeBucket _bucket = TimeBucket.day;
 
-  Metric get _metric => widget.item.metric;
   ChartConfig get _chart => widget.item.chart;
+  List<ChartSeriesWithMetric> get _series => widget.item.series;
 
-  String get _title =>
-      (_chart.title?.isNotEmpty == true) ? _chart.title! : _metric.name;
+  String get _title {
+    if (_chart.title?.isNotEmpty == true) return _chart.title!;
+    return _series.map((s) => s.metric.name).join(', ');
+  }
 
-  Future<void> _exportCsv() async {
+  Future<void> _exportCsv(Metric metric) async {
     final l = AppLocalizations.of(context);
     final readings =
-        await ref.read(readingRepositoryProvider).rawForMetric(_metric.id);
+        await ref.read(readingRepositoryProvider).rawForMetric(metric.id);
     await ref.read(exportServiceProvider).exportCsv(
-          metricName: _metric.name,
+          metricName: metric.name,
           readings: readings,
           timestampHeader: l.timestamp,
           valueHeader: l.value,
         );
   }
 
-  Future<void> _exportPdf() async {
+  Future<void> _exportPdf(Metric metric) async {
     final l = AppLocalizations.of(context);
     final readings =
-        await ref.read(readingRepositoryProvider).rawForMetric(_metric.id);
+        await ref.read(readingRepositoryProvider).rawForMetric(metric.id);
     await ref.read(exportServiceProvider).exportPdf(
-          metricName: _metric.name,
-          title: l.exportTitle(_metric.name),
+          metricName: metric.name,
+          title: l.exportTitle(metric.name),
           readings: readings,
           timestampHeader: l.timestamp,
           valueHeader: l.value,
         );
+  }
+
+  /// With one series, export it directly; with several, ask which metric.
+  Future<Metric?> _resolveMetric() async {
+    if (_series.length == 1) return _series.first.metric;
+    return showModalBottomSheet<Metric>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final s in _series)
+              ListTile(
+                leading: CircleIcon(
+                  icon: s.series.type.icon,
+                  color: Color(s.series.color),
+                  size: 36,
+                ),
+                title: Text(s.metric.name),
+                onTap: () => Navigator.pop(context, s.metric),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _openFullscreen() {
@@ -62,10 +90,9 @@ class _ChartCardState extends ConsumerState<ChartCard> {
       context,
       MaterialPageRoute(
         builder: (_) => ChartFullscreenScreen(
-          metric: _metric,
-          type: _chart.type,
+          series: _series,
           initialBucket: _bucket,
-          title: _chart.title,
+          title: _title,
         ),
       ),
     );
@@ -82,16 +109,13 @@ class _ChartCardState extends ConsumerState<ChartCard> {
         children: [
           Row(
             children: [
-              CircleIcon(
-                icon: _chart.type == ChartType.line
-                    ? Icons.show_chart
-                    : Icons.bar_chart,
-                size: 38,
-              ),
+              CircleIcon(icon: _series.first.series.type.icon, size: 38),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   _title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -109,9 +133,11 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 onSelected: (value) async {
                   switch (value) {
                     case 'csv':
-                      await _exportCsv();
+                      final m = await _resolveMetric();
+                      if (m != null) await _exportCsv(m);
                     case 'pdf':
-                      await _exportPdf();
+                      final m = await _resolveMetric();
+                      if (m != null) await _exportPdf(m);
                     case 'delete':
                       if (await confirmDelete(context)) {
                         await ref
@@ -139,11 +165,7 @@ class _ChartCardState extends ConsumerState<ChartCard> {
           const SizedBox(height: AppSpacing.md),
           SizedBox(
             height: 240,
-            child: MetricChart(
-              metric: _metric,
-              type: _chart.type,
-              bucket: _bucket,
-            ),
+            child: MetricChart(series: _series, bucket: _bucket),
           ),
         ],
       ),
