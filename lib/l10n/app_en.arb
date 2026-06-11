@@ -16,6 +16,12 @@
   "connect": "Connect",
   "disconnect": "Disconnect",
   "connected": "Connected",
+  "connectedTo": "Connected to {broker}",
+  "@connectedTo": {
+    "placeholders": {
+      "broker": { "type": "String" }
+    }
+  },
   "disconnected": "Disconnected",
   "connecting": "Connecting…",
   "connectionFailed": "Connection failed",
@@ -30,6 +36,16 @@
   "reasonBrokerUnavailable": "the broker is unavailable",
   "reasonRejected": "the broker rejected the connection request",
   "reasonUnknown": "unknown error",
+  "testConnection": "Test connection",
+  "testing": "Testing…",
+  "connectionSuccessful": "Connection successful",
+  "secureTls": "Secure (TLS)",
+  "advanced": "Advanced",
+  "qos": "QoS",
+  "retain": "Retain published messages",
+  "keepAliveSeconds": "Keep-alive (s)",
+  "timeoutSeconds": "Timeout (s)",
+  "invalidValue": "Enter a positive number",
   "metrics": "Metrics",
   "noMetrics": "No metrics yet. Tap + to add one.",
   "addMetric": "Add metric",

@@ -194,6 +194,12 @@ abstract class AppLocalizations {
   /// **'Connected'**
   String get connected;
 
+  /// No description provided for @connectedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to {broker}'**
+  String connectedTo(String broker);
+
   /// No description provided for @disconnected.
   ///
   /// In en, this message translates to:
@@ -247,6 +253,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'unknown error'**
   String get reasonUnknown;
+
+  /// No description provided for @testConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection'**
+  String get testConnection;
+
+  /// No description provided for @testing.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing…'**
+  String get testing;
+
+  /// No description provided for @connectionSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection successful'**
+  String get connectionSuccessful;
+
+  /// No description provided for @secureTls.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure (TLS)'**
+  String get secureTls;
+
+  /// No description provided for @advanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get advanced;
+
+  /// No description provided for @qos.
+  ///
+  /// In en, this message translates to:
+  /// **'QoS'**
+  String get qos;
+
+  /// No description provided for @retain.
+  ///
+  /// In en, this message translates to:
+  /// **'Retain published messages'**
+  String get retain;
+
+  /// No description provided for @keepAliveSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep-alive (s)'**
+  String get keepAliveSeconds;
+
+  /// No description provided for @timeoutSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeout (s)'**
+  String get timeoutSeconds;
+
+  /// No description provided for @invalidValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a positive number'**
+  String get invalidValue;
 
   /// No description provided for @metrics.
   ///

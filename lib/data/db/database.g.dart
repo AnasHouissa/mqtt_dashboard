@@ -76,6 +76,66 @@ class $BrokersTable extends Brokers with TableInfo<$BrokersTable, Broker> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _secureMeta = const VerificationMeta('secure');
+  @override
+  late final GeneratedColumn<bool> secure = GeneratedColumn<bool>(
+    'secure',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("secure" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _keepAliveMeta = const VerificationMeta(
+    'keepAlive',
+  );
+  @override
+  late final GeneratedColumn<int> keepAlive = GeneratedColumn<int>(
+    'keep_alive',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(30),
+  );
+  static const VerificationMeta _connectTimeoutMeta = const VerificationMeta(
+    'connectTimeout',
+  );
+  @override
+  late final GeneratedColumn<int> connectTimeout = GeneratedColumn<int>(
+    'connect_timeout',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(10),
+  );
+  static const VerificationMeta _qosMeta = const VerificationMeta('qos');
+  @override
+  late final GeneratedColumn<int> qos = GeneratedColumn<int>(
+    'qos',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _retainMeta = const VerificationMeta('retain');
+  @override
+  late final GeneratedColumn<bool> retain = GeneratedColumn<bool>(
+    'retain',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("retain" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -96,6 +156,11 @@ class $BrokersTable extends Brokers with TableInfo<$BrokersTable, Broker> {
     port,
     username,
     password,
+    secure,
+    keepAlive,
+    connectTimeout,
+    qos,
+    retain,
     createdAt,
   ];
   @override
@@ -149,6 +214,39 @@ class $BrokersTable extends Brokers with TableInfo<$BrokersTable, Broker> {
         password.isAcceptableOrUnknown(data['password']!, _passwordMeta),
       );
     }
+    if (data.containsKey('secure')) {
+      context.handle(
+        _secureMeta,
+        secure.isAcceptableOrUnknown(data['secure']!, _secureMeta),
+      );
+    }
+    if (data.containsKey('keep_alive')) {
+      context.handle(
+        _keepAliveMeta,
+        keepAlive.isAcceptableOrUnknown(data['keep_alive']!, _keepAliveMeta),
+      );
+    }
+    if (data.containsKey('connect_timeout')) {
+      context.handle(
+        _connectTimeoutMeta,
+        connectTimeout.isAcceptableOrUnknown(
+          data['connect_timeout']!,
+          _connectTimeoutMeta,
+        ),
+      );
+    }
+    if (data.containsKey('qos')) {
+      context.handle(
+        _qosMeta,
+        qos.isAcceptableOrUnknown(data['qos']!, _qosMeta),
+      );
+    }
+    if (data.containsKey('retain')) {
+      context.handle(
+        _retainMeta,
+        retain.isAcceptableOrUnknown(data['retain']!, _retainMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -188,6 +286,26 @@ class $BrokersTable extends Brokers with TableInfo<$BrokersTable, Broker> {
         DriftSqlType.string,
         data['${effectivePrefix}password'],
       ),
+      secure: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}secure'],
+      )!,
+      keepAlive: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}keep_alive'],
+      )!,
+      connectTimeout: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}connect_timeout'],
+      )!,
+      qos: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}qos'],
+      )!,
+      retain: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}retain'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -208,6 +326,21 @@ class Broker extends DataClass implements Insertable<Broker> {
   final int port;
   final String? username;
   final String? password;
+
+  /// Connect over TLS (defaults the port to 8883 in the UI).
+  final bool secure;
+
+  /// MQTT keep-alive ping interval, in seconds.
+  final int keepAlive;
+
+  /// Connection handshake timeout, in seconds.
+  final int connectTimeout;
+
+  /// Default QoS (0/1/2) applied to subscribes and publishes for this broker.
+  final int qos;
+
+  /// Whether published messages set the broker's retain flag.
+  final bool retain;
   final DateTime createdAt;
   const Broker({
     required this.id,
@@ -216,6 +349,11 @@ class Broker extends DataClass implements Insertable<Broker> {
     required this.port,
     this.username,
     this.password,
+    required this.secure,
+    required this.keepAlive,
+    required this.connectTimeout,
+    required this.qos,
+    required this.retain,
     required this.createdAt,
   });
   @override
@@ -231,6 +369,11 @@ class Broker extends DataClass implements Insertable<Broker> {
     if (!nullToAbsent || password != null) {
       map['password'] = Variable<String>(password);
     }
+    map['secure'] = Variable<bool>(secure);
+    map['keep_alive'] = Variable<int>(keepAlive);
+    map['connect_timeout'] = Variable<int>(connectTimeout);
+    map['qos'] = Variable<int>(qos);
+    map['retain'] = Variable<bool>(retain);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -247,6 +390,11 @@ class Broker extends DataClass implements Insertable<Broker> {
       password: password == null && nullToAbsent
           ? const Value.absent()
           : Value(password),
+      secure: Value(secure),
+      keepAlive: Value(keepAlive),
+      connectTimeout: Value(connectTimeout),
+      qos: Value(qos),
+      retain: Value(retain),
       createdAt: Value(createdAt),
     );
   }
@@ -263,6 +411,11 @@ class Broker extends DataClass implements Insertable<Broker> {
       port: serializer.fromJson<int>(json['port']),
       username: serializer.fromJson<String?>(json['username']),
       password: serializer.fromJson<String?>(json['password']),
+      secure: serializer.fromJson<bool>(json['secure']),
+      keepAlive: serializer.fromJson<int>(json['keepAlive']),
+      connectTimeout: serializer.fromJson<int>(json['connectTimeout']),
+      qos: serializer.fromJson<int>(json['qos']),
+      retain: serializer.fromJson<bool>(json['retain']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -276,6 +429,11 @@ class Broker extends DataClass implements Insertable<Broker> {
       'port': serializer.toJson<int>(port),
       'username': serializer.toJson<String?>(username),
       'password': serializer.toJson<String?>(password),
+      'secure': serializer.toJson<bool>(secure),
+      'keepAlive': serializer.toJson<int>(keepAlive),
+      'connectTimeout': serializer.toJson<int>(connectTimeout),
+      'qos': serializer.toJson<int>(qos),
+      'retain': serializer.toJson<bool>(retain),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -287,6 +445,11 @@ class Broker extends DataClass implements Insertable<Broker> {
     int? port,
     Value<String?> username = const Value.absent(),
     Value<String?> password = const Value.absent(),
+    bool? secure,
+    int? keepAlive,
+    int? connectTimeout,
+    int? qos,
+    bool? retain,
     DateTime? createdAt,
   }) => Broker(
     id: id ?? this.id,
@@ -295,6 +458,11 @@ class Broker extends DataClass implements Insertable<Broker> {
     port: port ?? this.port,
     username: username.present ? username.value : this.username,
     password: password.present ? password.value : this.password,
+    secure: secure ?? this.secure,
+    keepAlive: keepAlive ?? this.keepAlive,
+    connectTimeout: connectTimeout ?? this.connectTimeout,
+    qos: qos ?? this.qos,
+    retain: retain ?? this.retain,
     createdAt: createdAt ?? this.createdAt,
   );
   Broker copyWithCompanion(BrokersCompanion data) {
@@ -305,6 +473,13 @@ class Broker extends DataClass implements Insertable<Broker> {
       port: data.port.present ? data.port.value : this.port,
       username: data.username.present ? data.username.value : this.username,
       password: data.password.present ? data.password.value : this.password,
+      secure: data.secure.present ? data.secure.value : this.secure,
+      keepAlive: data.keepAlive.present ? data.keepAlive.value : this.keepAlive,
+      connectTimeout: data.connectTimeout.present
+          ? data.connectTimeout.value
+          : this.connectTimeout,
+      qos: data.qos.present ? data.qos.value : this.qos,
+      retain: data.retain.present ? data.retain.value : this.retain,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -318,14 +493,31 @@ class Broker extends DataClass implements Insertable<Broker> {
           ..write('port: $port, ')
           ..write('username: $username, ')
           ..write('password: $password, ')
+          ..write('secure: $secure, ')
+          ..write('keepAlive: $keepAlive, ')
+          ..write('connectTimeout: $connectTimeout, ')
+          ..write('qos: $qos, ')
+          ..write('retain: $retain, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, address, port, username, password, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    address,
+    port,
+    username,
+    password,
+    secure,
+    keepAlive,
+    connectTimeout,
+    qos,
+    retain,
+    createdAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -336,6 +528,11 @@ class Broker extends DataClass implements Insertable<Broker> {
           other.port == this.port &&
           other.username == this.username &&
           other.password == this.password &&
+          other.secure == this.secure &&
+          other.keepAlive == this.keepAlive &&
+          other.connectTimeout == this.connectTimeout &&
+          other.qos == this.qos &&
+          other.retain == this.retain &&
           other.createdAt == this.createdAt);
 }
 
@@ -346,6 +543,11 @@ class BrokersCompanion extends UpdateCompanion<Broker> {
   final Value<int> port;
   final Value<String?> username;
   final Value<String?> password;
+  final Value<bool> secure;
+  final Value<int> keepAlive;
+  final Value<int> connectTimeout;
+  final Value<int> qos;
+  final Value<bool> retain;
   final Value<DateTime> createdAt;
   const BrokersCompanion({
     this.id = const Value.absent(),
@@ -354,6 +556,11 @@ class BrokersCompanion extends UpdateCompanion<Broker> {
     this.port = const Value.absent(),
     this.username = const Value.absent(),
     this.password = const Value.absent(),
+    this.secure = const Value.absent(),
+    this.keepAlive = const Value.absent(),
+    this.connectTimeout = const Value.absent(),
+    this.qos = const Value.absent(),
+    this.retain = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   BrokersCompanion.insert({
@@ -363,6 +570,11 @@ class BrokersCompanion extends UpdateCompanion<Broker> {
     required int port,
     this.username = const Value.absent(),
     this.password = const Value.absent(),
+    this.secure = const Value.absent(),
+    this.keepAlive = const Value.absent(),
+    this.connectTimeout = const Value.absent(),
+    this.qos = const Value.absent(),
+    this.retain = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : name = Value(name),
        address = Value(address),
@@ -374,6 +586,11 @@ class BrokersCompanion extends UpdateCompanion<Broker> {
     Expression<int>? port,
     Expression<String>? username,
     Expression<String>? password,
+    Expression<bool>? secure,
+    Expression<int>? keepAlive,
+    Expression<int>? connectTimeout,
+    Expression<int>? qos,
+    Expression<bool>? retain,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -383,6 +600,11 @@ class BrokersCompanion extends UpdateCompanion<Broker> {
       if (port != null) 'port': port,
       if (username != null) 'username': username,
       if (password != null) 'password': password,
+      if (secure != null) 'secure': secure,
+      if (keepAlive != null) 'keep_alive': keepAlive,
+      if (connectTimeout != null) 'connect_timeout': connectTimeout,
+      if (qos != null) 'qos': qos,
+      if (retain != null) 'retain': retain,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -394,6 +616,11 @@ class BrokersCompanion extends UpdateCompanion<Broker> {
     Value<int>? port,
     Value<String?>? username,
     Value<String?>? password,
+    Value<bool>? secure,
+    Value<int>? keepAlive,
+    Value<int>? connectTimeout,
+    Value<int>? qos,
+    Value<bool>? retain,
     Value<DateTime>? createdAt,
   }) {
     return BrokersCompanion(
@@ -403,6 +630,11 @@ class BrokersCompanion extends UpdateCompanion<Broker> {
       port: port ?? this.port,
       username: username ?? this.username,
       password: password ?? this.password,
+      secure: secure ?? this.secure,
+      keepAlive: keepAlive ?? this.keepAlive,
+      connectTimeout: connectTimeout ?? this.connectTimeout,
+      qos: qos ?? this.qos,
+      retain: retain ?? this.retain,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -428,6 +660,21 @@ class BrokersCompanion extends UpdateCompanion<Broker> {
     if (password.present) {
       map['password'] = Variable<String>(password.value);
     }
+    if (secure.present) {
+      map['secure'] = Variable<bool>(secure.value);
+    }
+    if (keepAlive.present) {
+      map['keep_alive'] = Variable<int>(keepAlive.value);
+    }
+    if (connectTimeout.present) {
+      map['connect_timeout'] = Variable<int>(connectTimeout.value);
+    }
+    if (qos.present) {
+      map['qos'] = Variable<int>(qos.value);
+    }
+    if (retain.present) {
+      map['retain'] = Variable<bool>(retain.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -443,6 +690,11 @@ class BrokersCompanion extends UpdateCompanion<Broker> {
           ..write('port: $port, ')
           ..write('username: $username, ')
           ..write('password: $password, ')
+          ..write('secure: $secure, ')
+          ..write('keepAlive: $keepAlive, ')
+          ..write('connectTimeout: $connectTimeout, ')
+          ..write('qos: $qos, ')
+          ..write('retain: $retain, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -2257,6 +2509,11 @@ typedef $$BrokersTableCreateCompanionBuilder =
       required int port,
       Value<String?> username,
       Value<String?> password,
+      Value<bool> secure,
+      Value<int> keepAlive,
+      Value<int> connectTimeout,
+      Value<int> qos,
+      Value<bool> retain,
       Value<DateTime> createdAt,
     });
 typedef $$BrokersTableUpdateCompanionBuilder =
@@ -2267,6 +2524,11 @@ typedef $$BrokersTableUpdateCompanionBuilder =
       Value<int> port,
       Value<String?> username,
       Value<String?> password,
+      Value<bool> secure,
+      Value<int> keepAlive,
+      Value<int> connectTimeout,
+      Value<int> qos,
+      Value<bool> retain,
       Value<DateTime> createdAt,
     });
 
@@ -2348,6 +2610,31 @@ class $$BrokersTableFilterComposer
 
   ColumnFilters<String> get password => $composableBuilder(
     column: $table.password,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get secure => $composableBuilder(
+    column: $table.secure,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get keepAlive => $composableBuilder(
+    column: $table.keepAlive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get connectTimeout => $composableBuilder(
+    column: $table.connectTimeout,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get qos => $composableBuilder(
+    column: $table.qos,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get retain => $composableBuilder(
+    column: $table.retain,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2446,6 +2733,31 @@ class $$BrokersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get secure => $composableBuilder(
+    column: $table.secure,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get keepAlive => $composableBuilder(
+    column: $table.keepAlive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get connectTimeout => $composableBuilder(
+    column: $table.connectTimeout,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get qos => $composableBuilder(
+    column: $table.qos,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get retain => $composableBuilder(
+    column: $table.retain,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -2478,6 +2790,23 @@ class $$BrokersTableAnnotationComposer
 
   GeneratedColumn<String> get password =>
       $composableBuilder(column: $table.password, builder: (column) => column);
+
+  GeneratedColumn<bool> get secure =>
+      $composableBuilder(column: $table.secure, builder: (column) => column);
+
+  GeneratedColumn<int> get keepAlive =>
+      $composableBuilder(column: $table.keepAlive, builder: (column) => column);
+
+  GeneratedColumn<int> get connectTimeout => $composableBuilder(
+    column: $table.connectTimeout,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get qos =>
+      $composableBuilder(column: $table.qos, builder: (column) => column);
+
+  GeneratedColumn<bool> get retain =>
+      $composableBuilder(column: $table.retain, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2567,6 +2896,11 @@ class $$BrokersTableTableManager
                 Value<int> port = const Value.absent(),
                 Value<String?> username = const Value.absent(),
                 Value<String?> password = const Value.absent(),
+                Value<bool> secure = const Value.absent(),
+                Value<int> keepAlive = const Value.absent(),
+                Value<int> connectTimeout = const Value.absent(),
+                Value<int> qos = const Value.absent(),
+                Value<bool> retain = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => BrokersCompanion(
                 id: id,
@@ -2575,6 +2909,11 @@ class $$BrokersTableTableManager
                 port: port,
                 username: username,
                 password: password,
+                secure: secure,
+                keepAlive: keepAlive,
+                connectTimeout: connectTimeout,
+                qos: qos,
+                retain: retain,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -2585,6 +2924,11 @@ class $$BrokersTableTableManager
                 required int port,
                 Value<String?> username = const Value.absent(),
                 Value<String?> password = const Value.absent(),
+                Value<bool> secure = const Value.absent(),
+                Value<int> keepAlive = const Value.absent(),
+                Value<int> connectTimeout = const Value.absent(),
+                Value<int> qos = const Value.absent(),
+                Value<bool> retain = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => BrokersCompanion.insert(
                 id: id,
@@ -2593,6 +2937,11 @@ class $$BrokersTableTableManager
                 port: port,
                 username: username,
                 password: password,
+                secure: secure,
+                keepAlive: keepAlive,
+                connectTimeout: connectTimeout,
+                qos: qos,
+                retain: retain,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0

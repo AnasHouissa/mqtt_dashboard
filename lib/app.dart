@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/brokers/broker_list_screen.dart';
+import 'features/home/connection_banner.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/providers.dart';
 import 'theme/app_theme.dart';
@@ -20,7 +21,10 @@ class MqttDashApp extends ConsumerWidget {
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      builder: (context, child) =>
+          AppShell(child: child ?? const SizedBox.shrink()),
       home: const BrokerListScreen(),
     );
   }
 }
+

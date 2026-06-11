@@ -57,6 +57,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get connected => 'Connecté';
 
   @override
+  String connectedTo(String broker) {
+    return 'Connecté à $broker';
+  }
+
+  @override
   String get disconnected => 'Déconnecté';
 
   @override
@@ -86,6 +91,36 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reasonUnknown => 'erreur inconnue';
+
+  @override
+  String get testConnection => 'Tester la connexion';
+
+  @override
+  String get testing => 'Test en cours…';
+
+  @override
+  String get connectionSuccessful => 'Connexion réussie';
+
+  @override
+  String get secureTls => 'Sécurisé (TLS)';
+
+  @override
+  String get advanced => 'Avancé';
+
+  @override
+  String get qos => 'QoS';
+
+  @override
+  String get retain => 'Conserver les messages publiés';
+
+  @override
+  String get keepAliveSeconds => 'Keep-alive (s)';
+
+  @override
+  String get timeoutSeconds => 'Délai d\'expiration (s)';
+
+  @override
+  String get invalidValue => 'Entrez un nombre positif';
 
   @override
   String get metrics => 'Métriques';

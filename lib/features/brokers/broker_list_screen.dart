@@ -8,6 +8,7 @@ import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/entity_card.dart';
 import '../home/broker_home_screen.dart';
+import '../settings/settings_screen.dart';
 import 'broker_form.dart';
 
 class BrokerListScreen extends ConsumerWidget {
@@ -21,7 +22,7 @@ class BrokerListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l.brokers),
-        actions: const [_LanguageButton()],
+        actions: const [_SettingsButton()],
       ),
       body: brokers.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -82,21 +83,20 @@ class BrokerListScreen extends ConsumerWidget {
   }
 }
 
-/// Quick FR/EN/system language switcher in the app bar.
-class _LanguageButton extends ConsumerWidget {
-  const _LanguageButton();
+/// Opens the settings page (currently app language).
+class _SettingsButton extends StatelessWidget {
+  const _SettingsButton();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return PopupMenuButton<Locale?>(
-      icon: const Icon(Icons.language),
-      onSelected: (locale) =>
-          ref.read(localeProvider.notifier).setLocale(locale),
-      itemBuilder: (context) => const [
-        PopupMenuItem(value: Locale('en'), child: Text('English')),
-        PopupMenuItem(value: Locale('fr'), child: Text('Français')),
-        PopupMenuItem(value: null, child: Text('System')),
-      ],
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return IconButton(
+      icon: const Icon(Icons.settings),
+      tooltip: l.settings,
+      onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SettingsScreen()),
+      ),
     );
   }
 }
