@@ -101,6 +101,7 @@
   "liveConsole": "Live console",
   "consoleWaiting": "Waiting for messages…",
   "clear": "Clear",
-  "seedMockData": "Seed 30 days of mock data",
-  "mockDataSeeded": "Mock data added for the past 30 days"
+  "publishMessage": "Publish a message",
+  "publishDisabled": "Publishing is disabled for this metric",
+  "messageSent": "Message published"
 }

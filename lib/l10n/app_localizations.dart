@@ -614,17 +614,23 @@ abstract class AppLocalizations {
   /// **'Clear'**
   String get clear;
 
-  /// No description provided for @seedMockData.
+  /// No description provided for @publishMessage.
   ///
   /// In en, this message translates to:
-  /// **'Seed 30 days of mock data'**
-  String get seedMockData;
+  /// **'Publish a message'**
+  String get publishMessage;
 
-  /// No description provided for @mockDataSeeded.
+  /// No description provided for @publishDisabled.
   ///
   /// In en, this message translates to:
-  /// **'Mock data added for the past 30 days'**
-  String get mockDataSeeded;
+  /// **'Publishing is disabled for this metric'**
+  String get publishDisabled;
+
+  /// No description provided for @messageSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Message published'**
+  String get messageSent;
 }
 
 class _AppLocalizationsDelegate

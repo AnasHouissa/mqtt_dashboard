@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +8,7 @@ import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../services/mqtt_service.dart';
+import '../../theme/app_theme.dart';
 
 /// A terminal-style live feed showing every raw message received on a metric's
 /// topic, numeric or not. Numeric payloads (stored as readings) are shown in
@@ -30,6 +29,7 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
   final _lines = <RawMessage>[];
   final _scrollController = ScrollController();
   final _timeFormat = DateFormat('HH:mm:ss.SSS');
+  final _publishController = TextEditingController();
   StreamSubscription<RawMessage>? _sub;
 
   @override
@@ -53,22 +53,14 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
     _scrollToBottom();
   }
 
-  /// Dev helper: insert one sine sample per day for the past [days] days, so
-  /// the Day chart shows a full curve without waiting for real time to pass.
-  /// MQTT can't do this — it always stamps readings with the current time.
-  Future<void> _seedMockData({int days = 30}) async {
-    const offset = 50.0, amplitude = 40.0, period = 30.0;
-    final repo = ref.read(readingRepositoryProvider);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day, 12);
-    for (var i = 0; i < days; i++) {
-      final ts = today.subtract(Duration(days: days - 1 - i));
-      final value = offset + amplitude * sin(2 * pi * i / period);
-      await repo.insert(widget.metric.id, value, ts);
-    }
-    if (!mounted) return;
+  /// Publishes the current input on the metric's topic, then clears the field.
+  void _publish() {
+    final text = _publishController.text.trim();
+    if (text.isEmpty) return;
+    ref.read(connectionProvider.notifier).publish(widget.metric.topic, text);
+    _publishController.clear();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context).mockDataSeeded)),
+      SnackBar(content: Text(AppLocalizations.of(context).messageSent)),
     );
   }
 
@@ -84,6 +76,7 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
   void dispose() {
     _sub?.cancel();
     _scrollController.dispose();
+    _publishController.dispose();
     super.dispose();
   }
 
@@ -140,12 +133,6 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
           ],
         ),
         actions: [
-          if (kDebugMode)
-            IconButton(
-              icon: const Icon(Icons.auto_graph),
-              tooltip: l.seedMockData,
-              onPressed: _seedMockData,
-            ),
           IconButton(
             icon: const Icon(Icons.delete_sweep),
             tooltip: l.clear,
@@ -203,7 +190,86 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
               },
                   ),
           ),
+          _publishBar(l),
         ],
+      ),
+    );
+  }
+
+  /// Bottom bar to publish on the metric's topic. Enabled only when the metric
+  /// allows publishing and we're connected to its broker; otherwise it shows a
+  /// disabled hint so the reason is never ambiguous.
+  Widget _publishBar(AppLocalizations l) {
+    final connectedHere =
+        ref.watch(connectionProvider) == MqttStatus.connected &&
+            ref.read(connectionProvider.notifier).activeBrokerId ==
+                widget.metric.brokerId;
+    final canPublish = widget.metric.publishEnabled && connectedHere;
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+        decoration: const BoxDecoration(
+          color: Color(0xFF1A1A1A),
+          border: Border(top: BorderSide(color: Color(0xFF2A2A2A))),
+        ),
+        child: widget.metric.publishEnabled
+            ? Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _publishController,
+                      enabled: connectedHere,
+                      onSubmitted: (_) => canPublish ? _publish() : null,
+                      textInputAction: TextInputAction.send,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'monospace',
+                        fontSize: 13,
+                      ),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        filled: true,
+                        fillColor: const Color(0xFF0D0D0D),
+                        hintText: l.publishMessage,
+                        hintStyle: const TextStyle(color: Colors.white38),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.button),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    color: AppColors.primary,
+                    disabledColor: Colors.white24,
+                    tooltip: l.publishMessage,
+                    onPressed: canPublish ? _publish : null,
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  const Icon(Icons.block, color: Colors.white38, size: 16),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      l.publishDisabled,
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }
