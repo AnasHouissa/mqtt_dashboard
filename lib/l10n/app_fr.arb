@@ -16,6 +16,12 @@
   "connect": "Connecter",
   "disconnect": "Déconnecter",
   "connected": "Connecté",
+  "connectedTo": "Connecté à {broker}",
+  "@connectedTo": {
+    "placeholders": {
+      "broker": { "type": "String" }
+    }
+  },
   "disconnected": "Déconnecté",
   "connecting": "Connexion…",
   "connectionFailed": "Échec de la connexion",

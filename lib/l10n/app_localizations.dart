@@ -194,6 +194,12 @@ abstract class AppLocalizations {
   /// **'Connected'**
   String get connected;
 
+  /// No description provided for @connectedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to {broker}'**
+  String connectedTo(String broker);
+
   /// No description provided for @disconnected.
   ///
   /// In en, this message translates to:

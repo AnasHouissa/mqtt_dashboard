@@ -57,6 +57,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get connected => 'Connecté';
 
   @override
+  String connectedTo(String broker) {
+    return 'Connecté à $broker';
+  }
+
+  @override
   String get disconnected => 'Déconnecté';
 
   @override
