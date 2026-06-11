@@ -24,3 +24,4 @@ class MqttDashApp extends ConsumerWidget {
     );
   }
 }
+

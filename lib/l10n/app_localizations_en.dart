@@ -87,6 +87,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reasonUnknown => 'unknown error';
 
   @override
+  String get testConnection => 'Test connection';
+
+  @override
+  String get testing => 'Testing…';
+
+  @override
+  String get connectionSuccessful => 'Connection successful';
+
+  @override
+  String get secureTls => 'Secure (TLS)';
+
+  @override
+  String get advanced => 'Advanced';
+
+  @override
+  String get qos => 'QoS';
+
+  @override
+  String get retain => 'Retain published messages';
+
+  @override
+  String get keepAliveSeconds => 'Keep-alive (s)';
+
+  @override
+  String get timeoutSeconds => 'Timeout (s)';
+
+  @override
+  String get invalidValue => 'Enter a positive number';
+
+  @override
   String get metrics => 'Metrics';
 
   @override

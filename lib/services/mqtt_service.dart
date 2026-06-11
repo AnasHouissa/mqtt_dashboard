@@ -51,6 +51,12 @@ class RawMessage {
 /// [messages]. Callers (a provider) persist them as readings.
 class MqttService {
   MqttServerClient? _client;
+
+  /// QoS / retain defaults captured from the broker on [connect], reused by
+  /// [subscribe] and [publish] while the connection is live.
+  MqttQos _qos = MqttQos.atLeastOnce;
+  bool _retain = false;
+
   final _statusController = StreamController<MqttStatus>.broadcast();
   final _messageController = StreamController<TopicMessage>.broadcast();
   final _rawController = StreamController<RawMessage>.broadcast();
@@ -79,13 +85,18 @@ class MqttService {
 
     final clientId =
         'mqtt_dash_${broker.id}_${broker.name.hashCode.toUnsigned(16)}';
+    _qos = qosFromInt(broker.qos);
+    _retain = broker.retain;
+
     final client = MqttServerClient.withPort(
       broker.address,
       clientId,
       broker.port,
     );
     client.logging(on: true);
-    client.keepAlivePeriod = 30;
+    client.secure = broker.secure;
+    client.keepAlivePeriod = broker.keepAlive;
+    client.connectTimeoutPeriod = broker.connectTimeout * 1000;
     client.autoReconnect = true;
     client.onConnected = () => _setStatus(MqttStatus.connected);
     client.onDisconnected = () => _setStatus(MqttStatus.disconnected);
@@ -124,25 +135,8 @@ class MqttService {
     return false;
   }
 
-  /// Maps the broker's connect return code to a coarse [MqttFailureReason].
-  /// A missing/unspecified code means we never got a broker-level reply, which
-  /// is almost always a network-level problem (host, port, firewall, timeout).
-  static MqttFailureReason _classify(MqttClientConnectionStatus? status) {
-    switch (status?.returnCode) {
-      case MqttConnectReturnCode.badUsernameOrPassword:
-      case MqttConnectReturnCode.notAuthorized:
-        return MqttFailureReason.badCredentials;
-      case MqttConnectReturnCode.brokerUnavailable:
-        return MqttFailureReason.brokerUnavailable;
-      case MqttConnectReturnCode.identifierRejected:
-      case MqttConnectReturnCode.unacceptedProtocolVersion:
-        return MqttFailureReason.rejected;
-      case MqttConnectReturnCode.connectionAccepted:
-      case MqttConnectReturnCode.noneSpecified:
-      case null:
-        return MqttFailureReason.network;
-    }
-  }
+  static MqttFailureReason _classify(MqttClientConnectionStatus? status) =>
+      _classifyConnectionStatus(status);
 
   void _listen() {
     _client?.updates?.listen((events) {
@@ -174,7 +168,7 @@ class MqttService {
 
   void subscribe(String topic) {
     if (_status == MqttStatus.connected) {
-      _client?.subscribe(topic, MqttQos.atLeastOnce);
+      _client?.subscribe(topic, _qos);
     }
   }
 
@@ -183,7 +177,7 @@ class MqttService {
   void publish(String topic, String value) {
     if (_status != MqttStatus.connected) return;
     final builder = MqttClientPayloadBuilder()..addString(value);
-    _client?.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
+    _client?.publishMessage(topic, _qos, builder.payload!, retain: _retain);
   }
 
   Future<void> disconnect() async {
@@ -200,4 +194,75 @@ class MqttService {
     _messageController.close();
     _rawController.close();
   }
+}
+
+/// Maps a stored QoS integer (0/1/2) to its [MqttQos]; anything else falls
+/// back to QoS 1 (at-least-once).
+MqttQos qosFromInt(int qos) => switch (qos) {
+      0 => MqttQos.atMostOnce,
+      2 => MqttQos.exactlyOnce,
+      _ => MqttQos.atLeastOnce,
+    };
+
+/// Maps the broker's connect return code to a coarse [MqttFailureReason].
+/// A missing/unspecified code means we never got a broker-level reply, which
+/// is almost always a network-level problem (host, port, firewall, timeout).
+MqttFailureReason _classifyConnectionStatus(
+  MqttClientConnectionStatus? status,
+) {
+  switch (status?.returnCode) {
+    case MqttConnectReturnCode.badUsernameOrPassword:
+    case MqttConnectReturnCode.notAuthorized:
+      return MqttFailureReason.badCredentials;
+    case MqttConnectReturnCode.brokerUnavailable:
+      return MqttFailureReason.brokerUnavailable;
+    case MqttConnectReturnCode.identifierRejected:
+    case MqttConnectReturnCode.unacceptedProtocolVersion:
+      return MqttFailureReason.rejected;
+    case MqttConnectReturnCode.connectionAccepted:
+    case MqttConnectReturnCode.noneSpecified:
+    case null:
+      return MqttFailureReason.network;
+  }
+}
+
+/// Attempts a one-off connection with the given parameters purely to validate
+/// them. Uses its own throwaway client, so it never disturbs a live
+/// [MqttService] connection. Returns null on success, or a [MqttFailureReason].
+Future<MqttFailureReason?> testBrokerConnection({
+  required String address,
+  required int port,
+  String? username,
+  String? password,
+  bool secure = false,
+  int keepAlive = 20,
+  int connectTimeout = 10,
+}) async {
+  final clientId = 'mqtt_dash_test_${address.hashCode.toUnsigned(16)}';
+  final client = MqttServerClient.withPort(address, clientId, port)
+    ..secure = secure
+    ..keepAlivePeriod = keepAlive
+    ..connectTimeoutPeriod = connectTimeout * 1000
+    ..autoReconnect = false;
+
+  final connMessage = MqttConnectMessage()
+      .withClientIdentifier(clientId)
+      .startClean();
+  if (username != null && username.isNotEmpty) {
+    connMessage.authenticateAs(username, password ?? '');
+  }
+  client.connectionMessage = connMessage;
+
+  try {
+    await client.connect();
+  } catch (_) {
+    final reason = _classifyConnectionStatus(client.connectionStatus);
+    client.disconnect();
+    return reason;
+  }
+
+  final ok = client.connectionStatus?.state == MqttConnectionState.connected;
+  final reason = ok ? null : _classifyConnectionStatus(client.connectionStatus);
+  client.disconnect();
+  return reason;
 }

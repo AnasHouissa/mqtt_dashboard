@@ -18,6 +18,22 @@ class Brokers extends Table {
   IntColumn get port => integer()();
   TextColumn get username => text().nullable()();
   TextColumn get password => text().nullable()();
+
+  /// Connect over TLS (defaults the port to 8883 in the UI).
+  BoolColumn get secure => boolean().withDefault(const Constant(false))();
+
+  /// MQTT keep-alive ping interval, in seconds.
+  IntColumn get keepAlive => integer().withDefault(const Constant(30))();
+
+  /// Connection handshake timeout, in seconds.
+  IntColumn get connectTimeout => integer().withDefault(const Constant(10))();
+
+  /// Default QoS (0/1/2) applied to subscribes and publishes for this broker.
+  IntColumn get qos => integer().withDefault(const Constant(1))();
+
+  /// Whether published messages set the broker's retain flag.
+  BoolColumn get retain => boolean().withDefault(const Constant(false))();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -93,7 +109,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mqtt_dash'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -120,6 +136,15 @@ class AppDatabase extends _$AppDatabase {
               'SELECT id, metric_id, type, 0xFF2563EB, 1, 0 FROM charts',
             );
             await m.alterTable(TableMigration(charts));
+          }
+          if (from < 3) {
+            // Per-broker connection config. All have non-null defaults, so
+            // existing rows keep working unchanged.
+            await m.addColumn(brokers, brokers.secure);
+            await m.addColumn(brokers, brokers.keepAlive);
+            await m.addColumn(brokers, brokers.connectTimeout);
+            await m.addColumn(brokers, brokers.qos);
+            await m.addColumn(brokers, brokers.retain);
           }
         },
       );
