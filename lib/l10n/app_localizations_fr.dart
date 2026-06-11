@@ -276,9 +276,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clear => 'Effacer';
 
   @override
-  String get seedMockData => 'Générer 30 jours de données fictives';
+  String get publishMessage => 'Publier un message';
 
   @override
-  String get mockDataSeeded =>
-      'Données fictives ajoutées pour les 30 derniers jours';
+  String get publishDisabled =>
+      'La publication est désactivée pour cette métrique';
+
+  @override
+  String get messageSent => 'Message publié';
 }

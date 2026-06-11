@@ -101,6 +101,7 @@
   "liveConsole": "Console en direct",
   "consoleWaiting": "En attente de messages…",
   "clear": "Effacer",
-  "seedMockData": "Générer 30 jours de données fictives",
-  "mockDataSeeded": "Données fictives ajoutées pour les 30 derniers jours"
+  "publishMessage": "Publier un message",
+  "publishDisabled": "La publication est désactivée pour cette métrique",
+  "messageSent": "Message publié"
 }

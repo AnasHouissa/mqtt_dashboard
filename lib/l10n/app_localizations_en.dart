@@ -274,8 +274,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clear => 'Clear';
 
   @override
-  String get seedMockData => 'Seed 30 days of mock data';
+  String get publishMessage => 'Publish a message';
 
   @override
-  String get mockDataSeeded => 'Mock data added for the past 30 days';
+  String get publishDisabled => 'Publishing is disabled for this metric';
+
+  @override
+  String get messageSent => 'Message published';
 }
