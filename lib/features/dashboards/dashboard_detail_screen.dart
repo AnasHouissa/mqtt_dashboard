@@ -5,6 +5,7 @@ import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/labeled_add_button.dart';
 import '../charts/chart_card.dart';
 import 'add_curve_dialog.dart';
 
@@ -27,14 +28,14 @@ class DashboardDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(dashboard.name),
         actions: [
-          IconButton(
+          LabeledAddButton(
+            icon: Icons.add_chart,
+            label: l.addCurve,
             onPressed: () => showAddCurveSheet(
               context,
               brokerId: broker.id,
               dashboardId: dashboard.id,
             ),
-            icon: const Icon(Icons.add_chart),
-            tooltip: l.addCurve,
           ),
         ],
       ),

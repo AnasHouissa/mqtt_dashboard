@@ -6,7 +6,9 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../services/mqtt_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/labeled_add_button.dart';
 import '../dashboards/dashboard_list_view.dart';
+import '../metrics/metric_form.dart';
 import '../metrics/metric_list_view.dart';
 
 /// Tabbed home for a single broker: connection control + Metrics + Dashboards.
@@ -84,7 +86,7 @@ class BrokerHomeScreen extends ConsumerWidget {
             ),
           ),
           actions: [
-
+            _TabAddAction(broker: broker),
           ],
         ),
         body: TabBarView(
@@ -94,6 +96,33 @@ class BrokerHomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// App-bar add button whose label and action follow the selected tab: it adds
+/// a metric on the Metrics tab and a dashboard on the Dashboards tab.
+class _TabAddAction extends ConsumerWidget {
+  const _TabAddAction({required this.broker});
+
+  final Broker broker;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final tab = DefaultTabController.of(context);
+    return AnimatedBuilder(
+      animation: tab,
+      builder: (context, _) {
+        final isMetrics = tab.index == 0;
+        return LabeledAddButton(
+          icon: isMetrics ? Icons.sensors : Icons.dashboard_customize,
+          label: isMetrics ? l.addMetric : l.addDashboard,
+          onPressed: () => isMetrics
+              ? showMetricForm(context, brokerId: broker.id)
+              : showAddDashboardForm(context, ref, broker.id),
+        );
+      },
     );
   }
 }

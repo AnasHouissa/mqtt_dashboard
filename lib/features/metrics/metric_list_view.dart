@@ -88,11 +88,6 @@ class MetricListView extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'metric_fab',
-        onPressed: () => showMetricForm(context, brokerId: broker.id),
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
