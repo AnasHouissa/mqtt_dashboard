@@ -1,14 +1,16 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/db/database.dart';
+import '../../data/repositories/dashboard_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/color_swatch_picker.dart';
 import '../../widgets/sheet_header.dart';
+import '../charts/chart_series_editor.dart';
 
-/// "Ajouter courbe": pick a metric, chart type and optional title.
+/// "Add curve": name the chart, then add one or more metric series, each with
+/// its own type, color and visibility.
 class AddCurveSheet extends ConsumerStatefulWidget {
   const AddCurveSheet({
     super.key,
@@ -24,9 +26,18 @@ class AddCurveSheet extends ConsumerStatefulWidget {
 }
 
 class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
-  int? _metricId;
-  ChartType _type = ChartType.line;
   final _title = TextEditingController();
+  final _drafts = <SeriesDraft>[];
+
+  /// Index of the currently expanded series card (-1 = all collapsed). Only one
+  /// is open at a time to keep the list short.
+  int _expanded = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _drafts.add(_newDraft());
+  }
 
   @override
   void dispose() {
@@ -34,16 +45,41 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
     super.dispose();
   }
 
+  /// A fresh series with the next palette color (cycling).
+  SeriesDraft _newDraft() =>
+      SeriesDraft(color: kChartPalette[_drafts.length % kChartPalette.length]);
+
+  void _addSeries() => setState(() {
+        _drafts.add(_newDraft());
+        _expanded = _drafts.length - 1; // open the new one
+      });
+
+  void _removeSeries(int index) => setState(() {
+        _drafts.removeAt(index);
+        if (_expanded >= _drafts.length) _expanded = _drafts.length - 1;
+      });
+
+  void _toggle(int index) =>
+      setState(() => _expanded = _expanded == index ? -1 : index);
+
+  bool get _canSave => _drafts.any((d) => d.metricId != null);
+
   Future<void> _save() async {
-    final metricId = _metricId;
-    if (metricId == null) return;
-    await ref.read(dashboardRepositoryProvider).insertChart(
-          ChartsCompanion.insert(
-            dashboardId: widget.dashboardId,
-            metricId: metricId,
-            type: _type,
-            title: Value(_title.text.trim().isEmpty ? null : _title.text.trim()),
+    final series = [
+      for (final d in _drafts)
+        if (d.metricId != null)
+          ChartSeriesDraft(
+            metricId: d.metricId!,
+            type: d.type,
+            color: d.color.toARGB32(),
+            visible: d.visible,
           ),
+    ];
+    if (series.isEmpty) return;
+    await ref.read(dashboardRepositoryProvider).createChartWithSeries(
+          dashboardId: widget.dashboardId,
+          title: _title.text.trim().isEmpty ? null : _title.text.trim(),
+          series: series,
         );
     if (mounted) Navigator.pop(context);
   }
@@ -53,71 +89,109 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
     final l = AppLocalizations.of(context);
     final metrics = ref.watch(metricsProvider(widget.brokerId));
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SheetHeader(title: l.addCurve),
-          const SizedBox(height: AppSpacing.lg),
-          metrics.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Text('$e'),
-            data: (list) {
-              if (list.isEmpty) return Text(l.noMetrics);
-              return DropdownButtonFormField<int>(
-                initialValue: _metricId,
-                decoration: InputDecoration(labelText: l.selectMetric),
-                items: [
-                  for (final m in list)
-                    DropdownMenuItem(value: m.id, child: Text(m.name)),
+    return metrics.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('$e')),
+      data: (list) {
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                0,
+              ),
+              child: SheetHeader(title: l.addCurve),
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                children: [
+                  // 1) Chart title comes first.
+                  TextField(
+                    controller: _title,
+                    decoration: InputDecoration(labelText: l.chartTitle),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  if (list.isEmpty)
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                      child: Text(l.noMetrics),
+                    )
+                  else ...[
+                    // 2) One or more metric series (collapsible, one open).
+                    for (var i = 0; i < _drafts.length; i++)
+                      ChartSeriesEditor(
+                        key: ValueKey(_drafts[i]),
+                        metrics: list,
+                        draft: _drafts[i],
+                        expanded: _expanded == i,
+                        onToggle: () => _toggle(i),
+                        onChanged: () => setState(() {}),
+                        onRemove:
+                            _drafts.length > 1 ? () => _removeSeries(i) : null,
+                      ),
+                    const SizedBox(height: AppSpacing.sm),
+                    OutlinedButton.icon(
+                      onPressed: _addSeries,
+                      icon: const Icon(Icons.add),
+                      label: Text(l.addMetricSeries),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        minimumSize: const Size(0, 48),
+                        side: const BorderSide(color: AppColors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.button),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-                onChanged: (v) => setState(() => _metricId = v),
-              );
-            },
+              ),
+            ),
+            // Sticky action bar pinned above the keyboard.
+            _ActionBar(
+              onCancel: () => Navigator.pop(context),
+              onSave: _canSave ? _save : null,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Pinned Cancel / Save bar at the bottom of the sheet.
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({required this.onCancel, this.onSave});
+
+  final VoidCallback onCancel;
+  final VoidCallback? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.card,
+        border: Border(top: BorderSide(color: AppColors.divider)),
+      ),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextButton(onPressed: onCancel, child: Text(l.cancel)),
           ),
-          const SizedBox(height: 12),
-          SegmentedButton<ChartType>(
-            segments: [
-              ButtonSegment(
-                value: ChartType.line,
-                label: Text(l.curve),
-                icon: const Icon(Icons.show_chart),
-              ),
-              ButtonSegment(
-                value: ChartType.histogram,
-                label: Text(l.histogram),
-                icon: const Icon(Icons.bar_chart),
-              ),
-            ],
-            selected: {_type},
-            onSelectionChanged: (s) => setState(() => _type = s.first),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _title,
-            decoration: InputDecoration(labelText: l.chartTitle),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(l.cancel),
-              ),
-              const SizedBox(width: 8),
-              FilledButton(
-                onPressed: _metricId == null ? null : _save,
-                child: Text(l.save),
-              ),
-            ],
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: FilledButton(onPressed: onSave, child: Text(l.save)),
           ),
         ],
       ),
@@ -133,7 +207,15 @@ Future<void> showAddCurveSheet(
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    builder: (_) =>
-        AddCurveSheet(brokerId: brokerId, dashboardId: dashboardId),
+    useSafeArea: true,
+    builder: (context) => Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: FractionallySizedBox(
+        heightFactor: 1,
+        child: AddCurveSheet(brokerId: brokerId, dashboardId: dashboardId),
+      ),
+    ),
   );
 }

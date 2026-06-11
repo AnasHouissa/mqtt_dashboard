@@ -3,8 +3,9 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 part 'database.g.dart';
 
-/// Chart visualization style.
-enum ChartType { line, histogram }
+/// Chart visualization style. New values are appended (never reordered) so the
+/// integer indexes already persisted in the database stay valid.
+enum ChartType { line, histogram, spline, area, scatter }
 
 /// Time bucket used to aggregate readings for histograms / filtering.
 enum TimeBucket { today, day, month, year }
@@ -41,15 +42,32 @@ class Dashboards extends Table {
   TextColumn get name => text().withLength(min: 1, max: 100)();
 }
 
+/// A chart belongs to a dashboard and groups one or more [ChartSeries].
 @DataClassName('ChartConfig')
 class Charts extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get dashboardId =>
       integer().references(Dashboards, #id, onDelete: KeyAction.cascade)();
+  TextColumn get title => text().nullable()();
+}
+
+/// One plotted series within a [Charts] chart: a metric rendered with its own
+/// visualization [type], [color] and [visible] flag. A chart can mix types.
+@DataClassName('ChartSeriesRow')
+class ChartSeries extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get chartId =>
+      integer().references(Charts, #id, onDelete: KeyAction.cascade)();
   IntColumn get metricId =>
       integer().references(Metrics, #id, onDelete: KeyAction.cascade)();
   IntColumn get type => intEnum<ChartType>()();
-  TextColumn get title => text().nullable()();
+
+  /// ARGB color value used to draw the series.
+  IntColumn get color => integer()();
+  BoolColumn get visible => boolean().withDefault(const Constant(true))();
+
+  /// Display order within the chart.
+  IntColumn get position => integer().withDefault(const Constant(0))();
 }
 
 @DataClassName('Reading')
@@ -68,13 +86,14 @@ class AggregatedPoint {
   const AggregatedPoint(this.time, this.value);
 }
 
-@DriftDatabase(tables: [Brokers, Metrics, Dashboards, Charts, Readings])
+@DriftDatabase(
+    tables: [Brokers, Metrics, Dashboards, Charts, ChartSeries, Readings])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ?? driftDatabase(name: 'mqtt_dash'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -88,6 +107,20 @@ class AppDatabase extends _$AppDatabase {
             'CREATE INDEX IF NOT EXISTS idx_readings_metric_time '
             'ON readings (metric_id, timestamp)',
           );
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            // v1 charts held a single metric + type. Move each into its own
+            // series (default blue color, visible), then drop the now-unused
+            // columns from `charts`. `0xFF2563EB` is AppColors.primary.
+            await m.createTable(chartSeries);
+            await customStatement(
+              'INSERT INTO chart_series '
+              '(chart_id, metric_id, type, color, visible, position) '
+              'SELECT id, metric_id, type, 0xFF2563EB, 1, 0 FROM charts',
+            );
+            await m.alterTable(TableMigration(charts));
+          }
         },
       );
 }

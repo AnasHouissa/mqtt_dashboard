@@ -4,69 +4,122 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../data/db/database.dart';
+import '../../data/repositories/dashboard_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 
-/// Renders the Syncfusion chart for a metric + bucket. Reused in the dashboard
-/// card and in the fullscreen view.
+/// Renders one Syncfusion chart for a set of series sharing a time [bucket].
+/// Each visible series is drawn with its own type and color. Reused in the
+/// dashboard card and the fullscreen view.
 class MetricChart extends ConsumerWidget {
-  const MetricChart({
-    super.key,
-    required this.metric,
-    required this.type,
-    required this.bucket,
-  });
+  const MetricChart({super.key, required this.series, required this.bucket});
 
-  final Metric metric;
-  final ChartType type;
+  final List<ChartSeriesWithMetric> series;
   final TimeBucket bucket;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final data = ref.watch(
-      aggregatedProvider((metricId: metric.id, bucket: bucket)),
-    );
+    final visible = series.where((s) => s.series.visible).toList();
+    if (visible.isEmpty) return Center(child: Text(l.noData));
 
-    return data.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')) ,
-      data: (points) {
-        if (points.isEmpty) return Center(child: Text(l.noData));
-        return SfCartesianChart(
-          primaryXAxis: DateTimeAxis(
-            dateFormat: _axisFormat(bucket),
-            intervalType: _intervalType(bucket),
+    // Each series resolves its own aggregated stream.
+    final resolved = [
+      for (final s in visible)
+        (
+          s,
+          ref.watch(
+            aggregatedProvider((metricId: s.metric.id, bucket: bucket)),
           ),
-          // Y-axis auto-scales to the actual min/max of the readings.
-          // metric.minValue/maxValue are notification thresholds (upcoming
-          // feature), not chart bounds, so they are intentionally not used here.
-          primaryYAxis: const NumericAxis(),
-          tooltipBehavior: TooltipBehavior(enable: true),
-          zoomPanBehavior: ZoomPanBehavior(
-            enablePinching: true,
-            enablePanning: true,
-          ),
-          series: <CartesianSeries<AggregatedPoint, DateTime>>[
-            if (type == ChartType.line)
-              LineSeries<AggregatedPoint, DateTime>(
-                dataSource: points,
-                xValueMapper: (p, _) => p.time,
-                yValueMapper: (p, _) => p.value,
-                name: metric.name,
-                markerSettings: const MarkerSettings(isVisible: true),
-              )
-            else
-              ColumnSeries<AggregatedPoint, DateTime>(
-                dataSource: points,
-                xValueMapper: (p, _) => p.time,
-                yValueMapper: (p, _) => p.value,
-                name: metric.name,
-              ),
-          ],
-        );
-      },
+        ),
+    ];
+
+    if (resolved.any((r) => r.$2.isLoading) &&
+        !resolved.any((r) => r.$2.hasValue)) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final error = resolved.firstWhere(
+      (r) => r.$2.hasError,
+      orElse: () => (resolved.first.$1, const AsyncValue.loading()),
     );
+    if (error.$2.hasError) return Center(child: Text('${error.$2.error}'));
+
+    final cartesian = <CartesianSeries<AggregatedPoint, DateTime>>[
+      for (final (s, data) in resolved)
+        if ((data.valueOrNull ?? const []).isNotEmpty)
+          _buildSeries(s, data.value!),
+    ];
+    if (cartesian.isEmpty) return Center(child: Text(l.noData));
+
+    return SfCartesianChart(
+      primaryXAxis: DateTimeAxis(
+        dateFormat: _axisFormat(bucket),
+        intervalType: _intervalType(bucket),
+      ),
+      // Y-axis auto-scales to the actual readings. metric.minValue/maxValue are
+      // notification thresholds, not chart bounds, so they are not used here.
+      primaryYAxis: const NumericAxis(),
+      legend: Legend(isVisible: cartesian.length > 1),
+      tooltipBehavior: TooltipBehavior(enable: true),
+      zoomPanBehavior: ZoomPanBehavior(
+        enablePinching: true,
+        enablePanning: true,
+      ),
+      series: cartesian,
+    );
+  }
+
+  CartesianSeries<AggregatedPoint, DateTime> _buildSeries(
+    ChartSeriesWithMetric s,
+    List<AggregatedPoint> points,
+  ) {
+    final color = Color(s.series.color);
+    final name = s.metric.name;
+    DateTime x(AggregatedPoint p, int _) => p.time;
+    double y(AggregatedPoint p, int _) => p.value;
+    const marker = MarkerSettings(isVisible: true);
+
+    return switch (s.series.type) {
+      ChartType.line => LineSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+          markerSettings: marker,
+        ),
+      ChartType.spline => SplineSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+          markerSettings: marker,
+        ),
+      ChartType.area => AreaSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color.withValues(alpha: 0.4),
+          borderColor: color,
+          borderWidth: 2,
+        ),
+      ChartType.histogram => ColumnSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+        ),
+      ChartType.scatter => ScatterSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+        ),
+    };
   }
 
   static DateFormat _axisFormat(TimeBucket bucket) {

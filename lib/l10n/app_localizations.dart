@@ -365,7 +365,7 @@ abstract class AppLocalizations {
   /// No description provided for @curve.
   ///
   /// In en, this message translates to:
-  /// **'Curve'**
+  /// **'Line'**
   String get curve;
 
   /// No description provided for @histogram.
@@ -373,6 +373,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Histogram'**
   String get histogram;
+
+  /// No description provided for @spline.
+  ///
+  /// In en, this message translates to:
+  /// **'Spline'**
+  String get spline;
+
+  /// No description provided for @area.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get area;
+
+  /// No description provided for @scatter.
+  ///
+  /// In en, this message translates to:
+  /// **'Scatter'**
+  String get scatter;
+
+  /// No description provided for @color.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get color;
+
+  /// No description provided for @showInChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in chart'**
+  String get showInChart;
+
+  /// No description provided for @addMetricSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'Add metric'**
+  String get addMetricSeries;
 
   /// No description provided for @selectMetric.
   ///

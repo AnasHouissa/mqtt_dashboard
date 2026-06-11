@@ -50,7 +50,7 @@ final dashboardsProvider =
         ref.watch(dashboardRepositoryProvider).watchForBroker(brokerId));
 
 final chartsProvider = StreamProvider.autoDispose
-    .family<List<ChartWithMetric>, int>((ref, dashboardId) =>
+    .family<List<ChartWithSeries>, int>((ref, dashboardId) =>
         ref.watch(dashboardRepositoryProvider).watchCharts(dashboardId));
 
 /// Aggregated chart data, keyed by metric + time bucket.

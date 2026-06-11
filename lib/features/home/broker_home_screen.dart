@@ -34,45 +34,61 @@ class BrokerHomeScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(broker.name),
-          bottom: TabBar(
-            tabs: [
-              Tab(text: l.metrics, icon: const Icon(Icons.sensors)),
-              Tab(text: l.dashboards, icon: const Icon(Icons.dashboard)),
-            ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(112),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      _ConnectionChip(status: effectiveStatus),
+                      IconButton(
+                        tooltip: effectiveStatus == MqttStatus.connected
+                            ? l.disconnect
+                            : l.connect,
+                        icon: Icon(
+                          effectiveStatus == MqttStatus.connected
+                              ? Icons.link_off
+                              : Icons.link,
+                        ),
+                        onPressed: () async {
+                          if (effectiveStatus == MqttStatus.connected) {
+                            await controller.disconnect();
+                          } else {
+                            final ok = await controller.connect(broker);
+                            if (context.mounted && !ok) {
+                              final reason = switch (controller.lastFailureReason) {
+                                MqttFailureReason.badCredentials =>
+                                l.reasonBadCredentials,
+                                MqttFailureReason.brokerUnavailable =>
+                                l.reasonBrokerUnavailable,
+                                MqttFailureReason.rejected => l.reasonRejected,
+                                MqttFailureReason.network => l.reasonNetwork,
+                                MqttFailureReason.unknown || null => l.reasonUnknown,
+                              };
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(backgroundColor: Colors.red.shade600,content: Text(l.unableToConnect(reason),style: TextStyle(color: Colors.white),)),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                TabBar(
+                  tabs: [
+                    Tab(text: l.metrics, icon: const Icon(Icons.sensors)),
+                    Tab(text: l.dashboards, icon: const Icon(Icons.dashboard)),
+                  ],
+                ),
+              ],
+            ),
           ),
           actions: [
-            _ConnectionChip(status: effectiveStatus),
-            IconButton(
-              tooltip: effectiveStatus == MqttStatus.connected
-                  ? l.disconnect
-                  : l.connect,
-              icon: Icon(
-                effectiveStatus == MqttStatus.connected
-                    ? Icons.link_off
-                    : Icons.link,
-              ),
-              onPressed: () async {
-                if (effectiveStatus == MqttStatus.connected) {
-                  await controller.disconnect();
-                } else {
-                  final ok = await controller.connect(broker);
-                  if (context.mounted && !ok) {
-                    final reason = switch (controller.lastFailureReason) {
-                      MqttFailureReason.badCredentials =>
-                        l.reasonBadCredentials,
-                      MqttFailureReason.brokerUnavailable =>
-                        l.reasonBrokerUnavailable,
-                      MqttFailureReason.rejected => l.reasonRejected,
-                      MqttFailureReason.network => l.reasonNetwork,
-                      MqttFailureReason.unknown || null => l.reasonUnknown,
-                    };
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(backgroundColor: Colors.red.shade600,content: Text(l.unableToConnect(reason),style: TextStyle(color: Colors.white),)),
-                    );
-                  }
-                }
-              },
-            ),
+
           ],
         ),
         body: TabBarView(

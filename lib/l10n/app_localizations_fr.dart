@@ -152,6 +152,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get histogram => 'Histogramme';
 
   @override
+  String get spline => 'Spline';
+
+  @override
+  String get area => 'Aire';
+
+  @override
+  String get scatter => 'Nuage de points';
+
+  @override
+  String get color => 'Couleur';
+
+  @override
+  String get showInChart => 'Afficher dans le graphique';
+
+  @override
+  String get addMetricSeries => 'Ajouter une métrique';
+
+  @override
   String get selectMetric => 'Sélectionner une métrique';
 
   @override
