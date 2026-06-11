@@ -48,6 +48,11 @@ class Metrics extends Table {
       boolean().withDefault(const Constant(false))();
   RealColumn get minValue => real().nullable()();
   RealColumn get maxValue => real().nullable()();
+
+  /// When true, charts use [minValue]/[maxValue] as fixed Y-axis bounds.
+  /// When false, the axis auto-scales to the received readings.
+  BoolColumn get useFixedRange =>
+      boolean().withDefault(const Constant(false))();
 }
 
 @DataClassName('Dashboard')
@@ -109,7 +114,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mqtt_dash'));
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -145,6 +150,9 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(brokers, brokers.connectTimeout);
             await m.addColumn(brokers, brokers.qos);
             await m.addColumn(brokers, brokers.retain);
+          }
+          if (from < 4) {
+            await m.addColumn(metrics, metrics.useFixedRange);
           }
         },
       );

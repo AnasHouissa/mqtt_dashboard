@@ -792,6 +792,21 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _useFixedRangeMeta = const VerificationMeta(
+    'useFixedRange',
+  );
+  @override
+  late final GeneratedColumn<bool> useFixedRange = GeneratedColumn<bool>(
+    'use_fixed_range',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("use_fixed_range" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -801,6 +816,7 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
     publishEnabled,
     minValue,
     maxValue,
+    useFixedRange,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -862,6 +878,15 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
         maxValue.isAcceptableOrUnknown(data['max_value']!, _maxValueMeta),
       );
     }
+    if (data.containsKey('use_fixed_range')) {
+      context.handle(
+        _useFixedRangeMeta,
+        useFixedRange.isAcceptableOrUnknown(
+          data['use_fixed_range']!,
+          _useFixedRangeMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -899,6 +924,10 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
         DriftSqlType.double,
         data['${effectivePrefix}max_value'],
       ),
+      useFixedRange: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}use_fixed_range'],
+      )!,
     );
   }
 
@@ -916,6 +945,10 @@ class Metric extends DataClass implements Insertable<Metric> {
   final bool publishEnabled;
   final double? minValue;
   final double? maxValue;
+
+  /// When true, charts use [minValue]/[maxValue] as fixed Y-axis bounds.
+  /// When false, the axis auto-scales to the received readings.
+  final bool useFixedRange;
   const Metric({
     required this.id,
     required this.brokerId,
@@ -924,6 +957,7 @@ class Metric extends DataClass implements Insertable<Metric> {
     required this.publishEnabled,
     this.minValue,
     this.maxValue,
+    required this.useFixedRange,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -939,6 +973,7 @@ class Metric extends DataClass implements Insertable<Metric> {
     if (!nullToAbsent || maxValue != null) {
       map['max_value'] = Variable<double>(maxValue);
     }
+    map['use_fixed_range'] = Variable<bool>(useFixedRange);
     return map;
   }
 
@@ -955,6 +990,7 @@ class Metric extends DataClass implements Insertable<Metric> {
       maxValue: maxValue == null && nullToAbsent
           ? const Value.absent()
           : Value(maxValue),
+      useFixedRange: Value(useFixedRange),
     );
   }
 
@@ -971,6 +1007,7 @@ class Metric extends DataClass implements Insertable<Metric> {
       publishEnabled: serializer.fromJson<bool>(json['publishEnabled']),
       minValue: serializer.fromJson<double?>(json['minValue']),
       maxValue: serializer.fromJson<double?>(json['maxValue']),
+      useFixedRange: serializer.fromJson<bool>(json['useFixedRange']),
     );
   }
   @override
@@ -984,6 +1021,7 @@ class Metric extends DataClass implements Insertable<Metric> {
       'publishEnabled': serializer.toJson<bool>(publishEnabled),
       'minValue': serializer.toJson<double?>(minValue),
       'maxValue': serializer.toJson<double?>(maxValue),
+      'useFixedRange': serializer.toJson<bool>(useFixedRange),
     };
   }
 
@@ -995,6 +1033,7 @@ class Metric extends DataClass implements Insertable<Metric> {
     bool? publishEnabled,
     Value<double?> minValue = const Value.absent(),
     Value<double?> maxValue = const Value.absent(),
+    bool? useFixedRange,
   }) => Metric(
     id: id ?? this.id,
     brokerId: brokerId ?? this.brokerId,
@@ -1003,6 +1042,7 @@ class Metric extends DataClass implements Insertable<Metric> {
     publishEnabled: publishEnabled ?? this.publishEnabled,
     minValue: minValue.present ? minValue.value : this.minValue,
     maxValue: maxValue.present ? maxValue.value : this.maxValue,
+    useFixedRange: useFixedRange ?? this.useFixedRange,
   );
   Metric copyWithCompanion(MetricsCompanion data) {
     return Metric(
@@ -1015,6 +1055,9 @@ class Metric extends DataClass implements Insertable<Metric> {
           : this.publishEnabled,
       minValue: data.minValue.present ? data.minValue.value : this.minValue,
       maxValue: data.maxValue.present ? data.maxValue.value : this.maxValue,
+      useFixedRange: data.useFixedRange.present
+          ? data.useFixedRange.value
+          : this.useFixedRange,
     );
   }
 
@@ -1027,7 +1070,8 @@ class Metric extends DataClass implements Insertable<Metric> {
           ..write('topic: $topic, ')
           ..write('publishEnabled: $publishEnabled, ')
           ..write('minValue: $minValue, ')
-          ..write('maxValue: $maxValue')
+          ..write('maxValue: $maxValue, ')
+          ..write('useFixedRange: $useFixedRange')
           ..write(')'))
         .toString();
   }
@@ -1041,6 +1085,7 @@ class Metric extends DataClass implements Insertable<Metric> {
     publishEnabled,
     minValue,
     maxValue,
+    useFixedRange,
   );
   @override
   bool operator ==(Object other) =>
@@ -1052,7 +1097,8 @@ class Metric extends DataClass implements Insertable<Metric> {
           other.topic == this.topic &&
           other.publishEnabled == this.publishEnabled &&
           other.minValue == this.minValue &&
-          other.maxValue == this.maxValue);
+          other.maxValue == this.maxValue &&
+          other.useFixedRange == this.useFixedRange);
 }
 
 class MetricsCompanion extends UpdateCompanion<Metric> {
@@ -1063,6 +1109,7 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
   final Value<bool> publishEnabled;
   final Value<double?> minValue;
   final Value<double?> maxValue;
+  final Value<bool> useFixedRange;
   const MetricsCompanion({
     this.id = const Value.absent(),
     this.brokerId = const Value.absent(),
@@ -1071,6 +1118,7 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
     this.publishEnabled = const Value.absent(),
     this.minValue = const Value.absent(),
     this.maxValue = const Value.absent(),
+    this.useFixedRange = const Value.absent(),
   });
   MetricsCompanion.insert({
     this.id = const Value.absent(),
@@ -1080,6 +1128,7 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
     this.publishEnabled = const Value.absent(),
     this.minValue = const Value.absent(),
     this.maxValue = const Value.absent(),
+    this.useFixedRange = const Value.absent(),
   }) : brokerId = Value(brokerId),
        name = Value(name),
        topic = Value(topic);
@@ -1091,6 +1140,7 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
     Expression<bool>? publishEnabled,
     Expression<double>? minValue,
     Expression<double>? maxValue,
+    Expression<bool>? useFixedRange,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1100,6 +1150,7 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
       if (publishEnabled != null) 'publish_enabled': publishEnabled,
       if (minValue != null) 'min_value': minValue,
       if (maxValue != null) 'max_value': maxValue,
+      if (useFixedRange != null) 'use_fixed_range': useFixedRange,
     });
   }
 
@@ -1111,6 +1162,7 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
     Value<bool>? publishEnabled,
     Value<double?>? minValue,
     Value<double?>? maxValue,
+    Value<bool>? useFixedRange,
   }) {
     return MetricsCompanion(
       id: id ?? this.id,
@@ -1120,6 +1172,7 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
       publishEnabled: publishEnabled ?? this.publishEnabled,
       minValue: minValue ?? this.minValue,
       maxValue: maxValue ?? this.maxValue,
+      useFixedRange: useFixedRange ?? this.useFixedRange,
     );
   }
 
@@ -1147,6 +1200,9 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
     if (maxValue.present) {
       map['max_value'] = Variable<double>(maxValue.value);
     }
+    if (useFixedRange.present) {
+      map['use_fixed_range'] = Variable<bool>(useFixedRange.value);
+    }
     return map;
   }
 
@@ -1159,7 +1215,8 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
           ..write('topic: $topic, ')
           ..write('publishEnabled: $publishEnabled, ')
           ..write('minValue: $minValue, ')
-          ..write('maxValue: $maxValue')
+          ..write('maxValue: $maxValue, ')
+          ..write('useFixedRange: $useFixedRange')
           ..write(')'))
         .toString();
   }
@@ -3036,6 +3093,7 @@ typedef $$MetricsTableCreateCompanionBuilder =
       Value<bool> publishEnabled,
       Value<double?> minValue,
       Value<double?> maxValue,
+      Value<bool> useFixedRange,
     });
 typedef $$MetricsTableUpdateCompanionBuilder =
     MetricsCompanion Function({
@@ -3046,6 +3104,7 @@ typedef $$MetricsTableUpdateCompanionBuilder =
       Value<bool> publishEnabled,
       Value<double?> minValue,
       Value<double?> maxValue,
+      Value<bool> useFixedRange,
     });
 
 final class $$MetricsTableReferences
@@ -3143,6 +3202,11 @@ class $$MetricsTableFilterComposer
 
   ColumnFilters<double> get maxValue => $composableBuilder(
     column: $table.maxValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get useFixedRange => $composableBuilder(
+    column: $table.useFixedRange,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3259,6 +3323,11 @@ class $$MetricsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get useFixedRange => $composableBuilder(
+    column: $table.useFixedRange,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$BrokersTableOrderingComposer get brokerId {
     final $$BrokersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3311,6 +3380,11 @@ class $$MetricsTableAnnotationComposer
 
   GeneratedColumn<double> get maxValue =>
       $composableBuilder(column: $table.maxValue, builder: (column) => column);
+
+  GeneratedColumn<bool> get useFixedRange => $composableBuilder(
+    column: $table.useFixedRange,
+    builder: (column) => column,
+  );
 
   $$BrokersTableAnnotationComposer get brokerId {
     final $$BrokersTableAnnotationComposer composer = $composerBuilder(
@@ -3425,6 +3499,7 @@ class $$MetricsTableTableManager
                 Value<bool> publishEnabled = const Value.absent(),
                 Value<double?> minValue = const Value.absent(),
                 Value<double?> maxValue = const Value.absent(),
+                Value<bool> useFixedRange = const Value.absent(),
               }) => MetricsCompanion(
                 id: id,
                 brokerId: brokerId,
@@ -3433,6 +3508,7 @@ class $$MetricsTableTableManager
                 publishEnabled: publishEnabled,
                 minValue: minValue,
                 maxValue: maxValue,
+                useFixedRange: useFixedRange,
               ),
           createCompanionCallback:
               ({
@@ -3443,6 +3519,7 @@ class $$MetricsTableTableManager
                 Value<bool> publishEnabled = const Value.absent(),
                 Value<double?> minValue = const Value.absent(),
                 Value<double?> maxValue = const Value.absent(),
+                Value<bool> useFixedRange = const Value.absent(),
               }) => MetricsCompanion.insert(
                 id: id,
                 brokerId: brokerId,
@@ -3451,6 +3528,7 @@ class $$MetricsTableTableManager
                 publishEnabled: publishEnabled,
                 minValue: minValue,
                 maxValue: maxValue,
+                useFixedRange: useFixedRange,
               ),
           withReferenceMapper: (p0) => p0
               .map(

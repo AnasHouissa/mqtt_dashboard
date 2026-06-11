@@ -51,14 +51,25 @@ class MetricChart extends ConsumerWidget {
     ];
     if (cartesian.isEmpty) return Center(child: Text(l.noData));
 
+    // Series whose metric opted into a fixed range contribute explicit Y-axis
+    // bounds; we take the widest span so every fixed series fits. If none opt
+    // in (or lack values), both stay null and the axis auto-scales.
+    double? axisMin, axisMax;
+    for (final s in visible) {
+      final m = s.metric;
+      if (!m.useFixedRange || m.minValue == null || m.maxValue == null) continue;
+      axisMin = axisMin == null ? m.minValue : (m.minValue! < axisMin ? m.minValue : axisMin);
+      axisMax = axisMax == null ? m.maxValue : (m.maxValue! > axisMax ? m.maxValue : axisMax);
+    }
+
     return SfCartesianChart(
       primaryXAxis: DateTimeAxis(
         dateFormat: _axisFormat(bucket),
         intervalType: _intervalType(bucket),
       ),
-      // Y-axis auto-scales to the actual readings. metric.minValue/maxValue are
-      // notification thresholds, not chart bounds, so they are not used here.
-      primaryYAxis: const NumericAxis(),
+      // Fixed bounds when a series opted in via the metric's useFixedRange;
+      // otherwise null minimum/maximum lets the axis auto-scale to the data.
+      primaryYAxis: NumericAxis(minimum: axisMin, maximum: axisMax),
       legend: Legend(isVisible: cartesian.length > 1),
       tooltipBehavior: TooltipBehavior(enable: true),
       zoomPanBehavior: ZoomPanBehavior(

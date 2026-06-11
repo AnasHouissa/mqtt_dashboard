@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../services/mqtt_service.dart';
@@ -45,12 +44,16 @@ class _ConnectionBanner extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final brokerId = ref.read(connectionProvider.notifier).activeBrokerId;
     final brokers = ref.watch(brokersProvider).valueOrNull;
-    final name = brokerId == null
-        ? null
-        : brokers
-            ?.cast<Broker?>()
-            .firstWhere((b) => b?.id == brokerId, orElse: () => null)
-            ?.name;
+
+    String? name;
+    if (brokerId != null && brokers != null) {
+      for (final b in brokers) {
+        if (b.id == brokerId) {
+          name = b.name;
+          break;
+        }
+      }
+    }
 
     return Material(
       color: AppColors.success,

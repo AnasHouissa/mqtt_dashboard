@@ -150,6 +150,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get maxValue => 'Valeur max';
 
   @override
+  String get fixedChartRange => 'Plage de graphique fixe';
+
+  @override
+  String get fixedChartRangeOn =>
+      'L\'axe Y utilise les valeurs min/max saisies';
+
+  @override
+  String get fixedChartRangeOff => 'L\'axe Y s\'adapte aux valeurs reçues';
+
+  @override
+  String get rangeRequiresMinMax => 'Saisissez min et max pour une plage fixe';
+
+  @override
   String get publish => 'Publier';
 
   @override

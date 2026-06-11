@@ -149,6 +149,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maxValue => 'Max value';
 
   @override
+  String get fixedChartRange => 'Fixed chart range';
+
+  @override
+  String get fixedChartRangeOn => 'Chart Y-axis uses the entered min/max';
+
+  @override
+  String get fixedChartRangeOff => 'Chart Y-axis scales to received values';
+
+  @override
+  String get rangeRequiresMinMax => 'Enter both min and max for a fixed range';
+
+  @override
   String get publish => 'Publish';
 
   @override
