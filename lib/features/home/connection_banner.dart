@@ -69,12 +69,16 @@ class _ConnectionBanner extends ConsumerWidget {
             children: [
               const Icon(Icons.wifi, color: Colors.white, size: 16),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                name == null ? l.connected : l.connectedTo(name),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+              Flexible(
+                child: Text(
+                  name == null ? l.connected : l.connectedTo(name),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],

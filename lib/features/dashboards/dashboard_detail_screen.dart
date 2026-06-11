@@ -26,7 +26,7 @@ class DashboardDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(dashboard.name),
+        title: Text(dashboard.name, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           LabeledAddButton(
             icon: Icons.add_chart,

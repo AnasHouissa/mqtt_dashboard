@@ -34,7 +34,7 @@ class BrokerHomeScreen extends ConsumerWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(broker.name),
+          title: Text(broker.name, maxLines: 1, overflow: TextOverflow.ellipsis),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(136),
             child: Column(
