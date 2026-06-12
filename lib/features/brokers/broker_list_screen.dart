@@ -57,7 +57,8 @@ class BrokerListScreen extends ConsumerWidget {
                     if (value == 'edit') {
                       await showBrokerForm(context, broker: broker);
                     } else if (value == 'delete') {
-                      if (await confirmDelete(context)) {
+                      if (await confirmDelete(context,
+                          message: l.deleteBrokerBody(broker.name))) {
                         await ref
                             .read(brokerRepositoryProvider)
                             .delete(broker.id);
@@ -66,7 +67,11 @@ class BrokerListScreen extends ConsumerWidget {
                   },
                   itemBuilder: (context) => [
                     PopupMenuItem(value: 'edit', child: Text(l.editBroker)),
-                    PopupMenuItem(value: 'delete', child: Text(l.delete)),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Text(l.delete,
+                          style: const TextStyle(color: AppColors.danger)),
+                    ),
                   ],
                 ),
               );

@@ -139,7 +139,8 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                       final m = await _resolveMetric();
                       if (m != null) await _exportPdf(m);
                     case 'delete':
-                      if (await confirmDelete(context)) {
+                      if (await confirmDelete(context,
+                          message: l.deleteNamedBody(_title))) {
                         await ref
                             .read(dashboardRepositoryProvider)
                             .deleteChart(_chart.id);
@@ -149,7 +150,11 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 itemBuilder: (context) => [
                   PopupMenuItem(value: 'csv', child: Text(l.exportCsv)),
                   PopupMenuItem(value: 'pdf', child: Text(l.exportPdf)),
-                  PopupMenuItem(value: 'delete', child: Text(l.delete)),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text(l.delete,
+                        style: const TextStyle(color: AppColors.danger)),
+                  ),
                 ],
               ),
             ],

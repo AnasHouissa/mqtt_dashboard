@@ -94,6 +94,18 @@
   "settings": "Paramètres",
   "deleteConfirmTitle": "Supprimer ?",
   "deleteConfirmBody": "Cette action est irréversible.",
+  "deleteNamedBody": "Supprimer « {name} » ? Cette action est irréversible.",
+  "@deleteNamedBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "deleteBrokerBody": "Supprimer « {name} » ? Ses métriques, tableaux de bord, graphiques et relevés seront aussi supprimés définitivement.",
+  "@deleteBrokerBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "exportTitle": "Export des données {name}",
   "@exportTitle": {
     "placeholders": {

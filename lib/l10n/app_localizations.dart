@@ -602,6 +602,18 @@ abstract class AppLocalizations {
   /// **'This action cannot be undone.'**
   String get deleteConfirmBody;
 
+  /// No description provided for @deleteNamedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? This action cannot be undone.'**
+  String deleteNamedBody(String name);
+
+  /// No description provided for @deleteBrokerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? Its metrics, dashboards, charts and readings will also be permanently removed.'**
+  String deleteBrokerBody(String name);
+
   /// No description provided for @exportTitle.
   ///
   /// In en, this message translates to:

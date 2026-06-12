@@ -53,9 +53,10 @@ class DashboardListView extends ConsumerWidget {
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline,
-                      color: AppColors.textMuted),
+                      color: AppColors.danger),
                   onPressed: () async {
-                    if (await confirmDelete(context)) {
+                    if (await confirmDelete(context,
+                        message: l.deleteNamedBody(dashboard.name))) {
                       await ref
                           .read(dashboardRepositoryProvider)
                           .deleteDashboard(dashboard.id);

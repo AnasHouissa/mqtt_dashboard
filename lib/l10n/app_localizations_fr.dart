@@ -269,6 +269,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get deleteConfirmBody => 'Cette action est irréversible.';
 
   @override
+  String deleteNamedBody(String name) {
+    return 'Supprimer « $name » ? Cette action est irréversible.';
+  }
+
+  @override
+  String deleteBrokerBody(String name) {
+    return 'Supprimer « $name » ? Ses métriques, tableaux de bord, graphiques et relevés seront aussi supprimés définitivement.';
+  }
+
+  @override
   String exportTitle(String name) {
     return 'Export des données $name';
   }

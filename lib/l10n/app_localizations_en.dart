@@ -266,6 +266,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteConfirmBody => 'This action cannot be undone.';
 
   @override
+  String deleteNamedBody(String name) {
+    return 'Delete \"$name\"? This action cannot be undone.';
+  }
+
+  @override
+  String deleteBrokerBody(String name) {
+    return 'Delete \"$name\"? Its metrics, dashboards, charts and readings will also be permanently removed.';
+  }
+
+  @override
   String exportTitle(String name) {
     return '$name data export';
   }

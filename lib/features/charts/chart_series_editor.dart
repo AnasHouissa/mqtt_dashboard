@@ -131,7 +131,7 @@ class ChartSeriesEditor extends StatelessWidget {
               IconButton(
                 tooltip: l.delete,
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.close, color: AppColors.textMuted),
+                icon: const Icon(Icons.close, color: AppColors.danger),
                 onPressed: onRemove,
               ),
           ],
