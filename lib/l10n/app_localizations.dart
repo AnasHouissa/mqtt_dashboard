@@ -368,6 +368,30 @@ abstract class AppLocalizations {
   /// **'Max value'**
   String get maxValue;
 
+  /// No description provided for @fixedChartRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed chart range'**
+  String get fixedChartRange;
+
+  /// No description provided for @fixedChartRangeOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart Y-axis uses the entered min/max'**
+  String get fixedChartRangeOn;
+
+  /// No description provided for @fixedChartRangeOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart Y-axis scales to received values'**
+  String get fixedChartRangeOff;
+
+  /// No description provided for @rangeRequiresMinMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter both min and max for a fixed range'**
+  String get rangeRequiresMinMax;
+
   /// No description provided for @publish.
   ///
   /// In en, this message translates to:
@@ -577,6 +601,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This action cannot be undone.'**
   String get deleteConfirmBody;
+
+  /// No description provided for @deleteNamedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? This action cannot be undone.'**
+  String deleteNamedBody(String name);
+
+  /// No description provided for @deleteBrokerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? Its metrics, dashboards, charts and readings will also be permanently removed.'**
+  String deleteBrokerBody(String name);
 
   /// No description provided for @exportTitle.
   ///

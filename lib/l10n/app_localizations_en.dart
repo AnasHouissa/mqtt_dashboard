@@ -149,6 +149,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maxValue => 'Max value';
 
   @override
+  String get fixedChartRange => 'Fixed chart range';
+
+  @override
+  String get fixedChartRangeOn => 'Chart Y-axis uses the entered min/max';
+
+  @override
+  String get fixedChartRangeOff => 'Chart Y-axis scales to received values';
+
+  @override
+  String get rangeRequiresMinMax => 'Enter both min and max for a fixed range';
+
+  @override
   String get publish => 'Publish';
 
   @override
@@ -252,6 +264,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteConfirmBody => 'This action cannot be undone.';
+
+  @override
+  String deleteNamedBody(String name) {
+    return 'Delete \"$name\"? This action cannot be undone.';
+  }
+
+  @override
+  String deleteBrokerBody(String name) {
+    return 'Delete \"$name\"? Its metrics, dashboards, charts and readings will also be permanently removed.';
+  }
 
   @override
   String exportTitle(String name) {

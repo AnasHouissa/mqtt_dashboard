@@ -26,6 +26,7 @@ class _MetricFormState extends ConsumerState<MetricForm> {
   late final TextEditingController _min;
   late final TextEditingController _max;
   late bool _publishEnabled;
+  late bool _useFixedRange;
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _MetricFormState extends ConsumerState<MetricForm> {
     _min = TextEditingController(text: m?.minValue?.toString() ?? '');
     _max = TextEditingController(text: m?.maxValue?.toString() ?? '');
     _publishEnabled = m?.publishEnabled ?? false;
+    _useFixedRange = m?.useFixedRange ?? false;
   }
 
   @override
@@ -52,9 +54,16 @@ class _MetricFormState extends ConsumerState<MetricForm> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    final repo = ref.read(metricRepositoryProvider);
     final minV = _parseOptional(_min.text);
     final maxV = _parseOptional(_max.text);
+    // A fixed chart range needs both bounds; block save with a clear message.
+    if (_useFixedRange && (minV == null || maxV == null)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).rangeRequiresMinMax)),
+      );
+      return;
+    }
+    final repo = ref.read(metricRepositoryProvider);
 
     if (widget.metric == null) {
       await repo.insert(MetricsCompanion.insert(
@@ -64,6 +73,7 @@ class _MetricFormState extends ConsumerState<MetricForm> {
         publishEnabled: Value(_publishEnabled),
         minValue: Value(minV),
         maxValue: Value(maxV),
+        useFixedRange: Value(_useFixedRange),
       ));
     } else {
       await repo.update(widget.metric!.copyWith(
@@ -72,6 +82,7 @@ class _MetricFormState extends ConsumerState<MetricForm> {
         publishEnabled: _publishEnabled,
         minValue: Value(minV),
         maxValue: Value(maxV),
+        useFixedRange: _useFixedRange,
       ));
     }
     // Resync MQTT subscriptions if this broker is connected.
@@ -142,6 +153,16 @@ class _MetricFormState extends ConsumerState<MetricForm> {
                   ),
                 ),
               ],
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              activeThumbColor: AppColors.primary,
+              title: Text(l.fixedChartRange),
+              subtitle: Text(
+                _useFixedRange ? l.fixedChartRangeOn : l.fixedChartRangeOff,
+              ),
+              value: _useFixedRange,
+              onChanged: (v) => setState(() => _useFixedRange = v),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,

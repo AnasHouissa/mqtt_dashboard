@@ -31,7 +31,7 @@ class DashboardListView extends ConsumerWidget {
               icon: Icons.dashboard_outlined,
               message: l.noDashboards,
               actionLabel: l.addDashboard,
-              onAction: () => _addDashboard(context, ref),
+              onAction: () => showAddDashboardForm(context, ref, broker.id),
             );
           }
           return ListView.builder(
@@ -53,9 +53,10 @@ class DashboardListView extends ConsumerWidget {
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline,
-                      color: AppColors.textMuted),
+                      color: AppColors.danger),
                   onPressed: () async {
-                    if (await confirmDelete(context)) {
+                    if (await confirmDelete(context,
+                        message: l.deleteNamedBody(dashboard.name))) {
                       await ref
                           .read(dashboardRepositoryProvider)
                           .deleteDashboard(dashboard.id);
@@ -67,17 +68,19 @@ class DashboardListView extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'dashboard_fab',
-        onPressed: () => _addDashboard(context, ref),
-        child: const Icon(Icons.add),
-      ),
     );
   }
+}
 
-  Future<void> _addDashboard(BuildContext context, WidgetRef ref) async {
-    final l = AppLocalizations.of(context);
-    final controller = TextEditingController();
+/// Presents the "new dashboard" sheet and persists the result. Top-level so it
+/// can be triggered from the list's empty state or the broker home app bar.
+Future<void> showAddDashboardForm(
+  BuildContext context,
+  WidgetRef ref,
+  int brokerId,
+) async {
+  final l = AppLocalizations.of(context);
+  final controller = TextEditingController();
     final name = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -121,10 +124,9 @@ class DashboardListView extends ConsumerWidget {
       ),
     );
 
-    if (name != null && name.isNotEmpty) {
-      await ref.read(dashboardRepositoryProvider).insertDashboard(
-            DashboardsCompanion.insert(brokerId: broker.id, name: name),
-          );
-    }
+  if (name != null && name.isNotEmpty) {
+    await ref.read(dashboardRepositoryProvider).insertDashboard(
+          DashboardsCompanion.insert(brokerId: brokerId, name: name),
+        );
   }
 }

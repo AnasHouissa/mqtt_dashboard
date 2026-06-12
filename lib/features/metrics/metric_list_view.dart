@@ -66,7 +66,8 @@ class MetricListView extends ConsumerWidget {
                           await showMetricForm(context,
                               brokerId: broker.id, metric: metric);
                         } else if (value == 'delete') {
-                          if (await confirmDelete(context)) {
+                          if (await confirmDelete(context,
+                              message: l.deleteNamedBody(metric.name))) {
                             await ref
                                 .read(metricRepositoryProvider)
                                 .delete(metric.id);
@@ -78,7 +79,11 @@ class MetricListView extends ConsumerWidget {
                       },
                       itemBuilder: (context) => [
                         PopupMenuItem(value: 'edit', child: Text(l.editMetric)),
-                        PopupMenuItem(value: 'delete', child: Text(l.delete)),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Text(l.delete,
+                              style: const TextStyle(color: AppColors.danger)),
+                        ),
                       ],
                     ),
                   ],
@@ -87,11 +92,6 @@ class MetricListView extends ConsumerWidget {
             },
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'metric_fab',
-        onPressed: () => showMetricForm(context, brokerId: broker.id),
-        child: const Icon(Icons.add),
       ),
     );
   }

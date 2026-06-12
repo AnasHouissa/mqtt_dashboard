@@ -55,6 +55,10 @@
   "enablePublishing": "Activer la publication",
   "minValue": "Valeur min",
   "maxValue": "Valeur max",
+  "fixedChartRange": "Plage de graphique fixe",
+  "fixedChartRangeOn": "L'axe Y utilise les valeurs min/max saisies",
+  "fixedChartRangeOff": "L'axe Y s'adapte aux valeurs reçues",
+  "rangeRequiresMinMax": "Saisissez min et max pour une plage fixe",
   "publish": "Publier",
   "valueToPublish": "Valeur à publier",
   "published": "Publié",
@@ -90,6 +94,18 @@
   "settings": "Paramètres",
   "deleteConfirmTitle": "Supprimer ?",
   "deleteConfirmBody": "Cette action est irréversible.",
+  "deleteNamedBody": "Supprimer « {name} » ? Cette action est irréversible.",
+  "@deleteNamedBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "deleteBrokerBody": "Supprimer « {name} » ? Ses métriques, tableaux de bord, graphiques et relevés seront aussi supprimés définitivement.",
+  "@deleteBrokerBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "exportTitle": "Export des données {name}",
   "@exportTitle": {
     "placeholders": {

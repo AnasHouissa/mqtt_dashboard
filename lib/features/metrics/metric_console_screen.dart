@@ -106,6 +106,8 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Text(
         text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: const TextStyle(
           color: Colors.white,
           fontFamily: 'monospace',
@@ -125,9 +127,15 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.metric.name),
+            Text(
+              widget.metric.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             Text(
               widget.metric.topic,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
             ),
           ],

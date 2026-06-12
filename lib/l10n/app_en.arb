@@ -55,6 +55,10 @@
   "enablePublishing": "Enable publishing",
   "minValue": "Min value",
   "maxValue": "Max value",
+  "fixedChartRange": "Fixed chart range",
+  "fixedChartRangeOn": "Chart Y-axis uses the entered min/max",
+  "fixedChartRangeOff": "Chart Y-axis scales to received values",
+  "rangeRequiresMinMax": "Enter both min and max for a fixed range",
   "publish": "Publish",
   "valueToPublish": "Value to publish",
   "published": "Published",
@@ -90,6 +94,18 @@
   "settings": "Settings",
   "deleteConfirmTitle": "Delete?",
   "deleteConfirmBody": "This action cannot be undone.",
+  "deleteNamedBody": "Delete \"{name}\"? This action cannot be undone.",
+  "@deleteNamedBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "deleteBrokerBody": "Delete \"{name}\"? Its metrics, dashboards, charts and readings will also be permanently removed.",
+  "@deleteBrokerBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "exportTitle": "{name} data export",
   "@exportTitle": {
     "placeholders": {
