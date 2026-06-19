@@ -59,31 +59,37 @@ class _MetricFormState extends ConsumerState<MetricForm> {
     // A fixed chart range needs both bounds; block save with a clear message.
     if (_useFixedRange && (minV == null || maxV == null)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).rangeRequiresMinMax)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).rangeRequiresMinMax),
+        ),
       );
       return;
     }
     final repo = ref.read(metricRepositoryProvider);
 
     if (widget.metric == null) {
-      await repo.insert(MetricsCompanion.insert(
-        brokerId: widget.brokerId,
-        name: _name.text.trim(),
-        topic: _topic.text.trim(),
-        publishEnabled: Value(_publishEnabled),
-        minValue: Value(minV),
-        maxValue: Value(maxV),
-        useFixedRange: Value(_useFixedRange),
-      ));
+      await repo.insert(
+        MetricsCompanion.insert(
+          brokerId: widget.brokerId,
+          name: _name.text.trim(),
+          topic: _topic.text.trim(),
+          publishEnabled: Value(_publishEnabled),
+          minValue: Value(minV),
+          maxValue: Value(maxV),
+          useFixedRange: Value(_useFixedRange),
+        ),
+      );
     } else {
-      await repo.update(widget.metric!.copyWith(
-        name: _name.text.trim(),
-        topic: _topic.text.trim(),
-        publishEnabled: _publishEnabled,
-        minValue: Value(minV),
-        maxValue: Value(maxV),
-        useFixedRange: _useFixedRange,
-      ));
+      await repo.update(
+        widget.metric!.copyWith(
+          name: _name.text.trim(),
+          topic: _topic.text.trim(),
+          publishEnabled: _publishEnabled,
+          minValue: Value(minV),
+          maxValue: Value(maxV),
+          useFixedRange: _useFixedRange,
+        ),
+      );
     }
     // Resync MQTT subscriptions if this broker is connected.
     await ref.read(connectionProvider.notifier).refreshSubscriptions();
@@ -102,10 +108,7 @@ class _MetricFormState extends ConsumerState<MetricForm> {
     final l = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Form(
         key: _formKey,
@@ -113,75 +116,96 @@ class _MetricFormState extends ConsumerState<MetricForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SheetHeader(
-              title: widget.metric == null ? l.addMetric : l.editMetric,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            TextFormField(
-              controller: _name,
-              decoration: InputDecoration(labelText: l.metricName),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? l.fieldRequired : null,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextFormField(
-              controller: _topic,
-              decoration: InputDecoration(labelText: l.topic),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? l.fieldRequired : null,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _min,
-                    decoration: InputDecoration(labelText: l.minValue),
-                    keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true, signed: true),
-                    validator: _numberValidator,
-                  ),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SheetHeader(
+                      title: widget.metric == null ? l.addMetric : l.editMetric,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    TextFormField(
+                      controller: _name,
+                      decoration: InputDecoration(labelText: l.metricName),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? l.fieldRequired
+                          : null,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    TextFormField(
+                      controller: _topic,
+                      decoration: InputDecoration(labelText: l.topic),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? l.fieldRequired
+                          : null,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _min,
+                            decoration: InputDecoration(labelText: l.minValue),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                              signed: true,
+                            ),
+                            validator: _numberValidator,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _max,
+                            decoration: InputDecoration(labelText: l.maxValue),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                              signed: true,
+                            ),
+                            validator: _numberValidator,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      activeThumbColor: AppColors.primary,
+                      title: Text(l.fixedChartRange),
+                      subtitle: Text(
+                        _useFixedRange
+                            ? l.fixedChartRangeOn
+                            : l.fixedChartRangeOff,
+                      ),
+                      value: _useFixedRange,
+                      onChanged: (v) => setState(() => _useFixedRange = v),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      activeThumbColor: AppColors.primary,
+                      title: Text(l.enablePublishing),
+                      value: _publishEnabled,
+                      onChanged: (v) => setState(() => _publishEnabled = v),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _max,
-                    decoration: InputDecoration(labelText: l.maxValue),
-                    keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true, signed: true),
-                    validator: _numberValidator,
-                  ),
-                ),
-              ],
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              activeThumbColor: AppColors.primary,
-              title: Text(l.fixedChartRange),
-              subtitle: Text(
-                _useFixedRange ? l.fixedChartRangeOn : l.fixedChartRangeOff,
               ),
-              value: _useFixedRange,
-              onChanged: (v) => setState(() => _useFixedRange = v),
             ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              activeThumbColor: AppColors.primary,
-              title: Text(l.enablePublishing),
-              value: _publishEnabled,
-              onChanged: (v) => setState(() => _publishEnabled = v),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(l.cancel),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                FilledButton(onPressed: _save, child: Text(l.save)),
-              ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, AppSpacing.md, 16, 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l.cancel),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  FilledButton(onPressed: _save, child: Text(l.save)),
+                ],
+              ),
             ),
           ],
         ),
