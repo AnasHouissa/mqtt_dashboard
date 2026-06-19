@@ -23,7 +23,7 @@ class MqttDashApp extends ConsumerWidget {
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) =>
           AppShell(child: child ?? const SizedBox.shrink()),
-      home: const BrokerListScreen()
+      home: const BrokerListScreen() 
     );
   }
 }
