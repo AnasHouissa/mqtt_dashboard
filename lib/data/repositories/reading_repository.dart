@@ -9,7 +9,9 @@ class ReadingRepository {
   final AppDatabase _db;
 
   Future<int> insert(int metricId, double value, DateTime timestamp) {
-    return _db.into(_db.readings).insert(
+    return _db
+        .into(_db.readings)
+        .insert(
           ReadingsCompanion.insert(
             metricId: metricId,
             value: value,
@@ -47,17 +49,16 @@ class ReadingRepository {
     int metricId,
     TimeBucket bucket,
   ) {
+    // "Today" plots each individual reading as its own point (no averaging), so
+    // several values sent within the same hour each show up distinctly. The
+    // Day/Month/Year views instead summarise with a per-bucket average.
+    if (bucket == TimeBucket.today) return _watchTodayRaw(metricId);
+
     final fmt = _format(bucket);
-    // "Today" additionally restricts to the current local date.
-    final todayFilter = bucket == TimeBucket.today
-        ? "AND date(datetime(timestamp, 'unixepoch', 'localtime')) "
-            "= date('now', 'localtime') "
-        : '';
     final query = _db.customSelect(
       "SELECT strftime('$fmt', datetime(timestamp, 'unixepoch', 'localtime')) "
       "AS bucket, AVG(value) AS avg_value "
       "FROM readings WHERE metric_id = ?1 "
-      "$todayFilter"
       "GROUP BY bucket ORDER BY bucket",
       variables: [Variable.withInt(metricId)],
       readsFrom: {_db.readings},
@@ -71,6 +72,31 @@ class ReadingRepository {
           row.read<double>('avg_value'),
         );
       }).toList();
+    });
+  }
+
+  /// Every raw reading for the current local day, each as its own point at its
+  /// exact timestamp (ordered oldest → newest).
+  Stream<List<AggregatedPoint>> _watchTodayRaw(int metricId) {
+    final query = _db.customSelect(
+      "SELECT datetime(timestamp, 'unixepoch', 'localtime') AS ts, value "
+      "FROM readings WHERE metric_id = ?1 "
+      "AND date(datetime(timestamp, 'unixepoch', 'localtime')) "
+      "= date('now', 'localtime') "
+      "ORDER BY timestamp",
+      variables: [Variable.withInt(metricId)],
+      readsFrom: {_db.readings},
+    );
+
+    return query.watch().map((rows) {
+      return rows
+          .map(
+            (row) => AggregatedPoint(
+              DateTime.parse(row.read<String>('ts')),
+              row.read<double>('value'),
+            ),
+          )
+          .toList();
     });
   }
 
