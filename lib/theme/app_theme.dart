@@ -175,6 +175,16 @@ ThemeData buildAppTheme() {
               ? Colors.white
               : AppColors.textSecondary,
         ),
+        // Explicit shape (matched by the ClipRRect in TimeFilter) plus no
+        // shadow/tint, so the rounded corners never render dark artifacts.
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.button),
+          ),
+        ),
+        elevation: WidgetStateProperty.all(0),
+        shadowColor: WidgetStateProperty.all(Colors.transparent),
+        surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
       ),
     ),
     tabBarTheme: const TabBarThemeData(

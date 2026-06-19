@@ -188,6 +188,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addCurve => 'Ajouter courbe';
 
   @override
+  String get editCurve => 'Modifier courbe';
+
+  @override
   String get noCharts => 'Aucun graphique. Appuyez sur « Ajouter courbe ».';
 
   @override

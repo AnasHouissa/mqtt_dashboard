@@ -185,6 +185,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addCurve => 'Add curve';
 
   @override
+  String get editCurve => 'Edit curve';
+
+  @override
   String get noCharts => 'No charts yet. Tap \"Add curve\".';
 
   @override

@@ -9,17 +9,20 @@ import '../../widgets/color_swatch_picker.dart';
 import '../../widgets/sheet_header.dart';
 import '../charts/chart_series_editor.dart';
 
-/// "Add curve": name the chart, then add one or more metric series, each with
-/// its own type, color and visibility.
+/// "Add curve" / "Edit curve": name the chart, then add one or more metric
+/// series, each with its own type, color and visibility. Pass [existing] to
+/// edit a chart in place instead of creating a new one.
 class AddCurveSheet extends ConsumerStatefulWidget {
   const AddCurveSheet({
     super.key,
     required this.brokerId,
     required this.dashboardId,
+    this.existing,
   });
 
   final int brokerId;
   final int dashboardId;
+  final ChartWithSeries? existing;
 
   @override
   ConsumerState<AddCurveSheet> createState() => _AddCurveSheetState();
@@ -33,10 +36,26 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
   /// is open at a time to keep the list short.
   int _expanded = 0;
 
+  bool get _isEditing => widget.existing != null;
+
   @override
   void initState() {
     super.initState();
-    _drafts.add(_newDraft());
+    final existing = widget.existing;
+    if (existing != null) {
+      _title.text = existing.chart.title ?? '';
+      for (final s in existing.series) {
+        _drafts.add(
+          SeriesDraft(
+            metricId: s.series.metricId,
+            type: s.series.type,
+            color: Color(s.series.color),
+            visible: s.series.visible,
+          ),
+        );
+      }
+    }
+    if (_drafts.isEmpty) _drafts.add(_newDraft());
   }
 
   @override
@@ -50,14 +69,14 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
       SeriesDraft(color: kChartPalette[_drafts.length % kChartPalette.length]);
 
   void _addSeries() => setState(() {
-        _drafts.add(_newDraft());
-        _expanded = _drafts.length - 1; // open the new one
-      });
+    _drafts.add(_newDraft());
+    _expanded = _drafts.length - 1; // open the new one
+  });
 
   void _removeSeries(int index) => setState(() {
-        _drafts.removeAt(index);
-        if (_expanded >= _drafts.length) _expanded = _drafts.length - 1;
-      });
+    _drafts.removeAt(index);
+    if (_expanded >= _drafts.length) _expanded = _drafts.length - 1;
+  });
 
   void _toggle(int index) =>
       setState(() => _expanded = _expanded == index ? -1 : index);
@@ -76,11 +95,22 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
           ),
     ];
     if (series.isEmpty) return;
-    await ref.read(dashboardRepositoryProvider).createChartWithSeries(
-          dashboardId: widget.dashboardId,
-          title: _title.text.trim().isEmpty ? null : _title.text.trim(),
-          series: series,
-        );
+    final repo = ref.read(dashboardRepositoryProvider);
+    final title = _title.text.trim().isEmpty ? null : _title.text.trim();
+    final existing = widget.existing;
+    if (existing != null) {
+      await repo.updateChartWithSeries(
+        chartId: existing.chart.id,
+        title: title,
+        series: series,
+      );
+    } else {
+      await repo.createChartWithSeries(
+        dashboardId: widget.dashboardId,
+        title: title,
+        series: series,
+      );
+    }
     if (mounted) Navigator.pop(context);
   }
 
@@ -102,7 +132,7 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
                 AppSpacing.lg,
                 0,
               ),
-              child: SheetHeader(title: l.addCurve),
+              child: SheetHeader(title: _isEditing ? l.editCurve : l.addCurve),
             ),
             Expanded(
               child: ListView(
@@ -116,8 +146,9 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
                   const SizedBox(height: AppSpacing.lg),
                   if (list.isEmpty)
                     Padding(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.lg,
+                      ),
                       child: Text(l.noMetrics),
                     )
                   else ...[
@@ -130,8 +161,9 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
                         expanded: _expanded == i,
                         onToggle: () => _toggle(i),
                         onChanged: () => setState(() {}),
-                        onRemove:
-                            _drafts.length > 1 ? () => _removeSeries(i) : null,
+                        onRemove: _drafts.length > 1
+                            ? () => _removeSeries(i)
+                            : null,
                       ),
                     const SizedBox(height: AppSpacing.sm),
                     OutlinedButton.icon(
@@ -203,6 +235,7 @@ Future<void> showAddCurveSheet(
   BuildContext context, {
   required int brokerId,
   required int dashboardId,
+  ChartWithSeries? existing,
 }) {
   return showModalBottomSheet(
     context: context,
@@ -214,7 +247,11 @@ Future<void> showAddCurveSheet(
       ),
       child: FractionallySizedBox(
         heightFactor: 1,
-        child: AddCurveSheet(brokerId: brokerId, dashboardId: dashboardId),
+        child: AddCurveSheet(
+          brokerId: brokerId,
+          dashboardId: dashboardId,
+          existing: existing,
+        ),
       ),
     ),
   );

@@ -26,7 +26,11 @@ class DashboardDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(dashboard.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        title: Text(
+          dashboard.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         actions: [
           LabeledAddButton(
             icon: Icons.add_chart,
@@ -58,7 +62,8 @@ class DashboardDetailScreen extends ConsumerWidget {
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: list.length,
-            itemBuilder: (context, i) => ChartCard(item: list[i]),
+            itemBuilder: (context, i) =>
+                ChartCard(item: list[i], brokerId: broker.id),
           );
         },
       ),

@@ -28,17 +28,22 @@ class DashboardRepository {
   /// its metric), grouped per chart. A chart always has ≥1 series, so the inner
   /// join never hides a chart.
   Stream<List<ChartWithSeries>> watchCharts(int dashboardId) {
-    final query = _db.select(_db.charts).join([
-      innerJoin(_db.chartSeries,
-          _db.chartSeries.chartId.equalsExp(_db.charts.id)),
-      innerJoin(_db.metrics,
-          _db.metrics.id.equalsExp(_db.chartSeries.metricId)),
-    ])
-      ..where(_db.charts.dashboardId.equals(dashboardId))
-      ..orderBy([
-        OrderingTerm(expression: _db.charts.id),
-        OrderingTerm(expression: _db.chartSeries.position),
-      ]);
+    final query =
+        _db.select(_db.charts).join([
+            innerJoin(
+              _db.chartSeries,
+              _db.chartSeries.chartId.equalsExp(_db.charts.id),
+            ),
+            innerJoin(
+              _db.metrics,
+              _db.metrics.id.equalsExp(_db.chartSeries.metricId),
+            ),
+          ])
+          ..where(_db.charts.dashboardId.equals(dashboardId))
+          ..orderBy([
+            OrderingTerm(expression: _db.charts.id),
+            OrderingTerm(expression: _db.chartSeries.position),
+          ]);
 
     return query.watch().map((rows) {
       // Preserve chart order while grouping series under each chart.
@@ -49,10 +54,12 @@ class DashboardRepository {
           chart.id,
           () => ChartWithSeries(chart: chart, series: []),
         );
-        entry.series.add(ChartSeriesWithMetric(
-          series: row.readTable(_db.chartSeries),
-          metric: row.readTable(_db.metrics),
-        ));
+        entry.series.add(
+          ChartSeriesWithMetric(
+            series: row.readTable(_db.chartSeries),
+            metric: row.readTable(_db.metrics),
+          ),
+        );
       }
       return byChart.values.toList();
     });
@@ -66,7 +73,9 @@ class DashboardRepository {
     required List<ChartSeriesDraft> series,
   }) {
     return _db.transaction(() async {
-      final chartId = await _db.into(_db.charts).insert(
+      final chartId = await _db
+          .into(_db.charts)
+          .insert(
             ChartsCompanion.insert(
               dashboardId: dashboardId,
               title: Value(title),
@@ -74,7 +83,42 @@ class DashboardRepository {
           );
       for (var i = 0; i < series.length; i++) {
         final s = series[i];
-        await _db.into(_db.chartSeries).insert(
+        await _db
+            .into(_db.chartSeries)
+            .insert(
+              ChartSeriesCompanion.insert(
+                chartId: chartId,
+                metricId: s.metricId,
+                type: s.type,
+                color: s.color,
+                visible: Value(s.visible),
+                position: Value(i),
+              ),
+            );
+      }
+    });
+  }
+
+  /// Update an existing chart's title and replace its series atomically. The
+  /// old series are deleted and recreated from [series], so adding, removing
+  /// and reordering all work in one call. The chart id is preserved.
+  Future<void> updateChartWithSeries({
+    required int chartId,
+    String? title,
+    required List<ChartSeriesDraft> series,
+  }) {
+    return _db.transaction(() async {
+      await (_db.update(_db.charts)..where((c) => c.id.equals(chartId))).write(
+        ChartsCompanion(title: Value(title)),
+      );
+      await (_db.delete(
+        _db.chartSeries,
+      )..where((s) => s.chartId.equals(chartId))).go();
+      for (var i = 0; i < series.length; i++) {
+        final s = series[i];
+        await _db
+            .into(_db.chartSeries)
+            .insert(
               ChartSeriesCompanion.insert(
                 chartId: chartId,
                 metricId: s.metricId,

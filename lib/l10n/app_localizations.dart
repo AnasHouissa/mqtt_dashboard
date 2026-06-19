@@ -440,6 +440,12 @@ abstract class AppLocalizations {
   /// **'Add curve'**
   String get addCurve;
 
+  /// No description provided for @editCurve.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit curve'**
+  String get editCurve;
+
   /// No description provided for @noCharts.
   ///
   /// In en, this message translates to:
