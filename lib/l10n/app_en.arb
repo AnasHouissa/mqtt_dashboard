@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "MQTT Dashboard",
+  "appTitle": "TEKKIM Dash",
   "brokers": "Brokers",
   "noBrokers": "No brokers yet. Tap + to add one.",
   "addBroker": "Add broker",
@@ -67,6 +67,7 @@
   "addDashboard": "Add dashboard",
   "dashboardName": "Dashboard name",
   "addCurve": "Add curve",
+  "editCurve": "Edit curve",
   "noCharts": "No charts yet. Tap \"Add curve\".",
   "chartType": "Chart type",
   "curve": "Line",

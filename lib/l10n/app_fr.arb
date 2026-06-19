@@ -1,6 +1,6 @@
 {
   "@@locale": "fr",
-  "appTitle": "Tableau de bord MQTT",
+  "appTitle": "TEKKIM Dash",
   "brokers": "Brokers",
   "noBrokers": "Aucun broker. Appuyez sur + pour en ajouter un.",
   "addBroker": "Ajouter un broker",
@@ -67,6 +67,7 @@
   "addDashboard": "Ajouter un tableau de bord",
   "dashboardName": "Nom du tableau de bord",
   "addCurve": "Ajouter courbe",
+  "editCurve": "Modifier courbe",
   "noCharts": "Aucun graphique. Appuyez sur « Ajouter courbe ».",
   "chartType": "Type de graphique",
   "curve": "Courbe",

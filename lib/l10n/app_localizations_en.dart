@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'MQTT Dashboard';
+  String get appTitle => 'TEKKIM Dash';
 
   @override
   String get brokers => 'Brokers';
@@ -183,6 +183,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addCurve => 'Add curve';
+
+  @override
+  String get editCurve => 'Edit curve';
 
   @override
   String get noCharts => 'No charts yet. Tap \"Add curve\".';

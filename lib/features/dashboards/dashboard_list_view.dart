@@ -52,11 +52,15 @@ class DashboardListView extends ConsumerWidget {
                   ),
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline,
-                      color: AppColors.danger),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.danger,
+                  ),
                   onPressed: () async {
-                    if (await confirmDelete(context,
-                        message: l.deleteNamedBody(dashboard.name))) {
+                    if (await confirmDelete(
+                      context,
+                      message: l.deleteNamedBody(dashboard.name),
+                    )) {
                       await ref
                           .read(dashboardRepositoryProvider)
                           .deleteDashboard(dashboard.id);
@@ -81,30 +85,49 @@ Future<void> showAddDashboardForm(
 ) async {
   final l = AppLocalizations.of(context);
   final controller = TextEditingController();
-    final name = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SheetHeader(title: l.addDashboard),
-            const SizedBox(height: AppSpacing.lg),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              decoration: InputDecoration(labelText: l.dashboardName),
-              onSubmitted: (v) => Navigator.pop(context, v.trim()),
+  final name = await showModalBottomSheet<String>(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.lg,
+                0,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SheetHeader(title: l.addDashboard),
+                  const SizedBox(height: AppSpacing.lg),
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    decoration: InputDecoration(labelText: l.dashboardName),
+                    onSubmitted: (v) => Navigator.pop(context, v.trim()),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
@@ -119,13 +142,16 @@ Future<void> showAddDashboardForm(
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
+    ),
+  );
 
   if (name != null && name.isNotEmpty) {
-    await ref.read(dashboardRepositoryProvider).insertDashboard(
+    await ref
+        .read(dashboardRepositoryProvider)
+        .insertDashboard(
           DashboardsCompanion.insert(brokerId: brokerId, name: name),
         );
   }

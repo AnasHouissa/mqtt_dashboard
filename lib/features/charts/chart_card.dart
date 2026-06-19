@@ -9,16 +9,18 @@ import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/circle_icon.dart';
 import '../../widgets/confirm_dialog.dart';
+import '../dashboards/add_curve_dialog.dart';
 import 'chart_fullscreen.dart';
 import 'chart_type_ui.dart';
 import 'chart_view.dart';
 import 'time_filter.dart';
 
-/// A dashboard chart with its own time filter, fullscreen + export + delete.
+/// A dashboard chart with its own time filter, fullscreen + export + edit/delete.
 class ChartCard extends ConsumerStatefulWidget {
-  const ChartCard({super.key, required this.item});
+  const ChartCard({super.key, required this.item, required this.brokerId});
 
   final ChartWithSeries item;
+  final int brokerId;
 
   @override
   ConsumerState<ChartCard> createState() => _ChartCardState();
@@ -37,9 +39,12 @@ class _ChartCardState extends ConsumerState<ChartCard> {
 
   Future<void> _exportCsv(Metric metric) async {
     final l = AppLocalizations.of(context);
-    final readings =
-        await ref.read(readingRepositoryProvider).rawForMetric(metric.id);
-    await ref.read(exportServiceProvider).exportCsv(
+    final readings = await ref
+        .read(readingRepositoryProvider)
+        .rawForMetric(metric.id);
+    await ref
+        .read(exportServiceProvider)
+        .exportCsv(
           metricName: metric.name,
           readings: readings,
           timestampHeader: l.timestamp,
@@ -49,9 +54,12 @@ class _ChartCardState extends ConsumerState<ChartCard> {
 
   Future<void> _exportPdf(Metric metric) async {
     final l = AppLocalizations.of(context);
-    final readings =
-        await ref.read(readingRepositoryProvider).rawForMetric(metric.id);
-    await ref.read(exportServiceProvider).exportPdf(
+    final readings = await ref
+        .read(readingRepositoryProvider)
+        .rawForMetric(metric.id);
+    await ref
+        .read(exportServiceProvider)
+        .exportPdf(
           metricName: metric.name,
           title: l.exportTitle(metric.name),
           readings: readings,
@@ -132,6 +140,13 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
                 onSelected: (value) async {
                   switch (value) {
+                    case 'edit':
+                      await showAddCurveSheet(
+                        context,
+                        brokerId: widget.brokerId,
+                        dashboardId: _chart.dashboardId,
+                        existing: widget.item,
+                      );
                     case 'csv':
                       final m = await _resolveMetric();
                       if (m != null) await _exportCsv(m);
@@ -139,8 +154,10 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                       final m = await _resolveMetric();
                       if (m != null) await _exportPdf(m);
                     case 'delete':
-                      if (await confirmDelete(context,
-                          message: l.deleteNamedBody(_title))) {
+                      if (await confirmDelete(
+                        context,
+                        message: l.deleteNamedBody(_title),
+                      )) {
                         await ref
                             .read(dashboardRepositoryProvider)
                             .deleteChart(_chart.id);
@@ -148,12 +165,15 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                   }
                 },
                 itemBuilder: (context) => [
+                  PopupMenuItem(value: 'edit', child: Text(l.editCurve)),
                   PopupMenuItem(value: 'csv', child: Text(l.exportCsv)),
                   PopupMenuItem(value: 'pdf', child: Text(l.exportPdf)),
                   PopupMenuItem(
                     value: 'delete',
-                    child: Text(l.delete,
-                        style: const TextStyle(color: AppColors.danger)),
+                    child: Text(
+                      l.delete,
+                      style: const TextStyle(color: AppColors.danger),
+                    ),
                   ),
                 ],
               ),

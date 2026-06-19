@@ -1,4 +1,4 @@
-# mqtt_dash
+# TEKKIM Dash
 
 A new Flutter project.
 

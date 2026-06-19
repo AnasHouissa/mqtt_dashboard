@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'MQTT Dashboard'**
+  /// **'TEKKIM Dash'**
   String get appTitle;
 
   /// No description provided for @brokers.
@@ -439,6 +439,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add curve'**
   String get addCurve;
+
+  /// No description provided for @editCurve.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit curve'**
+  String get editCurve;
 
   /// No description provided for @noCharts.
   ///

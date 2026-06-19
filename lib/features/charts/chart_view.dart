@@ -66,6 +66,8 @@ class MetricChart extends ConsumerWidget {
       primaryXAxis: DateTimeAxis(
         dateFormat: _axisFormat(bucket),
         intervalType: _intervalType(bucket),
+        // Keep the first/last labels from being clipped at the plot edges.
+        edgeLabelPlacement: EdgeLabelPlacement.shift,
       ),
       // Fixed bounds when a series opted in via the metric's useFixedRange;
       // otherwise null minimum/maximum lets the axis auto-scale to the data.
@@ -149,7 +151,9 @@ class MetricChart extends ConsumerWidget {
   static DateTimeIntervalType _intervalType(TimeBucket bucket) {
     switch (bucket) {
       case TimeBucket.today:
-        return DateTimeIntervalType.hours;
+        // Raw readings can span minutes or hours; let the axis pick the unit so
+        // ticks/labels always fall inside the visible range.
+        return DateTimeIntervalType.auto;
       case TimeBucket.day:
         return DateTimeIntervalType.days;
       case TimeBucket.month:
