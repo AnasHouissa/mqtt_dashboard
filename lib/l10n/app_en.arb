@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "MQTT Dashboard",
+  "appTitle": "TEKKIM Dash",
   "brokers": "Brokers",
   "noBrokers": "No brokers yet. Tap + to add one.",
   "addBroker": "Add broker",

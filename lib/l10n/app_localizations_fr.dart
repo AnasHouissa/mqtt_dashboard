@@ -9,7 +9,7 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'Tableau de bord MQTT';
+  String get appTitle => 'TEKKIM Dash';
 
   @override
   String get brokers => 'Brokers';

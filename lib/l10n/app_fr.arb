@@ -1,6 +1,6 @@
 {
   "@@locale": "fr",
-  "appTitle": "Tableau de bord MQTT",
+  "appTitle": "TEKKIM Dash",
   "brokers": "Brokers",
   "noBrokers": "Aucun broker. Appuyez sur + pour en ajouter un.",
   "addBroker": "Ajouter un broker",

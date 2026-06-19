@@ -2,7 +2,7 @@
     <!-- Required for MQTT broker connections. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="mqtt_dash"
+        android:label="TEKKIM Dash"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
