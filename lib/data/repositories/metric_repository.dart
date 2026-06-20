@@ -14,6 +14,12 @@ class MetricRepository {
             ..orderBy([(m) => OrderingTerm(expression: m.name)]))
           .watch();
 
+  /// Every metric across all brokers, for the global dashboard chart editor.
+  Stream<List<Metric>> watchAll() =>
+      (_db.select(_db.metrics)
+            ..orderBy([(m) => OrderingTerm(expression: m.name)]))
+          .watch();
+
   Future<List<Metric>> getForBroker(int brokerId) =>
       (_db.select(_db.metrics)..where((m) => m.brokerId.equals(brokerId))).get();
 

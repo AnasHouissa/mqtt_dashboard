@@ -55,11 +55,11 @@ class Metrics extends Table {
       boolean().withDefault(const Constant(false))();
 }
 
+/// Dashboards are global: a dashboard groups charts that may visualize metrics
+/// from any data source (broker), so it deliberately has no broker foreign key.
 @DataClassName('Dashboard')
 class Dashboards extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get brokerId =>
-      integer().references(Brokers, #id, onDelete: KeyAction.cascade)();
   TextColumn get name => text().withLength(min: 1, max: 100)();
 }
 
@@ -114,7 +114,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mqtt_dash'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -153,6 +153,11 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 4) {
             await m.addColumn(metrics, metrics.useFixedRange);
+          }
+          if (from < 5) {
+            // Dashboards became global: drop the broker_id column (and its FK)
+            // while preserving existing dashboards (id + name copy over).
+            await m.alterTable(TableMigration(dashboards));
           }
         },
       );
