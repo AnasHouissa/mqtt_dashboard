@@ -8,20 +8,32 @@ import '../../theme/app_theme.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/entity_card.dart';
+import '../../widgets/labeled_add_button.dart';
 import '../../widgets/sheet_header.dart';
 import 'dashboard_detail_screen.dart';
 
-class DashboardListView extends ConsumerWidget {
-  const DashboardListView({super.key, required this.broker});
-
-  final Broker broker;
+/// Top-level "Dashboard" destination: lists all dashboards (global, not scoped
+/// to a broker) and opens them. Each dashboard's charts may visualize metrics
+/// from any data source.
+class DashboardListScreen extends ConsumerWidget {
+  const DashboardListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final dashboards = ref.watch(dashboardsProvider(broker.id));
+    final dashboards = ref.watch(dashboardsProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(l.dashboards),
+        actions: [
+          LabeledAddButton(
+            icon: Icons.dashboard_customize,
+            label: l.addDashboard,
+            onPressed: () => showAddDashboardForm(context, ref),
+          ),
+        ],
+      ),
       body: dashboards.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
@@ -31,7 +43,7 @@ class DashboardListView extends ConsumerWidget {
               icon: Icons.dashboard_outlined,
               message: l.noDashboards,
               actionLabel: l.addDashboard,
-              onAction: () => showAddDashboardForm(context, ref, broker.id),
+              onAction: () => showAddDashboardForm(context, ref),
             );
           }
           return ListView.builder(
@@ -45,10 +57,8 @@ class DashboardListView extends ConsumerWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => DashboardDetailScreen(
-                      broker: broker,
-                      dashboard: dashboard,
-                    ),
+                    builder: (_) =>
+                        DashboardDetailScreen(dashboard: dashboard),
                   ),
                 ),
                 trailing: IconButton(
@@ -77,11 +87,10 @@ class DashboardListView extends ConsumerWidget {
 }
 
 /// Presents the "new dashboard" sheet and persists the result. Top-level so it
-/// can be triggered from the list's empty state or the broker home app bar.
+/// can be triggered from the list's empty state or the app bar.
 Future<void> showAddDashboardForm(
   BuildContext context,
   WidgetRef ref,
-  int brokerId,
 ) async {
   final l = AppLocalizations.of(context);
   final controller = TextEditingController();
@@ -151,8 +160,6 @@ Future<void> showAddDashboardForm(
   if (name != null && name.isNotEmpty) {
     await ref
         .read(dashboardRepositoryProvider)
-        .insertDashboard(
-          DashboardsCompanion.insert(brokerId: brokerId, name: name),
-        );
+        .insertDashboard(DashboardsCompanion.insert(name: name));
   }
 }

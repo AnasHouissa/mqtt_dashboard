@@ -584,17 +584,47 @@ abstract class AppLocalizations {
   /// **'Enter a valid port (1-65535)'**
   String get invalidPort;
 
+  /// No description provided for @dataSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Data source'**
+  String get dataSource;
+
+  /// No description provided for @sms.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS'**
+  String get sms;
+
+  /// No description provided for @smsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS data sources coming soon.'**
+  String get smsComingSoon;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
 
+  /// No description provided for @systemDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get systemDefault;
+
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'App version'**
+  String get appVersion;
 
   /// No description provided for @deleteConfirmTitle.
   ///

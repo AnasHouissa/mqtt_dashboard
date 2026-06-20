@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../data/db/database.dart';
 import '../data/repositories/broker_repository.dart';
@@ -45,9 +46,13 @@ final metricsProvider =
     StreamProvider.autoDispose.family<List<Metric>, int>((ref, brokerId) =>
         ref.watch(metricRepositoryProvider).watchForBroker(brokerId));
 
-final dashboardsProvider =
-    StreamProvider.autoDispose.family<List<Dashboard>, int>((ref, brokerId) =>
-        ref.watch(dashboardRepositoryProvider).watchForBroker(brokerId));
+/// Every metric across all brokers — used by the global dashboard chart editor.
+final allMetricsProvider = StreamProvider.autoDispose<List<Metric>>((ref) =>
+    ref.watch(metricRepositoryProvider).watchAll());
+
+/// Dashboards are global (not scoped to a broker).
+final dashboardsProvider = StreamProvider.autoDispose<List<Dashboard>>((ref) =>
+    ref.watch(dashboardRepositoryProvider).watchAll());
 
 final chartsProvider = StreamProvider.autoDispose
     .family<List<ChartWithSeries>, int>((ref, dashboardId) =>
@@ -170,3 +175,11 @@ class LocaleController extends StateNotifier<Locale?> {
 
 final localeProvider =
     StateNotifierProvider<LocaleController, Locale?>((ref) => LocaleController());
+
+// --- App metadata ---
+
+/// The app's version string (e.g. "1.0.1"), read from the platform package info.
+final appVersionProvider = FutureProvider<String>((ref) async {
+  final info = await PackageInfo.fromPlatform();
+  return info.version;
+});

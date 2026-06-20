@@ -10,9 +10,9 @@ class DashboardRepository {
 
   // --- Dashboards ---
 
-  Stream<List<Dashboard>> watchForBroker(int brokerId) =>
+  /// Dashboards are global (not scoped to a broker).
+  Stream<List<Dashboard>> watchAll() =>
       (_db.select(_db.dashboards)
-            ..where((d) => d.brokerId.equals(brokerId))
             ..orderBy([(d) => OrderingTerm(expression: d.name)]))
           .watch();
 

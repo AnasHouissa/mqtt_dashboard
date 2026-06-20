@@ -260,10 +260,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invalidPort => 'Entrez un port valide (1-65535)';
 
   @override
+  String get dataSource => 'Source de données';
+
+  @override
+  String get sms => 'SMS';
+
+  @override
+  String get smsComingSoon => 'Sources de données SMS à venir.';
+
+  @override
   String get language => 'Langue';
 
   @override
+  String get systemDefault => 'Système';
+
+  @override
   String get settings => 'Paramètres';
+
+  @override
+  String get appVersion => 'Version de l’application';
 
   @override
   String get deleteConfirmTitle => 'Supprimer ?';

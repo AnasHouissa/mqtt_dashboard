@@ -1241,20 +1241,6 @@ class $DashboardsTable extends Dashboards
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _brokerIdMeta = const VerificationMeta(
-    'brokerId',
-  );
-  @override
-  late final GeneratedColumn<int> brokerId = GeneratedColumn<int>(
-    'broker_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES brokers (id) ON DELETE CASCADE',
-    ),
-  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -1269,7 +1255,7 @@ class $DashboardsTable extends Dashboards
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, brokerId, name];
+  List<GeneratedColumn> get $columns => [id, name];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1284,14 +1270,6 @@ class $DashboardsTable extends Dashboards
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('broker_id')) {
-      context.handle(
-        _brokerIdMeta,
-        brokerId.isAcceptableOrUnknown(data['broker_id']!, _brokerIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_brokerIdMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -1314,10 +1292,6 @@ class $DashboardsTable extends Dashboards
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
-      brokerId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}broker_id'],
-      )!,
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
@@ -1333,28 +1307,18 @@ class $DashboardsTable extends Dashboards
 
 class Dashboard extends DataClass implements Insertable<Dashboard> {
   final int id;
-  final int brokerId;
   final String name;
-  const Dashboard({
-    required this.id,
-    required this.brokerId,
-    required this.name,
-  });
+  const Dashboard({required this.id, required this.name});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['broker_id'] = Variable<int>(brokerId);
     map['name'] = Variable<String>(name);
     return map;
   }
 
   DashboardsCompanion toCompanion(bool nullToAbsent) {
-    return DashboardsCompanion(
-      id: Value(id),
-      brokerId: Value(brokerId),
-      name: Value(name),
-    );
+    return DashboardsCompanion(id: Value(id), name: Value(name));
   }
 
   factory Dashboard.fromJson(
@@ -1364,7 +1328,6 @@ class Dashboard extends DataClass implements Insertable<Dashboard> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Dashboard(
       id: serializer.fromJson<int>(json['id']),
-      brokerId: serializer.fromJson<int>(json['brokerId']),
       name: serializer.fromJson<String>(json['name']),
     );
   }
@@ -1373,20 +1336,15 @@ class Dashboard extends DataClass implements Insertable<Dashboard> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'brokerId': serializer.toJson<int>(brokerId),
       'name': serializer.toJson<String>(name),
     };
   }
 
-  Dashboard copyWith({int? id, int? brokerId, String? name}) => Dashboard(
-    id: id ?? this.id,
-    brokerId: brokerId ?? this.brokerId,
-    name: name ?? this.name,
-  );
+  Dashboard copyWith({int? id, String? name}) =>
+      Dashboard(id: id ?? this.id, name: name ?? this.name);
   Dashboard copyWithCompanion(DashboardsCompanion data) {
     return Dashboard(
       id: data.id.present ? data.id.value : this.id,
-      brokerId: data.brokerId.present ? data.brokerId.value : this.brokerId,
       name: data.name.present ? data.name.value : this.name,
     );
   }
@@ -1395,60 +1353,42 @@ class Dashboard extends DataClass implements Insertable<Dashboard> {
   String toString() {
     return (StringBuffer('Dashboard(')
           ..write('id: $id, ')
-          ..write('brokerId: $brokerId, ')
           ..write('name: $name')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, brokerId, name);
+  int get hashCode => Object.hash(id, name);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Dashboard &&
-          other.id == this.id &&
-          other.brokerId == this.brokerId &&
-          other.name == this.name);
+      (other is Dashboard && other.id == this.id && other.name == this.name);
 }
 
 class DashboardsCompanion extends UpdateCompanion<Dashboard> {
   final Value<int> id;
-  final Value<int> brokerId;
   final Value<String> name;
   const DashboardsCompanion({
     this.id = const Value.absent(),
-    this.brokerId = const Value.absent(),
     this.name = const Value.absent(),
   });
   DashboardsCompanion.insert({
     this.id = const Value.absent(),
-    required int brokerId,
     required String name,
-  }) : brokerId = Value(brokerId),
-       name = Value(name);
+  }) : name = Value(name);
   static Insertable<Dashboard> custom({
     Expression<int>? id,
-    Expression<int>? brokerId,
     Expression<String>? name,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (brokerId != null) 'broker_id': brokerId,
       if (name != null) 'name': name,
     });
   }
 
-  DashboardsCompanion copyWith({
-    Value<int>? id,
-    Value<int>? brokerId,
-    Value<String>? name,
-  }) {
-    return DashboardsCompanion(
-      id: id ?? this.id,
-      brokerId: brokerId ?? this.brokerId,
-      name: name ?? this.name,
-    );
+  DashboardsCompanion copyWith({Value<int>? id, Value<String>? name}) {
+    return DashboardsCompanion(id: id ?? this.id, name: name ?? this.name);
   }
 
   @override
@@ -1456,9 +1396,6 @@ class DashboardsCompanion extends UpdateCompanion<Dashboard> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
-    }
-    if (brokerId.present) {
-      map['broker_id'] = Variable<int>(brokerId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -1470,7 +1407,6 @@ class DashboardsCompanion extends UpdateCompanion<Dashboard> {
   String toString() {
     return (StringBuffer('DashboardsCompanion(')
           ..write('id: $id, ')
-          ..write('brokerId: $brokerId, ')
           ..write('name: $name')
           ..write(')'))
         .toString();
@@ -2522,13 +2458,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
-        'brokers',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('dashboards', kind: UpdateKind.delete)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
         'dashboards',
         limitUpdateKind: UpdateKind.delete,
       ),
@@ -2607,24 +2536,6 @@ final class $$BrokersTableReferences
     ).filter((f) => f.brokerId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_metricsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$DashboardsTable, List<Dashboard>>
-  _dashboardsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.dashboards,
-    aliasName: $_aliasNameGenerator(db.brokers.id, db.dashboards.brokerId),
-  );
-
-  $$DashboardsTableProcessedTableManager get dashboardsRefs {
-    final manager = $$DashboardsTableTableManager(
-      $_db,
-      $_db.dashboards,
-    ).filter((f) => f.brokerId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_dashboardsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2716,31 +2627,6 @@ class $$BrokersTableFilterComposer
           }) => $$MetricsTableFilterComposer(
             $db: $db,
             $table: $db.metrics,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> dashboardsRefs(
-    Expression<bool> Function($$DashboardsTableFilterComposer f) f,
-  ) {
-    final $$DashboardsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.dashboards,
-      getReferencedColumn: (t) => t.brokerId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DashboardsTableFilterComposer(
-            $db: $db,
-            $table: $db.dashboards,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2892,31 +2778,6 @@ class $$BrokersTableAnnotationComposer
     );
     return f(composer);
   }
-
-  Expression<T> dashboardsRefs<T extends Object>(
-    Expression<T> Function($$DashboardsTableAnnotationComposer a) f,
-  ) {
-    final $$DashboardsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.dashboards,
-      getReferencedColumn: (t) => t.brokerId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DashboardsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.dashboards,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$BrokersTableTableManager
@@ -2932,7 +2793,7 @@ class $$BrokersTableTableManager
           $$BrokersTableUpdateCompanionBuilder,
           (Broker, $$BrokersTableReferences),
           Broker,
-          PrefetchHooks Function({bool metricsRefs, bool dashboardsRefs})
+          PrefetchHooks Function({bool metricsRefs})
         > {
   $$BrokersTableTableManager(_$AppDatabase db, $BrokersTable table)
     : super(
@@ -3009,63 +2870,28 @@ class $$BrokersTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback:
-              ({metricsRefs = false, dashboardsRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (metricsRefs) db.metrics,
-                    if (dashboardsRefs) db.dashboards,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (metricsRefs)
-                        await $_getPrefetchedData<
-                          Broker,
-                          $BrokersTable,
-                          Metric
-                        >(
-                          currentTable: table,
-                          referencedTable: $$BrokersTableReferences
-                              ._metricsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$BrokersTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).metricsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.brokerId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (dashboardsRefs)
-                        await $_getPrefetchedData<
-                          Broker,
-                          $BrokersTable,
-                          Dashboard
-                        >(
-                          currentTable: table,
-                          referencedTable: $$BrokersTableReferences
-                              ._dashboardsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$BrokersTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).dashboardsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.brokerId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
+          prefetchHooksCallback: ({metricsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (metricsRefs) db.metrics],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (metricsRefs)
+                    await $_getPrefetchedData<Broker, $BrokersTable, Metric>(
+                      currentTable: table,
+                      referencedTable: $$BrokersTableReferences
+                          ._metricsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$BrokersTableReferences(db, table, p0).metricsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.brokerId == item.id),
+                      typedResults: items,
+                    ),
+                ];
               },
+            );
+          },
         ),
       );
 }
@@ -3082,7 +2908,7 @@ typedef $$BrokersTableProcessedTableManager =
       $$BrokersTableUpdateCompanionBuilder,
       (Broker, $$BrokersTableReferences),
       Broker,
-      PrefetchHooks Function({bool metricsRefs, bool dashboardsRefs})
+      PrefetchHooks Function({bool metricsRefs})
     >;
 typedef $$MetricsTableCreateCompanionBuilder =
     MetricsCompanion Function({
@@ -3653,38 +3479,13 @@ typedef $$MetricsTableProcessedTableManager =
       })
     >;
 typedef $$DashboardsTableCreateCompanionBuilder =
-    DashboardsCompanion Function({
-      Value<int> id,
-      required int brokerId,
-      required String name,
-    });
+    DashboardsCompanion Function({Value<int> id, required String name});
 typedef $$DashboardsTableUpdateCompanionBuilder =
-    DashboardsCompanion Function({
-      Value<int> id,
-      Value<int> brokerId,
-      Value<String> name,
-    });
+    DashboardsCompanion Function({Value<int> id, Value<String> name});
 
 final class $$DashboardsTableReferences
     extends BaseReferences<_$AppDatabase, $DashboardsTable, Dashboard> {
   $$DashboardsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $BrokersTable _brokerIdTable(_$AppDatabase db) => db.brokers
-      .createAlias($_aliasNameGenerator(db.dashboards.brokerId, db.brokers.id));
-
-  $$BrokersTableProcessedTableManager get brokerId {
-    final $_column = $_itemColumn<int>('broker_id')!;
-
-    final manager = $$BrokersTableTableManager(
-      $_db,
-      $_db.brokers,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_brokerIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
 
   static MultiTypedResultKey<$ChartsTable, List<ChartConfig>> _chartsRefsTable(
     _$AppDatabase db,
@@ -3724,29 +3525,6 @@ class $$DashboardsTableFilterComposer
     column: $table.name,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$BrokersTableFilterComposer get brokerId {
-    final $$BrokersTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.brokerId,
-      referencedTable: $db.brokers,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BrokersTableFilterComposer(
-            $db: $db,
-            $table: $db.brokers,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   Expression<bool> chartsRefs(
     Expression<bool> Function($$ChartsTableFilterComposer f) f,
@@ -3792,29 +3570,6 @@ class $$DashboardsTableOrderingComposer
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$BrokersTableOrderingComposer get brokerId {
-    final $$BrokersTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.brokerId,
-      referencedTable: $db.brokers,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BrokersTableOrderingComposer(
-            $db: $db,
-            $table: $db.brokers,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$DashboardsTableAnnotationComposer
@@ -3831,29 +3586,6 @@ class $$DashboardsTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
-
-  $$BrokersTableAnnotationComposer get brokerId {
-    final $$BrokersTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.brokerId,
-      referencedTable: $db.brokers,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BrokersTableAnnotationComposer(
-            $db: $db,
-            $table: $db.brokers,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   Expression<T> chartsRefs<T extends Object>(
     Expression<T> Function($$ChartsTableAnnotationComposer a) f,
@@ -3894,7 +3626,7 @@ class $$DashboardsTableTableManager
           $$DashboardsTableUpdateCompanionBuilder,
           (Dashboard, $$DashboardsTableReferences),
           Dashboard,
-          PrefetchHooks Function({bool brokerId, bool chartsRefs})
+          PrefetchHooks Function({bool chartsRefs})
         > {
   $$DashboardsTableTableManager(_$AppDatabase db, $DashboardsTable table)
     : super(
@@ -3910,19 +3642,11 @@ class $$DashboardsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<int> brokerId = const Value.absent(),
                 Value<String> name = const Value.absent(),
-              }) => DashboardsCompanion(id: id, brokerId: brokerId, name: name),
+              }) => DashboardsCompanion(id: id, name: name),
           createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required int brokerId,
-                required String name,
-              }) => DashboardsCompanion.insert(
-                id: id,
-                brokerId: brokerId,
-                name: name,
-              ),
+              ({Value<int> id = const Value.absent(), required String name}) =>
+                  DashboardsCompanion.insert(id: id, name: name),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
@@ -3931,42 +3655,11 @@ class $$DashboardsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({brokerId = false, chartsRefs = false}) {
+          prefetchHooksCallback: ({chartsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [if (chartsRefs) db.charts],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (brokerId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.brokerId,
-                                referencedTable: $$DashboardsTableReferences
-                                    ._brokerIdTable(db),
-                                referencedColumn: $$DashboardsTableReferences
-                                    ._brokerIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
+              addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (chartsRefs)
@@ -4006,7 +3699,7 @@ typedef $$DashboardsTableProcessedTableManager =
       $$DashboardsTableUpdateCompanionBuilder,
       (Dashboard, $$DashboardsTableReferences),
       Dashboard,
-      PrefetchHooks Function({bool brokerId, bool chartsRefs})
+      PrefetchHooks Function({bool chartsRefs})
     >;
 typedef $$ChartsTableCreateCompanionBuilder =
     ChartsCompanion Function({
