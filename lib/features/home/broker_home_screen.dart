@@ -7,11 +7,11 @@ import '../../providers/providers.dart';
 import '../../services/mqtt_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/labeled_add_button.dart';
-import '../dashboards/dashboard_list_view.dart';
 import '../metrics/metric_form.dart';
 import '../metrics/metric_list_view.dart';
 
-/// Tabbed home for a single broker: connection control + Metrics + Dashboards.
+/// Home for a single broker: connection control + the broker's Metrics.
+/// (Dashboards are now a global top-level destination, not nested here.)
 class BrokerHomeScreen extends ConsumerWidget {
   const BrokerHomeScreen({super.key, required this.broker});
 
@@ -30,99 +30,56 @@ class BrokerHomeScreen extends ConsumerWidget {
         ? MqttStatus.disconnected
         : rawStatus;
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(broker.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(136),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xl + AppSpacing.lg,
-                    vertical: AppSpacing.sm,
-                  ),
-                  child: _ConnectionButton(
-                    status: effectiveStatus,
-                    onPressed: () async {
-                      if (effectiveStatus == MqttStatus.connected) {
-                        await controller.disconnect();
-                        return;
-                      }
-                      final ok = await controller.connect(broker);
-                      if (context.mounted && !ok) {
-                        final reason = switch (controller.lastFailureReason) {
-                          MqttFailureReason.badCredentials =>
-                            l.reasonBadCredentials,
-                          MqttFailureReason.brokerUnavailable =>
-                            l.reasonBrokerUnavailable,
-                          MqttFailureReason.rejected => l.reasonRejected,
-                          MqttFailureReason.network => l.reasonNetwork,
-                          MqttFailureReason.unknown || null => l.reasonUnknown,
-                        };
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: Colors.red.shade600,
-                            content: Text(
-                              l.unableToConnect(reason),
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ),
-                TabBar(
-                  tabs: [
-                    Tab(text: l.metrics, icon: const Icon(Icons.sensors)),
-                    Tab(text: l.dashboards, icon: const Icon(Icons.dashboard)),
-                  ],
-                ),
-              ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(broker.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(72),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl + AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            child: _ConnectionButton(
+              status: effectiveStatus,
+              onPressed: () async {
+                if (effectiveStatus == MqttStatus.connected) {
+                  await controller.disconnect();
+                  return;
+                }
+                final ok = await controller.connect(broker);
+                if (context.mounted && !ok) {
+                  final reason = switch (controller.lastFailureReason) {
+                    MqttFailureReason.badCredentials => l.reasonBadCredentials,
+                    MqttFailureReason.brokerUnavailable =>
+                      l.reasonBrokerUnavailable,
+                    MqttFailureReason.rejected => l.reasonRejected,
+                    MqttFailureReason.network => l.reasonNetwork,
+                    MqttFailureReason.unknown || null => l.reasonUnknown,
+                  };
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.red.shade600,
+                      content: Text(
+                        l.unableToConnect(reason),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  );
+                }
+              },
             ),
           ),
-          actions: [
-            _TabAddAction(broker: broker),
-          ],
         ),
-        body: TabBarView(
-          children: [
-            MetricListView(broker: broker),
-            DashboardListView(broker: broker),
-          ],
-        ),
+        actions: [
+          LabeledAddButton(
+            icon: Icons.sensors,
+            label: l.addMetric,
+            onPressed: () => showMetricForm(context, brokerId: broker.id),
+          ),
+        ],
       ),
-    );
-  }
-}
-
-/// App-bar add button whose label and action follow the selected tab: it adds
-/// a metric on the Metrics tab and a dashboard on the Dashboards tab.
-class _TabAddAction extends ConsumerWidget {
-  const _TabAddAction({required this.broker});
-
-  final Broker broker;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final tab = DefaultTabController.of(context);
-    return AnimatedBuilder(
-      animation: tab,
-      builder: (context, _) {
-        final isMetrics = tab.index == 0;
-        return LabeledAddButton(
-          icon: isMetrics ? Icons.sensors : Icons.dashboard_customize,
-          label: isMetrics ? l.addMetric : l.addDashboard,
-          onPressed: () => isMetrics
-              ? showMetricForm(context, brokerId: broker.id)
-              : showAddDashboardForm(context, ref, broker.id),
-        );
-      },
+      body: MetricListView(broker: broker),
     );
   }
 }

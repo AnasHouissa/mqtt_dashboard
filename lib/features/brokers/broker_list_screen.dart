@@ -8,11 +8,13 @@ import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/entity_card.dart';
 import '../home/broker_home_screen.dart';
-import '../settings/settings_screen.dart';
 import 'broker_form.dart';
 
-class BrokerListScreen extends ConsumerWidget {
-  const BrokerListScreen({super.key});
+/// The "Brokers" tab inside the Data source destination: lists saved brokers
+/// and adds new ones. The surrounding [DataSourceScreen] owns the app bar, so
+/// this tab is an app-bar-less [Scaffold] (kept for the per-tab FAB).
+class BrokersTab extends ConsumerWidget {
+  const BrokersTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,10 +22,6 @@ class BrokerListScreen extends ConsumerWidget {
     final brokers = ref.watch(brokersProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.brokers),
-        actions: const [_SettingsButton()],
-      ),
       body: brokers.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
@@ -83,24 +81,6 @@ class BrokerListScreen extends ConsumerWidget {
         onPressed: () => showBrokerForm(context),
         icon: const Icon(Icons.add),
         label: Text(l.addBroker),
-      ),
-    );
-  }
-}
-
-/// Opens the settings page (currently app language).
-class _SettingsButton extends StatelessWidget {
-  const _SettingsButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return IconButton(
-      icon: const Icon(Icons.settings),
-      tooltip: l.settings,
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const SettingsScreen()),
       ),
     );
   }
