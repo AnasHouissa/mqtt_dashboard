@@ -17,10 +17,9 @@ import 'time_filter.dart';
 
 /// A dashboard chart with its own time filter, fullscreen + export + edit/delete.
 class ChartCard extends ConsumerStatefulWidget {
-  const ChartCard({super.key, required this.item, required this.brokerId});
+  const ChartCard({super.key, required this.item});
 
   final ChartWithSeries item;
-  final int brokerId;
 
   @override
   ConsumerState<ChartCard> createState() => _ChartCardState();
@@ -143,7 +142,6 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                     case 'edit':
                       await showAddCurveSheet(
                         context,
-                        brokerId: widget.brokerId,
                         dashboardId: _chart.dashboardId,
                         existing: widget.item,
                       );

@@ -10,13 +10,8 @@ import '../charts/chart_card.dart';
 import 'add_curve_dialog.dart';
 
 class DashboardDetailScreen extends ConsumerWidget {
-  const DashboardDetailScreen({
-    super.key,
-    required this.broker,
-    required this.dashboard,
-  });
+  const DashboardDetailScreen({super.key, required this.dashboard});
 
-  final Broker broker;
   final Dashboard dashboard;
 
   @override
@@ -35,11 +30,8 @@ class DashboardDetailScreen extends ConsumerWidget {
           LabeledAddButton(
             icon: Icons.add_chart,
             label: l.addCurve,
-            onPressed: () => showAddCurveSheet(
-              context,
-              brokerId: broker.id,
-              dashboardId: dashboard.id,
-            ),
+            onPressed: () =>
+                showAddCurveSheet(context, dashboardId: dashboard.id),
           ),
         ],
       ),
@@ -52,18 +44,14 @@ class DashboardDetailScreen extends ConsumerWidget {
               icon: Icons.insert_chart_outlined,
               message: l.noCharts,
               actionLabel: l.addCurve,
-              onAction: () => showAddCurveSheet(
-                context,
-                brokerId: broker.id,
-                dashboardId: dashboard.id,
-              ),
+              onAction: () =>
+                  showAddCurveSheet(context, dashboardId: dashboard.id),
             );
           }
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: list.length,
-            itemBuilder: (context, i) =>
-                ChartCard(item: list[i], brokerId: broker.id),
+            itemBuilder: (context, i) => ChartCard(item: list[i]),
           );
         },
       ),

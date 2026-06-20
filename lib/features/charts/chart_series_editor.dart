@@ -34,20 +34,31 @@ class ChartSeriesEditor extends StatelessWidget {
     required this.onChanged,
     required this.expanded,
     required this.onToggle,
+    this.sourceNames = const {},
     this.onRemove,
   });
 
   final List<Metric> metrics;
+
+  /// brokerId -> data-source name, used to label metrics so same-named topics
+  /// from different sources stay distinguishable.
+  final Map<int, String> sourceNames;
   final SeriesDraft draft;
   final VoidCallback onChanged;
   final bool expanded;
   final VoidCallback onToggle;
   final VoidCallback? onRemove;
 
+  /// A metric label that includes its source, e.g. "temperature · Greenhouse".
+  String _label(Metric m) {
+    final source = sourceNames[m.brokerId];
+    return source == null ? m.name : '${m.name} · $source';
+  }
+
   String? get _metricName {
     if (draft.metricId == null) return null;
     for (final m in metrics) {
-      if (m.id == draft.metricId) return m.name;
+      if (m.id == draft.metricId) return _label(m);
     }
     return null;
   }
@@ -150,7 +161,7 @@ class ChartSeriesEditor extends StatelessWidget {
           decoration: InputDecoration(labelText: l.selectMetric),
           items: [
             for (final m in metrics)
-              DropdownMenuItem(value: m.id, child: Text(m.name)),
+              DropdownMenuItem(value: m.id, child: Text(_label(m))),
           ],
           onChanged: (v) {
             draft.metricId = v;

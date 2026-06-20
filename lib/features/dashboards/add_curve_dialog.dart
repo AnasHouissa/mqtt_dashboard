@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/db/database.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
@@ -15,12 +16,10 @@ import '../charts/chart_series_editor.dart';
 class AddCurveSheet extends ConsumerStatefulWidget {
   const AddCurveSheet({
     super.key,
-    required this.brokerId,
     required this.dashboardId,
     this.existing,
   });
 
-  final int brokerId;
   final int dashboardId;
   final ChartWithSeries? existing;
 
@@ -117,7 +116,14 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final metrics = ref.watch(metricsProvider(widget.brokerId));
+    final metrics = ref.watch(allMetricsProvider);
+    // Metrics can come from several brokers, so map brokerId -> name to label
+    // each metric with its source and disambiguate same-named topics.
+    final sourceNames = {
+      for (final b
+          in ref.watch(brokersProvider).valueOrNull ?? const <Broker>[])
+        b.id: b.name,
+    };
 
     return metrics.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -157,6 +163,7 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
                       ChartSeriesEditor(
                         key: ValueKey(_drafts[i]),
                         metrics: list,
+                        sourceNames: sourceNames,
                         draft: _drafts[i],
                         expanded: _expanded == i,
                         onToggle: () => _toggle(i),
@@ -233,7 +240,6 @@ class _ActionBar extends StatelessWidget {
 
 Future<void> showAddCurveSheet(
   BuildContext context, {
-  required int brokerId,
   required int dashboardId,
   ChartWithSeries? existing,
 }) {
@@ -248,7 +254,6 @@ Future<void> showAddCurveSheet(
       child: FractionallySizedBox(
         heightFactor: 1,
         child: AddCurveSheet(
-          brokerId: brokerId,
           dashboardId: dashboardId,
           existing: existing,
         ),
