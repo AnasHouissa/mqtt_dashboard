@@ -61,6 +61,9 @@ dependencies:
   printing: ^5.13.0
   share_plus: ^10.0.0
 
+  # App metadata (version display in Settings)
+  package_info_plus: ^8.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
