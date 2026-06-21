@@ -317,11 +317,22 @@ final smsIngestionProvider = Provider<SmsIngestionController>((ref) {
 /// Whether the SMS permission has been granted this session. The UI calls
 /// [SmsPermissionController.request] to prompt and starts listening on grant.
 class SmsPermissionController extends StateNotifier<bool> {
-  SmsPermissionController(this._ref) : super(false);
+  SmsPermissionController(this._ref) : super(false) {
+    // Seed from the OS so the banner stays hidden when access was already
+    // granted (in a prior session or via system settings).
+    refresh();
+  }
 
   final Ref _ref;
 
   bool get isSupported => _ref.read(smsServiceProvider).isSupported;
+
+  /// Re-syncs state with the current OS permission status without prompting.
+  /// Call on app resume so granting via system settings reflects immediately.
+  Future<void> refresh() async {
+    final granted = await _ref.read(smsServiceProvider).hasPermission();
+    if (mounted) state = granted;
+  }
 
   Future<bool> request() async {
     final service = _ref.read(smsServiceProvider);

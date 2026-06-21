@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:another_telephony/telephony.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// A single incoming SMS, normalised for the ingestion pipeline.
 class IncomingSms {
@@ -34,6 +35,14 @@ class SmsService {
 
   /// Broadcast stream of incoming messages (only emits on supported platforms).
   Stream<IncomingSms> get messages => _controller.stream;
+
+  /// Whether SMS read access is currently granted, checked silently (no prompt).
+  /// Always false on unsupported platforms. Used to seed the permission banner
+  /// so it doesn't reappear when access was granted in a previous session.
+  Future<bool> hasPermission() async {
+    if (!Platform.isAndroid) return false;
+    return Permission.sms.isGranted;
+  }
 
   /// Requests the SMS permissions. Returns true when granted; always false on
   /// unsupported platforms. Only RECEIVE_SMS/READ_SMS are declared in the

@@ -66,11 +66,39 @@ class SmsSourceDetailScreen extends ConsumerWidget {
 }
 
 /// Shown when SMS access isn't granted (Android) or isn't possible (iOS).
-class _SmsPermissionBanner extends ConsumerWidget {
+class _SmsPermissionBanner extends ConsumerStatefulWidget {
   const _SmsPermissionBanner();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_SmsPermissionBanner> createState() =>
+      _SmsPermissionBannerState();
+}
+
+class _SmsPermissionBannerState extends ConsumerState<_SmsPermissionBanner>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Re-check after returning from the system settings screen so a permission
+    // granted there hides the banner without an app restart.
+    if (state == AppLifecycleState.resumed) {
+      ref.read(smsPermissionProvider.notifier).refresh();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final controller = ref.read(smsPermissionProvider.notifier);
     final granted = ref.watch(smsPermissionProvider);
