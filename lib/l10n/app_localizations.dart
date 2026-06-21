@@ -602,6 +602,180 @@ abstract class AppLocalizations {
   /// **'SMS data sources coming soon.'**
   String get smsComingSoon;
 
+  /// No description provided for @noSmsSources.
+  ///
+  /// In en, this message translates to:
+  /// **'No SMS sources yet. Tap + to add one.'**
+  String get noSmsSources;
+
+  /// No description provided for @addSmsSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Add SMS source'**
+  String get addSmsSource;
+
+  /// No description provided for @editSmsSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit SMS source'**
+  String get editSmsSource;
+
+  /// No description provided for @smsSourceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Source name'**
+  String get smsSourceName;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get phoneNumber;
+
+  /// No description provided for @phoneNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sender number — +216 then 8 digits'**
+  String get phoneNumberHint;
+
+  /// No description provided for @invalidTunisianNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Tunisian number (+216 then 8 digits)'**
+  String get invalidTunisianNumber;
+
+  /// No description provided for @deleteSmsSourceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? Its metrics and readings will also be permanently removed.'**
+  String deleteSmsSourceBody(String name);
+
+  /// No description provided for @smsStationName.
+  ///
+  /// In en, this message translates to:
+  /// **'Station name'**
+  String get smsStationName;
+
+  /// No description provided for @smsStationNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches the first line of the message'**
+  String get smsStationNameHint;
+
+  /// No description provided for @valueMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Value mode'**
+  String get valueMode;
+
+  /// No description provided for @valueModeAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-detect'**
+  String get valueModeAuto;
+
+  /// No description provided for @valueModeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Number'**
+  String get valueModeNumber;
+
+  /// No description provided for @valueModeNumberDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the number inside the brackets'**
+  String get valueModeNumberDesc;
+
+  /// No description provided for @valueModeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Active count'**
+  String get valueModeCount;
+
+  /// No description provided for @valueModeCountDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Count active inputs (OK = 0)'**
+  String get valueModeCountDesc;
+
+  /// No description provided for @valueModePresence.
+  ///
+  /// In en, this message translates to:
+  /// **'Presence'**
+  String get valueModePresence;
+
+  /// No description provided for @valueModePresenceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'1 while alerting, otherwise 0'**
+  String get valueModePresenceDesc;
+
+  /// No description provided for @smsRawLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw SMS log'**
+  String get smsRawLog;
+
+  /// No description provided for @noSmsMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages received yet.'**
+  String get noSmsMessages;
+
+  /// No description provided for @smsStatusMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched'**
+  String get smsStatusMatched;
+
+  /// No description provided for @smsStatusUnmatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmatched'**
+  String get smsStatusUnmatched;
+
+  /// No description provided for @smsStatusError.
+  ///
+  /// In en, this message translates to:
+  /// **'Parse error'**
+  String get smsStatusError;
+
+  /// No description provided for @smsReadings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} readings'**
+  String smsReadings(int count);
+
+  /// No description provided for @smsPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS permission required'**
+  String get smsPermissionRequired;
+
+  /// No description provided for @smsPermissionRationale.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow reading SMS so messages from your sources become readings.'**
+  String get smsPermissionRationale;
+
+  /// No description provided for @grantPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant permission'**
+  String get grantPermission;
+
+  /// No description provided for @smsPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied. Enable SMS access in the system settings.'**
+  String get smsPermissionDenied;
+
+  /// No description provided for @smsAndroidOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS data sources are only available on Android.'**
+  String get smsAndroidOnly;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:
@@ -619,6 +793,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
+
+  /// No description provided for @smsSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS'**
+  String get smsSettings;
+
+  /// No description provided for @smsTopicPresets.
+  ///
+  /// In en, this message translates to:
+  /// **'Predefined topics'**
+  String get smsTopicPresets;
+
+  /// No description provided for @smsTopicPresetsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reusable topic labels for SMS metrics'**
+  String get smsTopicPresetsSubtitle;
+
+  /// No description provided for @addSmsTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Add topic'**
+  String get addSmsTopic;
+
+  /// No description provided for @smsTopicLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic label'**
+  String get smsTopicLabel;
+
+  /// No description provided for @noSmsTopics.
+  ///
+  /// In en, this message translates to:
+  /// **'No predefined topics yet'**
+  String get noSmsTopics;
 
   /// No description provided for @appVersion.
   ///

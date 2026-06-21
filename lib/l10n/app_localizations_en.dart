@@ -266,6 +266,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String get smsComingSoon => 'SMS data sources coming soon.';
 
   @override
+  String get noSmsSources => 'No SMS sources yet. Tap + to add one.';
+
+  @override
+  String get addSmsSource => 'Add SMS source';
+
+  @override
+  String get editSmsSource => 'Edit SMS source';
+
+  @override
+  String get smsSourceName => 'Source name';
+
+  @override
+  String get phoneNumber => 'Phone number';
+
+  @override
+  String get phoneNumberHint => 'Sender number — +216 then 8 digits';
+
+  @override
+  String get invalidTunisianNumber =>
+      'Enter a valid Tunisian number (+216 then 8 digits)';
+
+  @override
+  String deleteSmsSourceBody(String name) {
+    return 'Delete \"$name\"? Its metrics and readings will also be permanently removed.';
+  }
+
+  @override
+  String get smsStationName => 'Station name';
+
+  @override
+  String get smsStationNameHint => 'Matches the first line of the message';
+
+  @override
+  String get valueMode => 'Value mode';
+
+  @override
+  String get valueModeAuto => 'Auto-detect';
+
+  @override
+  String get valueModeNumber => 'Number';
+
+  @override
+  String get valueModeNumberDesc => 'Use the number inside the brackets';
+
+  @override
+  String get valueModeCount => 'Active count';
+
+  @override
+  String get valueModeCountDesc => 'Count active inputs (OK = 0)';
+
+  @override
+  String get valueModePresence => 'Presence';
+
+  @override
+  String get valueModePresenceDesc => '1 while alerting, otherwise 0';
+
+  @override
+  String get smsRawLog => 'Raw SMS log';
+
+  @override
+  String get noSmsMessages => 'No messages received yet.';
+
+  @override
+  String get smsStatusMatched => 'Matched';
+
+  @override
+  String get smsStatusUnmatched => 'Unmatched';
+
+  @override
+  String get smsStatusError => 'Parse error';
+
+  @override
+  String smsReadings(int count) {
+    return '$count readings';
+  }
+
+  @override
+  String get smsPermissionRequired => 'SMS permission required';
+
+  @override
+  String get smsPermissionRationale =>
+      'Allow reading SMS so messages from your sources become readings.';
+
+  @override
+  String get grantPermission => 'Grant permission';
+
+  @override
+  String get smsPermissionDenied =>
+      'Permission denied. Enable SMS access in the system settings.';
+
+  @override
+  String get smsAndroidOnly =>
+      'SMS data sources are only available on Android.';
+
+  @override
   String get language => 'Language';
 
   @override
@@ -273,6 +368,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings => 'Settings';
+
+  @override
+  String get smsSettings => 'SMS';
+
+  @override
+  String get smsTopicPresets => 'Predefined topics';
+
+  @override
+  String get smsTopicPresetsSubtitle => 'Reusable topic labels for SMS metrics';
+
+  @override
+  String get addSmsTopic => 'Add topic';
+
+  @override
+  String get smsTopicLabel => 'Topic label';
+
+  @override
+  String get noSmsTopics => 'No predefined topics yet';
 
   @override
   String get appVersion => 'App version';

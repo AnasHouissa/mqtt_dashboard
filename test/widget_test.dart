@@ -33,7 +33,7 @@ void main() {
       port: 1883,
     ));
     final metricId = await db.into(db.metrics).insert(MetricsCompanion.insert(
-          brokerId: brokerId,
+          brokerId: Value(brokerId),
           name: 'temp',
           topic: 'home/temp',
         ));
@@ -56,7 +56,7 @@ void main() {
       port: 1883,
     ));
     await db.into(db.metrics).insert(MetricsCompanion.insert(
-          brokerId: brokerId,
+          brokerId: Value(brokerId),
           name: 'm',
           topic: 't',
           publishEnabled: const Value(true),

@@ -269,6 +269,102 @@ class AppLocalizationsFr extends AppLocalizations {
   String get smsComingSoon => 'Sources de données SMS à venir.';
 
   @override
+  String get noSmsSources =>
+      'Aucune source SMS. Appuyez sur + pour en ajouter une.';
+
+  @override
+  String get addSmsSource => 'Ajouter une source SMS';
+
+  @override
+  String get editSmsSource => 'Modifier la source SMS';
+
+  @override
+  String get smsSourceName => 'Nom de la source';
+
+  @override
+  String get phoneNumber => 'Numéro de téléphone';
+
+  @override
+  String get phoneNumberHint => 'Numéro expéditeur — +216 puis 8 chiffres';
+
+  @override
+  String get invalidTunisianNumber =>
+      'Saisissez un numéro tunisien valide (+216 puis 8 chiffres)';
+
+  @override
+  String deleteSmsSourceBody(String name) {
+    return 'Supprimer « $name » ? Ses métriques et relevés seront aussi supprimés définitivement.';
+  }
+
+  @override
+  String get smsStationName => 'Nom de la station';
+
+  @override
+  String get smsStationNameHint => 'Correspond à la première ligne du message';
+
+  @override
+  String get valueMode => 'Mode de valeur';
+
+  @override
+  String get valueModeAuto => 'Détection auto';
+
+  @override
+  String get valueModeNumber => 'Nombre';
+
+  @override
+  String get valueModeNumberDesc => 'Utiliser le nombre entre crochets';
+
+  @override
+  String get valueModeCount => 'Nombre d\'entrées actives';
+
+  @override
+  String get valueModeCountDesc => 'Compter les entrées actives (OK = 0)';
+
+  @override
+  String get valueModePresence => 'Présence';
+
+  @override
+  String get valueModePresenceDesc => '1 en alerte, sinon 0';
+
+  @override
+  String get smsRawLog => 'Journal SMS brut';
+
+  @override
+  String get noSmsMessages => 'Aucun message reçu pour l\'instant.';
+
+  @override
+  String get smsStatusMatched => 'Associé';
+
+  @override
+  String get smsStatusUnmatched => 'Non associé';
+
+  @override
+  String get smsStatusError => 'Erreur d\'analyse';
+
+  @override
+  String smsReadings(int count) {
+    return '$count relevés';
+  }
+
+  @override
+  String get smsPermissionRequired => 'Autorisation SMS requise';
+
+  @override
+  String get smsPermissionRationale =>
+      'Autorisez la lecture des SMS pour transformer les messages de vos sources en relevés.';
+
+  @override
+  String get grantPermission => 'Autoriser';
+
+  @override
+  String get smsPermissionDenied =>
+      'Autorisation refusée. Activez l\'accès aux SMS dans les paramètres système.';
+
+  @override
+  String get smsAndroidOnly =>
+      'Les sources de données SMS ne sont disponibles que sur Android.';
+
+  @override
   String get language => 'Langue';
 
   @override
@@ -276,6 +372,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settings => 'Paramètres';
+
+  @override
+  String get smsSettings => 'SMS';
+
+  @override
+  String get smsTopicPresets => 'Topics prédéfinis';
+
+  @override
+  String get smsTopicPresetsSubtitle =>
+      'Libellés de topic réutilisables pour les métriques SMS';
+
+  @override
+  String get addSmsTopic => 'Ajouter un topic';
+
+  @override
+  String get smsTopicLabel => 'Libellé du topic';
+
+  @override
+  String get noSmsTopics => 'Aucun topic prédéfini pour le moment';
 
   @override
   String get appVersion => 'Version de l’application';

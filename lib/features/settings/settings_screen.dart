@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
+import 'sms_topics_screen.dart';
 
 /// App settings: language selection and the current app version.
 class SettingsScreen extends ConsumerWidget {
@@ -43,6 +44,23 @@ class SettingsScreen extends ConsumerWidget {
                   value: null,
                 ),
               ],
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            title: Text(
+              l.smsSettings,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.label_outline),
+            title: Text(l.smsTopicPresets),
+            subtitle: Text(l.smsTopicPresetsSubtitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SmsTopicsScreen()),
             ),
           ),
           const Divider(),

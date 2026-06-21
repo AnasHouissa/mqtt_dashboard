@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../widgets/empty_state.dart';
 import '../brokers/broker_list_screen.dart';
+import '../sms/sms_sources_tab.dart';
 
 /// Top-level "Data source" destination: a tabbed shell hosting the broker list
-/// and (for now) an empty SMS placeholder. Future data-source types slot in as
-/// additional tabs here.
+/// and the SMS sources. Future data-source types slot in as additional tabs.
 class DataSourceScreen extends StatelessWidget {
   const DataSourceScreen({super.key});
 
@@ -28,24 +27,9 @@ class DataSourceScreen extends StatelessWidget {
         body: const TabBarView(
           children: [
             BrokersTab(),
-            _SmsTab(),
+            SmsSourcesTab(),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SmsTab extends StatelessWidget {
-  const _SmsTab();
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return Scaffold(
-      body: EmptyState(
-        icon: Icons.sms_outlined,
-        message: l.smsComingSoon,
       ),
     );
   }
