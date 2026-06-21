@@ -80,47 +80,10 @@ Future<String?> showAddSmsTopicDialog(
   BuildContext context,
   WidgetRef ref,
 ) async {
-  final l = AppLocalizations.of(context);
-  final controller = TextEditingController();
-  final formKey = GlobalKey<FormState>();
-
   final label = await showDialog<String>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: Text(l.addSmsTopic),
-      content: Form(
-        key: formKey,
-        child: TextFormField(
-          controller: controller,
-          autofocus: true,
-          textCapitalization: TextCapitalization.characters,
-          decoration: InputDecoration(labelText: l.smsTopicLabel),
-          validator: (v) =>
-              (v == null || v.trim().isEmpty) ? l.fieldRequired : null,
-          onFieldSubmitted: (_) {
-            if (formKey.currentState!.validate()) {
-              Navigator.pop(dialogContext, controller.text.trim());
-            }
-          },
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext),
-          child: Text(l.cancel),
-        ),
-        FilledButton(
-          onPressed: () {
-            if (formKey.currentState!.validate()) {
-              Navigator.pop(dialogContext, controller.text.trim());
-            }
-          },
-          child: Text(l.save),
-        ),
-      ],
-    ),
+    builder: (_) => const _AddSmsTopicDialog(),
   );
-  controller.dispose();
 
   if (label == null || label.isEmpty) return null;
 
@@ -133,4 +96,59 @@ Future<String?> showAddSmsTopicDialog(
   }
   await repo.insert(label);
   return label;
+}
+
+/// The add-topic prompt. A [StatefulWidget] so its [TextEditingController] is
+/// owned by the dialog's element and disposed only once the route is fully gone
+/// — disposing it eagerly after `showDialog` returns crashes during the dialog's
+/// exit animation. Pops the trimmed label, or nothing on cancel.
+class _AddSmsTopicDialog extends StatefulWidget {
+  const _AddSmsTopicDialog();
+
+  @override
+  State<_AddSmsTopicDialog> createState() => _AddSmsTopicDialogState();
+}
+
+class _AddSmsTopicDialogState extends State<_AddSmsTopicDialog> {
+  final _controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_formKey.currentState!.validate()) {
+      Navigator.pop(context, _controller.text.trim());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l.addSmsTopic),
+      content: Form(
+        key: _formKey,
+        child: TextFormField(
+          controller: _controller,
+          autofocus: true,
+          textCapitalization: TextCapitalization.characters,
+          decoration: InputDecoration(labelText: l.smsTopicLabel),
+          validator: (v) =>
+              (v == null || v.trim().isEmpty) ? l.fieldRequired : null,
+          onFieldSubmitted: (_) => _submit(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l.cancel),
+        ),
+        FilledButton(onPressed: _submit, child: Text(l.save)),
+      ],
+    );
+  }
 }
