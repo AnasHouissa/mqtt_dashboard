@@ -701,6 +701,311 @@ class BrokersCompanion extends UpdateCompanion<Broker> {
   }
 }
 
+class $SmsSourcesTable extends SmsSources
+    with TableInfo<$SmsSourcesTable, SmsSource> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SmsSourcesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _phoneNumberMeta = const VerificationMeta(
+    'phoneNumber',
+  );
+  @override
+  late final GeneratedColumn<String> phoneNumber = GeneratedColumn<String>(
+    'phone_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, phoneNumber, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sms_sources';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SmsSource> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('phone_number')) {
+      context.handle(
+        _phoneNumberMeta,
+        phoneNumber.isAcceptableOrUnknown(
+          data['phone_number']!,
+          _phoneNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_phoneNumberMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SmsSource map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SmsSource(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      phoneNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}phone_number'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SmsSourcesTable createAlias(String alias) {
+    return $SmsSourcesTable(attachedDatabase, alias);
+  }
+}
+
+class SmsSource extends DataClass implements Insertable<SmsSource> {
+  final int id;
+  final String name;
+  final String phoneNumber;
+  final DateTime createdAt;
+  const SmsSource({
+    required this.id,
+    required this.name,
+    required this.phoneNumber,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['phone_number'] = Variable<String>(phoneNumber);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SmsSourcesCompanion toCompanion(bool nullToAbsent) {
+    return SmsSourcesCompanion(
+      id: Value(id),
+      name: Value(name),
+      phoneNumber: Value(phoneNumber),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SmsSource.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SmsSource(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      phoneNumber: serializer.fromJson<String>(json['phoneNumber']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'phoneNumber': serializer.toJson<String>(phoneNumber),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  SmsSource copyWith({
+    int? id,
+    String? name,
+    String? phoneNumber,
+    DateTime? createdAt,
+  }) => SmsSource(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    phoneNumber: phoneNumber ?? this.phoneNumber,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SmsSource copyWithCompanion(SmsSourcesCompanion data) {
+    return SmsSource(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      phoneNumber: data.phoneNumber.present
+          ? data.phoneNumber.value
+          : this.phoneNumber,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmsSource(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('phoneNumber: $phoneNumber, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, phoneNumber, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SmsSource &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.phoneNumber == this.phoneNumber &&
+          other.createdAt == this.createdAt);
+}
+
+class SmsSourcesCompanion extends UpdateCompanion<SmsSource> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> phoneNumber;
+  final Value<DateTime> createdAt;
+  const SmsSourcesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.phoneNumber = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  SmsSourcesCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String phoneNumber,
+    this.createdAt = const Value.absent(),
+  }) : name = Value(name),
+       phoneNumber = Value(phoneNumber);
+  static Insertable<SmsSource> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? phoneNumber,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (phoneNumber != null) 'phone_number': phoneNumber,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  SmsSourcesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? phoneNumber,
+    Value<DateTime>? createdAt,
+  }) {
+    return SmsSourcesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (phoneNumber.present) {
+      map['phone_number'] = Variable<String>(phoneNumber.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmsSourcesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('phoneNumber: $phoneNumber, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -719,6 +1024,16 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<MetricSourceKind, int>
+  sourceKind = GeneratedColumn<int>(
+    'source_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  ).withConverter<MetricSourceKind>($MetricsTable.$convertersourceKind);
   static const VerificationMeta _brokerIdMeta = const VerificationMeta(
     'brokerId',
   );
@@ -726,11 +1041,25 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
   late final GeneratedColumn<int> brokerId = GeneratedColumn<int>(
     'broker_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES brokers (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _smsSourceIdMeta = const VerificationMeta(
+    'smsSourceId',
+  );
+  @override
+  late final GeneratedColumn<int> smsSourceId = GeneratedColumn<int>(
+    'sms_source_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES sms_sources (id) ON DELETE CASCADE',
     ),
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
@@ -808,15 +1137,27 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
     defaultValue: const Constant(false),
   );
   @override
+  late final GeneratedColumnWithTypeConverter<SmsValueMode?, int> smsValueMode =
+      GeneratedColumn<int>(
+        'sms_value_mode',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      ).withConverter<SmsValueMode?>($MetricsTable.$convertersmsValueModen);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
+    sourceKind,
     brokerId,
+    smsSourceId,
     name,
     topic,
     publishEnabled,
     minValue,
     maxValue,
     useFixedRange,
+    smsValueMode,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -838,8 +1179,15 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
         _brokerIdMeta,
         brokerId.isAcceptableOrUnknown(data['broker_id']!, _brokerIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_brokerIdMeta);
+    }
+    if (data.containsKey('sms_source_id')) {
+      context.handle(
+        _smsSourceIdMeta,
+        smsSourceId.isAcceptableOrUnknown(
+          data['sms_source_id']!,
+          _smsSourceIdMeta,
+        ),
+      );
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -900,10 +1248,20 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      sourceKind: $MetricsTable.$convertersourceKind.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}source_kind'],
+        )!,
+      ),
       brokerId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}broker_id'],
-      )!,
+      ),
+      smsSourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sms_source_id'],
+      ),
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
@@ -928,6 +1286,12 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
         DriftSqlType.bool,
         data['${effectivePrefix}use_fixed_range'],
       )!,
+      smsValueMode: $MetricsTable.$convertersmsValueModen.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sms_value_mode'],
+        ),
+      ),
     );
   }
 
@@ -935,12 +1299,34 @@ class $MetricsTable extends Metrics with TableInfo<$MetricsTable, Metric> {
   $MetricsTable createAlias(String alias) {
     return $MetricsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<MetricSourceKind, int, int> $convertersourceKind =
+      const EnumIndexConverter<MetricSourceKind>(MetricSourceKind.values);
+  static JsonTypeConverter2<SmsValueMode, int, int> $convertersmsValueMode =
+      const EnumIndexConverter<SmsValueMode>(SmsValueMode.values);
+  static JsonTypeConverter2<SmsValueMode?, int?, int?> $convertersmsValueModen =
+      JsonTypeConverter2.asNullable($convertersmsValueMode);
 }
 
 class Metric extends DataClass implements Insertable<Metric> {
   final int id;
-  final int brokerId;
+
+  /// Which kind of data source feeds this metric. Defaults to `mqtt` (index 0)
+  /// so pre-existing broker metrics keep working after migration.
+  final MetricSourceKind sourceKind;
+
+  /// Owning broker when [sourceKind] is mqtt; null for SMS metrics.
+  final int? brokerId;
+
+  /// Owning SMS source when [sourceKind] is sms; null for broker metrics.
+  final int? smsSourceId;
+
+  /// For MQTT this is the display name; for SMS it is the station NAME line we
+  /// match against (the first line of the message body).
   final String name;
+
+  /// For MQTT this is the subscription topic; for SMS it is the TOPIC label we
+  /// match against (the text before the trailing `[ value ]`).
   final String topic;
   final bool publishEnabled;
   final double? minValue;
@@ -949,21 +1335,37 @@ class Metric extends DataClass implements Insertable<Metric> {
   /// When true, charts use [minValue]/[maxValue] as fixed Y-axis bounds.
   /// When false, the axis auto-scales to the received readings.
   final bool useFixedRange;
+
+  /// How to convert an SMS bracket value to a number; null for MQTT metrics.
+  final SmsValueMode? smsValueMode;
   const Metric({
     required this.id,
-    required this.brokerId,
+    required this.sourceKind,
+    this.brokerId,
+    this.smsSourceId,
     required this.name,
     required this.topic,
     required this.publishEnabled,
     this.minValue,
     this.maxValue,
     required this.useFixedRange,
+    this.smsValueMode,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['broker_id'] = Variable<int>(brokerId);
+    {
+      map['source_kind'] = Variable<int>(
+        $MetricsTable.$convertersourceKind.toSql(sourceKind),
+      );
+    }
+    if (!nullToAbsent || brokerId != null) {
+      map['broker_id'] = Variable<int>(brokerId);
+    }
+    if (!nullToAbsent || smsSourceId != null) {
+      map['sms_source_id'] = Variable<int>(smsSourceId);
+    }
     map['name'] = Variable<String>(name);
     map['topic'] = Variable<String>(topic);
     map['publish_enabled'] = Variable<bool>(publishEnabled);
@@ -974,13 +1376,24 @@ class Metric extends DataClass implements Insertable<Metric> {
       map['max_value'] = Variable<double>(maxValue);
     }
     map['use_fixed_range'] = Variable<bool>(useFixedRange);
+    if (!nullToAbsent || smsValueMode != null) {
+      map['sms_value_mode'] = Variable<int>(
+        $MetricsTable.$convertersmsValueModen.toSql(smsValueMode),
+      );
+    }
     return map;
   }
 
   MetricsCompanion toCompanion(bool nullToAbsent) {
     return MetricsCompanion(
       id: Value(id),
-      brokerId: Value(brokerId),
+      sourceKind: Value(sourceKind),
+      brokerId: brokerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(brokerId),
+      smsSourceId: smsSourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(smsSourceId),
       name: Value(name),
       topic: Value(topic),
       publishEnabled: Value(publishEnabled),
@@ -991,6 +1404,9 @@ class Metric extends DataClass implements Insertable<Metric> {
           ? const Value.absent()
           : Value(maxValue),
       useFixedRange: Value(useFixedRange),
+      smsValueMode: smsValueMode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(smsValueMode),
     );
   }
 
@@ -1001,13 +1417,20 @@ class Metric extends DataClass implements Insertable<Metric> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Metric(
       id: serializer.fromJson<int>(json['id']),
-      brokerId: serializer.fromJson<int>(json['brokerId']),
+      sourceKind: $MetricsTable.$convertersourceKind.fromJson(
+        serializer.fromJson<int>(json['sourceKind']),
+      ),
+      brokerId: serializer.fromJson<int?>(json['brokerId']),
+      smsSourceId: serializer.fromJson<int?>(json['smsSourceId']),
       name: serializer.fromJson<String>(json['name']),
       topic: serializer.fromJson<String>(json['topic']),
       publishEnabled: serializer.fromJson<bool>(json['publishEnabled']),
       minValue: serializer.fromJson<double?>(json['minValue']),
       maxValue: serializer.fromJson<double?>(json['maxValue']),
       useFixedRange: serializer.fromJson<bool>(json['useFixedRange']),
+      smsValueMode: $MetricsTable.$convertersmsValueModen.fromJson(
+        serializer.fromJson<int?>(json['smsValueMode']),
+      ),
     );
   }
   @override
@@ -1015,39 +1438,58 @@ class Metric extends DataClass implements Insertable<Metric> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'brokerId': serializer.toJson<int>(brokerId),
+      'sourceKind': serializer.toJson<int>(
+        $MetricsTable.$convertersourceKind.toJson(sourceKind),
+      ),
+      'brokerId': serializer.toJson<int?>(brokerId),
+      'smsSourceId': serializer.toJson<int?>(smsSourceId),
       'name': serializer.toJson<String>(name),
       'topic': serializer.toJson<String>(topic),
       'publishEnabled': serializer.toJson<bool>(publishEnabled),
       'minValue': serializer.toJson<double?>(minValue),
       'maxValue': serializer.toJson<double?>(maxValue),
       'useFixedRange': serializer.toJson<bool>(useFixedRange),
+      'smsValueMode': serializer.toJson<int?>(
+        $MetricsTable.$convertersmsValueModen.toJson(smsValueMode),
+      ),
     };
   }
 
   Metric copyWith({
     int? id,
-    int? brokerId,
+    MetricSourceKind? sourceKind,
+    Value<int?> brokerId = const Value.absent(),
+    Value<int?> smsSourceId = const Value.absent(),
     String? name,
     String? topic,
     bool? publishEnabled,
     Value<double?> minValue = const Value.absent(),
     Value<double?> maxValue = const Value.absent(),
     bool? useFixedRange,
+    Value<SmsValueMode?> smsValueMode = const Value.absent(),
   }) => Metric(
     id: id ?? this.id,
-    brokerId: brokerId ?? this.brokerId,
+    sourceKind: sourceKind ?? this.sourceKind,
+    brokerId: brokerId.present ? brokerId.value : this.brokerId,
+    smsSourceId: smsSourceId.present ? smsSourceId.value : this.smsSourceId,
     name: name ?? this.name,
     topic: topic ?? this.topic,
     publishEnabled: publishEnabled ?? this.publishEnabled,
     minValue: minValue.present ? minValue.value : this.minValue,
     maxValue: maxValue.present ? maxValue.value : this.maxValue,
     useFixedRange: useFixedRange ?? this.useFixedRange,
+    smsValueMode: smsValueMode.present ? smsValueMode.value : this.smsValueMode,
   );
   Metric copyWithCompanion(MetricsCompanion data) {
     return Metric(
       id: data.id.present ? data.id.value : this.id,
+      sourceKind: data.sourceKind.present
+          ? data.sourceKind.value
+          : this.sourceKind,
       brokerId: data.brokerId.present ? data.brokerId.value : this.brokerId,
+      smsSourceId: data.smsSourceId.present
+          ? data.smsSourceId.value
+          : this.smsSourceId,
       name: data.name.present ? data.name.value : this.name,
       topic: data.topic.present ? data.topic.value : this.topic,
       publishEnabled: data.publishEnabled.present
@@ -1058,6 +1500,9 @@ class Metric extends DataClass implements Insertable<Metric> {
       useFixedRange: data.useFixedRange.present
           ? data.useFixedRange.value
           : this.useFixedRange,
+      smsValueMode: data.smsValueMode.present
+          ? data.smsValueMode.value
+          : this.smsValueMode,
     );
   }
 
@@ -1065,13 +1510,16 @@ class Metric extends DataClass implements Insertable<Metric> {
   String toString() {
     return (StringBuffer('Metric(')
           ..write('id: $id, ')
+          ..write('sourceKind: $sourceKind, ')
           ..write('brokerId: $brokerId, ')
+          ..write('smsSourceId: $smsSourceId, ')
           ..write('name: $name, ')
           ..write('topic: $topic, ')
           ..write('publishEnabled: $publishEnabled, ')
           ..write('minValue: $minValue, ')
           ..write('maxValue: $maxValue, ')
-          ..write('useFixedRange: $useFixedRange')
+          ..write('useFixedRange: $useFixedRange, ')
+          ..write('smsValueMode: $smsValueMode')
           ..write(')'))
         .toString();
   }
@@ -1079,100 +1527,126 @@ class Metric extends DataClass implements Insertable<Metric> {
   @override
   int get hashCode => Object.hash(
     id,
+    sourceKind,
     brokerId,
+    smsSourceId,
     name,
     topic,
     publishEnabled,
     minValue,
     maxValue,
     useFixedRange,
+    smsValueMode,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Metric &&
           other.id == this.id &&
+          other.sourceKind == this.sourceKind &&
           other.brokerId == this.brokerId &&
+          other.smsSourceId == this.smsSourceId &&
           other.name == this.name &&
           other.topic == this.topic &&
           other.publishEnabled == this.publishEnabled &&
           other.minValue == this.minValue &&
           other.maxValue == this.maxValue &&
-          other.useFixedRange == this.useFixedRange);
+          other.useFixedRange == this.useFixedRange &&
+          other.smsValueMode == this.smsValueMode);
 }
 
 class MetricsCompanion extends UpdateCompanion<Metric> {
   final Value<int> id;
-  final Value<int> brokerId;
+  final Value<MetricSourceKind> sourceKind;
+  final Value<int?> brokerId;
+  final Value<int?> smsSourceId;
   final Value<String> name;
   final Value<String> topic;
   final Value<bool> publishEnabled;
   final Value<double?> minValue;
   final Value<double?> maxValue;
   final Value<bool> useFixedRange;
+  final Value<SmsValueMode?> smsValueMode;
   const MetricsCompanion({
     this.id = const Value.absent(),
+    this.sourceKind = const Value.absent(),
     this.brokerId = const Value.absent(),
+    this.smsSourceId = const Value.absent(),
     this.name = const Value.absent(),
     this.topic = const Value.absent(),
     this.publishEnabled = const Value.absent(),
     this.minValue = const Value.absent(),
     this.maxValue = const Value.absent(),
     this.useFixedRange = const Value.absent(),
+    this.smsValueMode = const Value.absent(),
   });
   MetricsCompanion.insert({
     this.id = const Value.absent(),
-    required int brokerId,
+    this.sourceKind = const Value.absent(),
+    this.brokerId = const Value.absent(),
+    this.smsSourceId = const Value.absent(),
     required String name,
     required String topic,
     this.publishEnabled = const Value.absent(),
     this.minValue = const Value.absent(),
     this.maxValue = const Value.absent(),
     this.useFixedRange = const Value.absent(),
-  }) : brokerId = Value(brokerId),
-       name = Value(name),
+    this.smsValueMode = const Value.absent(),
+  }) : name = Value(name),
        topic = Value(topic);
   static Insertable<Metric> custom({
     Expression<int>? id,
+    Expression<int>? sourceKind,
     Expression<int>? brokerId,
+    Expression<int>? smsSourceId,
     Expression<String>? name,
     Expression<String>? topic,
     Expression<bool>? publishEnabled,
     Expression<double>? minValue,
     Expression<double>? maxValue,
     Expression<bool>? useFixedRange,
+    Expression<int>? smsValueMode,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (sourceKind != null) 'source_kind': sourceKind,
       if (brokerId != null) 'broker_id': brokerId,
+      if (smsSourceId != null) 'sms_source_id': smsSourceId,
       if (name != null) 'name': name,
       if (topic != null) 'topic': topic,
       if (publishEnabled != null) 'publish_enabled': publishEnabled,
       if (minValue != null) 'min_value': minValue,
       if (maxValue != null) 'max_value': maxValue,
       if (useFixedRange != null) 'use_fixed_range': useFixedRange,
+      if (smsValueMode != null) 'sms_value_mode': smsValueMode,
     });
   }
 
   MetricsCompanion copyWith({
     Value<int>? id,
-    Value<int>? brokerId,
+    Value<MetricSourceKind>? sourceKind,
+    Value<int?>? brokerId,
+    Value<int?>? smsSourceId,
     Value<String>? name,
     Value<String>? topic,
     Value<bool>? publishEnabled,
     Value<double?>? minValue,
     Value<double?>? maxValue,
     Value<bool>? useFixedRange,
+    Value<SmsValueMode?>? smsValueMode,
   }) {
     return MetricsCompanion(
       id: id ?? this.id,
+      sourceKind: sourceKind ?? this.sourceKind,
       brokerId: brokerId ?? this.brokerId,
+      smsSourceId: smsSourceId ?? this.smsSourceId,
       name: name ?? this.name,
       topic: topic ?? this.topic,
       publishEnabled: publishEnabled ?? this.publishEnabled,
       minValue: minValue ?? this.minValue,
       maxValue: maxValue ?? this.maxValue,
       useFixedRange: useFixedRange ?? this.useFixedRange,
+      smsValueMode: smsValueMode ?? this.smsValueMode,
     );
   }
 
@@ -1182,8 +1656,16 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
+    if (sourceKind.present) {
+      map['source_kind'] = Variable<int>(
+        $MetricsTable.$convertersourceKind.toSql(sourceKind.value),
+      );
+    }
     if (brokerId.present) {
       map['broker_id'] = Variable<int>(brokerId.value);
+    }
+    if (smsSourceId.present) {
+      map['sms_source_id'] = Variable<int>(smsSourceId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -1203,6 +1685,11 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
     if (useFixedRange.present) {
       map['use_fixed_range'] = Variable<bool>(useFixedRange.value);
     }
+    if (smsValueMode.present) {
+      map['sms_value_mode'] = Variable<int>(
+        $MetricsTable.$convertersmsValueModen.toSql(smsValueMode.value),
+      );
+    }
     return map;
   }
 
@@ -1210,13 +1697,16 @@ class MetricsCompanion extends UpdateCompanion<Metric> {
   String toString() {
     return (StringBuffer('MetricsCompanion(')
           ..write('id: $id, ')
+          ..write('sourceKind: $sourceKind, ')
           ..write('brokerId: $brokerId, ')
+          ..write('smsSourceId: $smsSourceId, ')
           ..write('name: $name, ')
           ..write('topic: $topic, ')
           ..write('publishEnabled: $publishEnabled, ')
           ..write('minValue: $minValue, ')
           ..write('maxValue: $maxValue, ')
-          ..write('useFixedRange: $useFixedRange')
+          ..write('useFixedRange: $useFixedRange, ')
+          ..write('smsValueMode: $smsValueMode')
           ..write(')'))
         .toString();
   }
@@ -2426,32 +2916,778 @@ class ReadingsCompanion extends UpdateCompanion<Reading> {
   }
 }
 
+class $SmsMessagesTable extends SmsMessages
+    with TableInfo<$SmsMessagesTable, SmsMessage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SmsMessagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _smsSourceIdMeta = const VerificationMeta(
+    'smsSourceId',
+  );
+  @override
+  late final GeneratedColumn<int> smsSourceId = GeneratedColumn<int>(
+    'sms_source_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES sms_sources (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _senderMeta = const VerificationMeta('sender');
+  @override
+  late final GeneratedColumn<String> sender = GeneratedColumn<String>(
+    'sender',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _receivedAtMeta = const VerificationMeta(
+    'receivedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> receivedAt = GeneratedColumn<DateTime>(
+    'received_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<SmsParseStatus, int> status =
+      GeneratedColumn<int>(
+        'status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<SmsParseStatus>($SmsMessagesTable.$converterstatus);
+  static const VerificationMeta _readingsCreatedMeta = const VerificationMeta(
+    'readingsCreated',
+  );
+  @override
+  late final GeneratedColumn<int> readingsCreated = GeneratedColumn<int>(
+    'readings_created',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    smsSourceId,
+    sender,
+    body,
+    receivedAt,
+    status,
+    readingsCreated,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sms_messages';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SmsMessage> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('sms_source_id')) {
+      context.handle(
+        _smsSourceIdMeta,
+        smsSourceId.isAcceptableOrUnknown(
+          data['sms_source_id']!,
+          _smsSourceIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_smsSourceIdMeta);
+    }
+    if (data.containsKey('sender')) {
+      context.handle(
+        _senderMeta,
+        sender.isAcceptableOrUnknown(data['sender']!, _senderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_senderMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('received_at')) {
+      context.handle(
+        _receivedAtMeta,
+        receivedAt.isAcceptableOrUnknown(data['received_at']!, _receivedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_receivedAtMeta);
+    }
+    if (data.containsKey('readings_created')) {
+      context.handle(
+        _readingsCreatedMeta,
+        readingsCreated.isAcceptableOrUnknown(
+          data['readings_created']!,
+          _readingsCreatedMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SmsMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SmsMessage(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      smsSourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sms_source_id'],
+      )!,
+      sender: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sender'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      receivedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}received_at'],
+      )!,
+      status: $SmsMessagesTable.$converterstatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}status'],
+        )!,
+      ),
+      readingsCreated: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}readings_created'],
+      )!,
+    );
+  }
+
+  @override
+  $SmsMessagesTable createAlias(String alias) {
+    return $SmsMessagesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<SmsParseStatus, int, int> $converterstatus =
+      const EnumIndexConverter<SmsParseStatus>(SmsParseStatus.values);
+}
+
+class SmsMessage extends DataClass implements Insertable<SmsMessage> {
+  final int id;
+  final int smsSourceId;
+
+  /// Raw sender address as reported by the OS.
+  final String sender;
+
+  /// Full, unmodified SMS body.
+  final String body;
+  final DateTime receivedAt;
+
+  /// Outcome of parsing/matching this message.
+  final SmsParseStatus status;
+
+  /// How many readings this message produced (0 when unmatched).
+  final int readingsCreated;
+  const SmsMessage({
+    required this.id,
+    required this.smsSourceId,
+    required this.sender,
+    required this.body,
+    required this.receivedAt,
+    required this.status,
+    required this.readingsCreated,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['sms_source_id'] = Variable<int>(smsSourceId);
+    map['sender'] = Variable<String>(sender);
+    map['body'] = Variable<String>(body);
+    map['received_at'] = Variable<DateTime>(receivedAt);
+    {
+      map['status'] = Variable<int>(
+        $SmsMessagesTable.$converterstatus.toSql(status),
+      );
+    }
+    map['readings_created'] = Variable<int>(readingsCreated);
+    return map;
+  }
+
+  SmsMessagesCompanion toCompanion(bool nullToAbsent) {
+    return SmsMessagesCompanion(
+      id: Value(id),
+      smsSourceId: Value(smsSourceId),
+      sender: Value(sender),
+      body: Value(body),
+      receivedAt: Value(receivedAt),
+      status: Value(status),
+      readingsCreated: Value(readingsCreated),
+    );
+  }
+
+  factory SmsMessage.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SmsMessage(
+      id: serializer.fromJson<int>(json['id']),
+      smsSourceId: serializer.fromJson<int>(json['smsSourceId']),
+      sender: serializer.fromJson<String>(json['sender']),
+      body: serializer.fromJson<String>(json['body']),
+      receivedAt: serializer.fromJson<DateTime>(json['receivedAt']),
+      status: $SmsMessagesTable.$converterstatus.fromJson(
+        serializer.fromJson<int>(json['status']),
+      ),
+      readingsCreated: serializer.fromJson<int>(json['readingsCreated']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'smsSourceId': serializer.toJson<int>(smsSourceId),
+      'sender': serializer.toJson<String>(sender),
+      'body': serializer.toJson<String>(body),
+      'receivedAt': serializer.toJson<DateTime>(receivedAt),
+      'status': serializer.toJson<int>(
+        $SmsMessagesTable.$converterstatus.toJson(status),
+      ),
+      'readingsCreated': serializer.toJson<int>(readingsCreated),
+    };
+  }
+
+  SmsMessage copyWith({
+    int? id,
+    int? smsSourceId,
+    String? sender,
+    String? body,
+    DateTime? receivedAt,
+    SmsParseStatus? status,
+    int? readingsCreated,
+  }) => SmsMessage(
+    id: id ?? this.id,
+    smsSourceId: smsSourceId ?? this.smsSourceId,
+    sender: sender ?? this.sender,
+    body: body ?? this.body,
+    receivedAt: receivedAt ?? this.receivedAt,
+    status: status ?? this.status,
+    readingsCreated: readingsCreated ?? this.readingsCreated,
+  );
+  SmsMessage copyWithCompanion(SmsMessagesCompanion data) {
+    return SmsMessage(
+      id: data.id.present ? data.id.value : this.id,
+      smsSourceId: data.smsSourceId.present
+          ? data.smsSourceId.value
+          : this.smsSourceId,
+      sender: data.sender.present ? data.sender.value : this.sender,
+      body: data.body.present ? data.body.value : this.body,
+      receivedAt: data.receivedAt.present
+          ? data.receivedAt.value
+          : this.receivedAt,
+      status: data.status.present ? data.status.value : this.status,
+      readingsCreated: data.readingsCreated.present
+          ? data.readingsCreated.value
+          : this.readingsCreated,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmsMessage(')
+          ..write('id: $id, ')
+          ..write('smsSourceId: $smsSourceId, ')
+          ..write('sender: $sender, ')
+          ..write('body: $body, ')
+          ..write('receivedAt: $receivedAt, ')
+          ..write('status: $status, ')
+          ..write('readingsCreated: $readingsCreated')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    smsSourceId,
+    sender,
+    body,
+    receivedAt,
+    status,
+    readingsCreated,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SmsMessage &&
+          other.id == this.id &&
+          other.smsSourceId == this.smsSourceId &&
+          other.sender == this.sender &&
+          other.body == this.body &&
+          other.receivedAt == this.receivedAt &&
+          other.status == this.status &&
+          other.readingsCreated == this.readingsCreated);
+}
+
+class SmsMessagesCompanion extends UpdateCompanion<SmsMessage> {
+  final Value<int> id;
+  final Value<int> smsSourceId;
+  final Value<String> sender;
+  final Value<String> body;
+  final Value<DateTime> receivedAt;
+  final Value<SmsParseStatus> status;
+  final Value<int> readingsCreated;
+  const SmsMessagesCompanion({
+    this.id = const Value.absent(),
+    this.smsSourceId = const Value.absent(),
+    this.sender = const Value.absent(),
+    this.body = const Value.absent(),
+    this.receivedAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.readingsCreated = const Value.absent(),
+  });
+  SmsMessagesCompanion.insert({
+    this.id = const Value.absent(),
+    required int smsSourceId,
+    required String sender,
+    required String body,
+    required DateTime receivedAt,
+    required SmsParseStatus status,
+    this.readingsCreated = const Value.absent(),
+  }) : smsSourceId = Value(smsSourceId),
+       sender = Value(sender),
+       body = Value(body),
+       receivedAt = Value(receivedAt),
+       status = Value(status);
+  static Insertable<SmsMessage> custom({
+    Expression<int>? id,
+    Expression<int>? smsSourceId,
+    Expression<String>? sender,
+    Expression<String>? body,
+    Expression<DateTime>? receivedAt,
+    Expression<int>? status,
+    Expression<int>? readingsCreated,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (smsSourceId != null) 'sms_source_id': smsSourceId,
+      if (sender != null) 'sender': sender,
+      if (body != null) 'body': body,
+      if (receivedAt != null) 'received_at': receivedAt,
+      if (status != null) 'status': status,
+      if (readingsCreated != null) 'readings_created': readingsCreated,
+    });
+  }
+
+  SmsMessagesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? smsSourceId,
+    Value<String>? sender,
+    Value<String>? body,
+    Value<DateTime>? receivedAt,
+    Value<SmsParseStatus>? status,
+    Value<int>? readingsCreated,
+  }) {
+    return SmsMessagesCompanion(
+      id: id ?? this.id,
+      smsSourceId: smsSourceId ?? this.smsSourceId,
+      sender: sender ?? this.sender,
+      body: body ?? this.body,
+      receivedAt: receivedAt ?? this.receivedAt,
+      status: status ?? this.status,
+      readingsCreated: readingsCreated ?? this.readingsCreated,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (smsSourceId.present) {
+      map['sms_source_id'] = Variable<int>(smsSourceId.value);
+    }
+    if (sender.present) {
+      map['sender'] = Variable<String>(sender.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (receivedAt.present) {
+      map['received_at'] = Variable<DateTime>(receivedAt.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<int>(
+        $SmsMessagesTable.$converterstatus.toSql(status.value),
+      );
+    }
+    if (readingsCreated.present) {
+      map['readings_created'] = Variable<int>(readingsCreated.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmsMessagesCompanion(')
+          ..write('id: $id, ')
+          ..write('smsSourceId: $smsSourceId, ')
+          ..write('sender: $sender, ')
+          ..write('body: $body, ')
+          ..write('receivedAt: $receivedAt, ')
+          ..write('status: $status, ')
+          ..write('readingsCreated: $readingsCreated')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SmsTopicPresetsTable extends SmsTopicPresets
+    with TableInfo<$SmsTopicPresetsTable, SmsTopicPreset> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SmsTopicPresetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, label, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sms_topic_presets';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SmsTopicPreset> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {label},
+  ];
+  @override
+  SmsTopicPreset map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SmsTopicPreset(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SmsTopicPresetsTable createAlias(String alias) {
+    return $SmsTopicPresetsTable(attachedDatabase, alias);
+  }
+}
+
+class SmsTopicPreset extends DataClass implements Insertable<SmsTopicPreset> {
+  final int id;
+  final String label;
+  final DateTime createdAt;
+  const SmsTopicPreset({
+    required this.id,
+    required this.label,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['label'] = Variable<String>(label);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SmsTopicPresetsCompanion toCompanion(bool nullToAbsent) {
+    return SmsTopicPresetsCompanion(
+      id: Value(id),
+      label: Value(label),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SmsTopicPreset.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SmsTopicPreset(
+      id: serializer.fromJson<int>(json['id']),
+      label: serializer.fromJson<String>(json['label']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'label': serializer.toJson<String>(label),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  SmsTopicPreset copyWith({int? id, String? label, DateTime? createdAt}) =>
+      SmsTopicPreset(
+        id: id ?? this.id,
+        label: label ?? this.label,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  SmsTopicPreset copyWithCompanion(SmsTopicPresetsCompanion data) {
+    return SmsTopicPreset(
+      id: data.id.present ? data.id.value : this.id,
+      label: data.label.present ? data.label.value : this.label,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmsTopicPreset(')
+          ..write('id: $id, ')
+          ..write('label: $label, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, label, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SmsTopicPreset &&
+          other.id == this.id &&
+          other.label == this.label &&
+          other.createdAt == this.createdAt);
+}
+
+class SmsTopicPresetsCompanion extends UpdateCompanion<SmsTopicPreset> {
+  final Value<int> id;
+  final Value<String> label;
+  final Value<DateTime> createdAt;
+  const SmsTopicPresetsCompanion({
+    this.id = const Value.absent(),
+    this.label = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  SmsTopicPresetsCompanion.insert({
+    this.id = const Value.absent(),
+    required String label,
+    this.createdAt = const Value.absent(),
+  }) : label = Value(label);
+  static Insertable<SmsTopicPreset> custom({
+    Expression<int>? id,
+    Expression<String>? label,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (label != null) 'label': label,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  SmsTopicPresetsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? label,
+    Value<DateTime>? createdAt,
+  }) {
+    return SmsTopicPresetsCompanion(
+      id: id ?? this.id,
+      label: label ?? this.label,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmsTopicPresetsCompanion(')
+          ..write('id: $id, ')
+          ..write('label: $label, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $BrokersTable brokers = $BrokersTable(this);
+  late final $SmsSourcesTable smsSources = $SmsSourcesTable(this);
   late final $MetricsTable metrics = $MetricsTable(this);
   late final $DashboardsTable dashboards = $DashboardsTable(this);
   late final $ChartsTable charts = $ChartsTable(this);
   late final $ChartSeriesTable chartSeries = $ChartSeriesTable(this);
   late final $ReadingsTable readings = $ReadingsTable(this);
+  late final $SmsMessagesTable smsMessages = $SmsMessagesTable(this);
+  late final $SmsTopicPresetsTable smsTopicPresets = $SmsTopicPresetsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     brokers,
+    smsSources,
     metrics,
     dashboards,
     charts,
     chartSeries,
     readings,
+    smsMessages,
+    smsTopicPresets,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'brokers',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('metrics', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'sms_sources',
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('metrics', kind: UpdateKind.delete)],
@@ -2483,6 +3719,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('readings', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'sms_sources',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('sms_messages', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -2910,27 +4153,410 @@ typedef $$BrokersTableProcessedTableManager =
       Broker,
       PrefetchHooks Function({bool metricsRefs})
     >;
+typedef $$SmsSourcesTableCreateCompanionBuilder =
+    SmsSourcesCompanion Function({
+      Value<int> id,
+      required String name,
+      required String phoneNumber,
+      Value<DateTime> createdAt,
+    });
+typedef $$SmsSourcesTableUpdateCompanionBuilder =
+    SmsSourcesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> phoneNumber,
+      Value<DateTime> createdAt,
+    });
+
+final class $$SmsSourcesTableReferences
+    extends BaseReferences<_$AppDatabase, $SmsSourcesTable, SmsSource> {
+  $$SmsSourcesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$MetricsTable, List<Metric>> _metricsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.metrics,
+    aliasName: $_aliasNameGenerator(db.smsSources.id, db.metrics.smsSourceId),
+  );
+
+  $$MetricsTableProcessedTableManager get metricsRefs {
+    final manager = $$MetricsTableTableManager(
+      $_db,
+      $_db.metrics,
+    ).filter((f) => f.smsSourceId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_metricsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$SmsMessagesTable, List<SmsMessage>>
+  _smsMessagesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.smsMessages,
+    aliasName: $_aliasNameGenerator(
+      db.smsSources.id,
+      db.smsMessages.smsSourceId,
+    ),
+  );
+
+  $$SmsMessagesTableProcessedTableManager get smsMessagesRefs {
+    final manager = $$SmsMessagesTableTableManager(
+      $_db,
+      $_db.smsMessages,
+    ).filter((f) => f.smsSourceId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_smsMessagesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$SmsSourcesTableFilterComposer
+    extends Composer<_$AppDatabase, $SmsSourcesTable> {
+  $$SmsSourcesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get phoneNumber => $composableBuilder(
+    column: $table.phoneNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> metricsRefs(
+    Expression<bool> Function($$MetricsTableFilterComposer f) f,
+  ) {
+    final $$MetricsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.metrics,
+      getReferencedColumn: (t) => t.smsSourceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MetricsTableFilterComposer(
+            $db: $db,
+            $table: $db.metrics,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> smsMessagesRefs(
+    Expression<bool> Function($$SmsMessagesTableFilterComposer f) f,
+  ) {
+    final $$SmsMessagesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.smsMessages,
+      getReferencedColumn: (t) => t.smsSourceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SmsMessagesTableFilterComposer(
+            $db: $db,
+            $table: $db.smsMessages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$SmsSourcesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SmsSourcesTable> {
+  $$SmsSourcesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get phoneNumber => $composableBuilder(
+    column: $table.phoneNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SmsSourcesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SmsSourcesTable> {
+  $$SmsSourcesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get phoneNumber => $composableBuilder(
+    column: $table.phoneNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  Expression<T> metricsRefs<T extends Object>(
+    Expression<T> Function($$MetricsTableAnnotationComposer a) f,
+  ) {
+    final $$MetricsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.metrics,
+      getReferencedColumn: (t) => t.smsSourceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MetricsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.metrics,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> smsMessagesRefs<T extends Object>(
+    Expression<T> Function($$SmsMessagesTableAnnotationComposer a) f,
+  ) {
+    final $$SmsMessagesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.smsMessages,
+      getReferencedColumn: (t) => t.smsSourceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SmsMessagesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.smsMessages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$SmsSourcesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SmsSourcesTable,
+          SmsSource,
+          $$SmsSourcesTableFilterComposer,
+          $$SmsSourcesTableOrderingComposer,
+          $$SmsSourcesTableAnnotationComposer,
+          $$SmsSourcesTableCreateCompanionBuilder,
+          $$SmsSourcesTableUpdateCompanionBuilder,
+          (SmsSource, $$SmsSourcesTableReferences),
+          SmsSource,
+          PrefetchHooks Function({bool metricsRefs, bool smsMessagesRefs})
+        > {
+  $$SmsSourcesTableTableManager(_$AppDatabase db, $SmsSourcesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SmsSourcesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SmsSourcesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SmsSourcesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> phoneNumber = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => SmsSourcesCompanion(
+                id: id,
+                name: name,
+                phoneNumber: phoneNumber,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String phoneNumber,
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => SmsSourcesCompanion.insert(
+                id: id,
+                name: name,
+                phoneNumber: phoneNumber,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$SmsSourcesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({metricsRefs = false, smsMessagesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (metricsRefs) db.metrics,
+                    if (smsMessagesRefs) db.smsMessages,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (metricsRefs)
+                        await $_getPrefetchedData<
+                          SmsSource,
+                          $SmsSourcesTable,
+                          Metric
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SmsSourcesTableReferences
+                              ._metricsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SmsSourcesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).metricsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.smsSourceId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (smsMessagesRefs)
+                        await $_getPrefetchedData<
+                          SmsSource,
+                          $SmsSourcesTable,
+                          SmsMessage
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SmsSourcesTableReferences
+                              ._smsMessagesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SmsSourcesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).smsMessagesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.smsSourceId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$SmsSourcesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SmsSourcesTable,
+      SmsSource,
+      $$SmsSourcesTableFilterComposer,
+      $$SmsSourcesTableOrderingComposer,
+      $$SmsSourcesTableAnnotationComposer,
+      $$SmsSourcesTableCreateCompanionBuilder,
+      $$SmsSourcesTableUpdateCompanionBuilder,
+      (SmsSource, $$SmsSourcesTableReferences),
+      SmsSource,
+      PrefetchHooks Function({bool metricsRefs, bool smsMessagesRefs})
+    >;
 typedef $$MetricsTableCreateCompanionBuilder =
     MetricsCompanion Function({
       Value<int> id,
-      required int brokerId,
+      Value<MetricSourceKind> sourceKind,
+      Value<int?> brokerId,
+      Value<int?> smsSourceId,
       required String name,
       required String topic,
       Value<bool> publishEnabled,
       Value<double?> minValue,
       Value<double?> maxValue,
       Value<bool> useFixedRange,
+      Value<SmsValueMode?> smsValueMode,
     });
 typedef $$MetricsTableUpdateCompanionBuilder =
     MetricsCompanion Function({
       Value<int> id,
-      Value<int> brokerId,
+      Value<MetricSourceKind> sourceKind,
+      Value<int?> brokerId,
+      Value<int?> smsSourceId,
       Value<String> name,
       Value<String> topic,
       Value<bool> publishEnabled,
       Value<double?> minValue,
       Value<double?> maxValue,
       Value<bool> useFixedRange,
+      Value<SmsValueMode?> smsValueMode,
     });
 
 final class $$MetricsTableReferences
@@ -2940,14 +4566,33 @@ final class $$MetricsTableReferences
   static $BrokersTable _brokerIdTable(_$AppDatabase db) => db.brokers
       .createAlias($_aliasNameGenerator(db.metrics.brokerId, db.brokers.id));
 
-  $$BrokersTableProcessedTableManager get brokerId {
-    final $_column = $_itemColumn<int>('broker_id')!;
-
+  $$BrokersTableProcessedTableManager? get brokerId {
+    final $_column = $_itemColumn<int>('broker_id');
+    if ($_column == null) return null;
     final manager = $$BrokersTableTableManager(
       $_db,
       $_db.brokers,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_brokerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $SmsSourcesTable _smsSourceIdTable(_$AppDatabase db) =>
+      db.smsSources.createAlias(
+        $_aliasNameGenerator(db.metrics.smsSourceId, db.smsSources.id),
+      );
+
+  $$SmsSourcesTableProcessedTableManager? get smsSourceId {
+    final $_column = $_itemColumn<int>('sms_source_id');
+    if ($_column == null) return null;
+    final manager = $$SmsSourcesTableTableManager(
+      $_db,
+      $_db.smsSources,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_smsSourceIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -3006,6 +4651,12 @@ class $$MetricsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<MetricSourceKind, MetricSourceKind, int>
+  get sourceKind => $composableBuilder(
+    column: $table.sourceKind,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnFilters(column),
@@ -3036,6 +4687,12 @@ class $$MetricsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<SmsValueMode?, SmsValueMode, int>
+  get smsValueMode => $composableBuilder(
+    column: $table.smsValueMode,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   $$BrokersTableFilterComposer get brokerId {
     final $$BrokersTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -3050,6 +4707,29 @@ class $$MetricsTableFilterComposer
           }) => $$BrokersTableFilterComposer(
             $db: $db,
             $table: $db.brokers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SmsSourcesTableFilterComposer get smsSourceId {
+    final $$SmsSourcesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.smsSourceId,
+      referencedTable: $db.smsSources,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SmsSourcesTableFilterComposer(
+            $db: $db,
+            $table: $db.smsSources,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3124,6 +4804,11 @@ class $$MetricsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sourceKind => $composableBuilder(
+    column: $table.sourceKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
@@ -3154,6 +4839,11 @@ class $$MetricsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get smsValueMode => $composableBuilder(
+    column: $table.smsValueMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$BrokersTableOrderingComposer get brokerId {
     final $$BrokersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3176,6 +4866,29 @@ class $$MetricsTableOrderingComposer
     );
     return composer;
   }
+
+  $$SmsSourcesTableOrderingComposer get smsSourceId {
+    final $$SmsSourcesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.smsSourceId,
+      referencedTable: $db.smsSources,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SmsSourcesTableOrderingComposer(
+            $db: $db,
+            $table: $db.smsSources,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$MetricsTableAnnotationComposer
@@ -3189,6 +4902,12 @@ class $$MetricsTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<MetricSourceKind, int> get sourceKind =>
+      $composableBuilder(
+        column: $table.sourceKind,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
@@ -3212,6 +4931,12 @@ class $$MetricsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumnWithTypeConverter<SmsValueMode?, int> get smsValueMode =>
+      $composableBuilder(
+        column: $table.smsValueMode,
+        builder: (column) => column,
+      );
+
   $$BrokersTableAnnotationComposer get brokerId {
     final $$BrokersTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -3226,6 +4951,29 @@ class $$MetricsTableAnnotationComposer
           }) => $$BrokersTableAnnotationComposer(
             $db: $db,
             $table: $db.brokers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SmsSourcesTableAnnotationComposer get smsSourceId {
+    final $$SmsSourcesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.smsSourceId,
+      referencedTable: $db.smsSources,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SmsSourcesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.smsSources,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3301,6 +5049,7 @@ class $$MetricsTableTableManager
           Metric,
           PrefetchHooks Function({
             bool brokerId,
+            bool smsSourceId,
             bool chartSeriesRefs,
             bool readingsRefs,
           })
@@ -3319,42 +5068,54 @@ class $$MetricsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<int> brokerId = const Value.absent(),
+                Value<MetricSourceKind> sourceKind = const Value.absent(),
+                Value<int?> brokerId = const Value.absent(),
+                Value<int?> smsSourceId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> topic = const Value.absent(),
                 Value<bool> publishEnabled = const Value.absent(),
                 Value<double?> minValue = const Value.absent(),
                 Value<double?> maxValue = const Value.absent(),
                 Value<bool> useFixedRange = const Value.absent(),
+                Value<SmsValueMode?> smsValueMode = const Value.absent(),
               }) => MetricsCompanion(
                 id: id,
+                sourceKind: sourceKind,
                 brokerId: brokerId,
+                smsSourceId: smsSourceId,
                 name: name,
                 topic: topic,
                 publishEnabled: publishEnabled,
                 minValue: minValue,
                 maxValue: maxValue,
                 useFixedRange: useFixedRange,
+                smsValueMode: smsValueMode,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required int brokerId,
+                Value<MetricSourceKind> sourceKind = const Value.absent(),
+                Value<int?> brokerId = const Value.absent(),
+                Value<int?> smsSourceId = const Value.absent(),
                 required String name,
                 required String topic,
                 Value<bool> publishEnabled = const Value.absent(),
                 Value<double?> minValue = const Value.absent(),
                 Value<double?> maxValue = const Value.absent(),
                 Value<bool> useFixedRange = const Value.absent(),
+                Value<SmsValueMode?> smsValueMode = const Value.absent(),
               }) => MetricsCompanion.insert(
                 id: id,
+                sourceKind: sourceKind,
                 brokerId: brokerId,
+                smsSourceId: smsSourceId,
                 name: name,
                 topic: topic,
                 publishEnabled: publishEnabled,
                 minValue: minValue,
                 maxValue: maxValue,
                 useFixedRange: useFixedRange,
+                smsValueMode: smsValueMode,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -3367,6 +5128,7 @@ class $$MetricsTableTableManager
           prefetchHooksCallback:
               ({
                 brokerId = false,
+                smsSourceId = false,
                 chartSeriesRefs = false,
                 readingsRefs = false,
               }) {
@@ -3401,6 +5163,19 @@ class $$MetricsTableTableManager
                                         ._brokerIdTable(db),
                                     referencedColumn: $$MetricsTableReferences
                                         ._brokerIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (smsSourceId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.smsSourceId,
+                                    referencedTable: $$MetricsTableReferences
+                                        ._smsSourceIdTable(db),
+                                    referencedColumn: $$MetricsTableReferences
+                                        ._smsSourceIdTable(db)
                                         .id,
                                   )
                                   as T;
@@ -3474,6 +5249,7 @@ typedef $$MetricsTableProcessedTableManager =
       Metric,
       PrefetchHooks Function({
         bool brokerId,
+        bool smsSourceId,
         bool chartSeriesRefs,
         bool readingsRefs,
       })
@@ -4798,12 +6574,532 @@ typedef $$ReadingsTableProcessedTableManager =
       Reading,
       PrefetchHooks Function({bool metricId})
     >;
+typedef $$SmsMessagesTableCreateCompanionBuilder =
+    SmsMessagesCompanion Function({
+      Value<int> id,
+      required int smsSourceId,
+      required String sender,
+      required String body,
+      required DateTime receivedAt,
+      required SmsParseStatus status,
+      Value<int> readingsCreated,
+    });
+typedef $$SmsMessagesTableUpdateCompanionBuilder =
+    SmsMessagesCompanion Function({
+      Value<int> id,
+      Value<int> smsSourceId,
+      Value<String> sender,
+      Value<String> body,
+      Value<DateTime> receivedAt,
+      Value<SmsParseStatus> status,
+      Value<int> readingsCreated,
+    });
+
+final class $$SmsMessagesTableReferences
+    extends BaseReferences<_$AppDatabase, $SmsMessagesTable, SmsMessage> {
+  $$SmsMessagesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $SmsSourcesTable _smsSourceIdTable(_$AppDatabase db) =>
+      db.smsSources.createAlias(
+        $_aliasNameGenerator(db.smsMessages.smsSourceId, db.smsSources.id),
+      );
+
+  $$SmsSourcesTableProcessedTableManager get smsSourceId {
+    final $_column = $_itemColumn<int>('sms_source_id')!;
+
+    final manager = $$SmsSourcesTableTableManager(
+      $_db,
+      $_db.smsSources,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_smsSourceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$SmsMessagesTableFilterComposer
+    extends Composer<_$AppDatabase, $SmsMessagesTable> {
+  $$SmsMessagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sender => $composableBuilder(
+    column: $table.sender,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get receivedAt => $composableBuilder(
+    column: $table.receivedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SmsParseStatus, SmsParseStatus, int>
+  get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get readingsCreated => $composableBuilder(
+    column: $table.readingsCreated,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$SmsSourcesTableFilterComposer get smsSourceId {
+    final $$SmsSourcesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.smsSourceId,
+      referencedTable: $db.smsSources,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SmsSourcesTableFilterComposer(
+            $db: $db,
+            $table: $db.smsSources,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SmsMessagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SmsMessagesTable> {
+  $$SmsMessagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sender => $composableBuilder(
+    column: $table.sender,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get receivedAt => $composableBuilder(
+    column: $table.receivedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get readingsCreated => $composableBuilder(
+    column: $table.readingsCreated,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$SmsSourcesTableOrderingComposer get smsSourceId {
+    final $$SmsSourcesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.smsSourceId,
+      referencedTable: $db.smsSources,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SmsSourcesTableOrderingComposer(
+            $db: $db,
+            $table: $db.smsSources,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SmsMessagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SmsMessagesTable> {
+  $$SmsMessagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get sender =>
+      $composableBuilder(column: $table.sender, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get receivedAt => $composableBuilder(
+    column: $table.receivedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<SmsParseStatus, int> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get readingsCreated => $composableBuilder(
+    column: $table.readingsCreated,
+    builder: (column) => column,
+  );
+
+  $$SmsSourcesTableAnnotationComposer get smsSourceId {
+    final $$SmsSourcesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.smsSourceId,
+      referencedTable: $db.smsSources,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SmsSourcesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.smsSources,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SmsMessagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SmsMessagesTable,
+          SmsMessage,
+          $$SmsMessagesTableFilterComposer,
+          $$SmsMessagesTableOrderingComposer,
+          $$SmsMessagesTableAnnotationComposer,
+          $$SmsMessagesTableCreateCompanionBuilder,
+          $$SmsMessagesTableUpdateCompanionBuilder,
+          (SmsMessage, $$SmsMessagesTableReferences),
+          SmsMessage,
+          PrefetchHooks Function({bool smsSourceId})
+        > {
+  $$SmsMessagesTableTableManager(_$AppDatabase db, $SmsMessagesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SmsMessagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SmsMessagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SmsMessagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> smsSourceId = const Value.absent(),
+                Value<String> sender = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<DateTime> receivedAt = const Value.absent(),
+                Value<SmsParseStatus> status = const Value.absent(),
+                Value<int> readingsCreated = const Value.absent(),
+              }) => SmsMessagesCompanion(
+                id: id,
+                smsSourceId: smsSourceId,
+                sender: sender,
+                body: body,
+                receivedAt: receivedAt,
+                status: status,
+                readingsCreated: readingsCreated,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int smsSourceId,
+                required String sender,
+                required String body,
+                required DateTime receivedAt,
+                required SmsParseStatus status,
+                Value<int> readingsCreated = const Value.absent(),
+              }) => SmsMessagesCompanion.insert(
+                id: id,
+                smsSourceId: smsSourceId,
+                sender: sender,
+                body: body,
+                receivedAt: receivedAt,
+                status: status,
+                readingsCreated: readingsCreated,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$SmsMessagesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({smsSourceId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (smsSourceId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.smsSourceId,
+                                referencedTable: $$SmsMessagesTableReferences
+                                    ._smsSourceIdTable(db),
+                                referencedColumn: $$SmsMessagesTableReferences
+                                    ._smsSourceIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$SmsMessagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SmsMessagesTable,
+      SmsMessage,
+      $$SmsMessagesTableFilterComposer,
+      $$SmsMessagesTableOrderingComposer,
+      $$SmsMessagesTableAnnotationComposer,
+      $$SmsMessagesTableCreateCompanionBuilder,
+      $$SmsMessagesTableUpdateCompanionBuilder,
+      (SmsMessage, $$SmsMessagesTableReferences),
+      SmsMessage,
+      PrefetchHooks Function({bool smsSourceId})
+    >;
+typedef $$SmsTopicPresetsTableCreateCompanionBuilder =
+    SmsTopicPresetsCompanion Function({
+      Value<int> id,
+      required String label,
+      Value<DateTime> createdAt,
+    });
+typedef $$SmsTopicPresetsTableUpdateCompanionBuilder =
+    SmsTopicPresetsCompanion Function({
+      Value<int> id,
+      Value<String> label,
+      Value<DateTime> createdAt,
+    });
+
+class $$SmsTopicPresetsTableFilterComposer
+    extends Composer<_$AppDatabase, $SmsTopicPresetsTable> {
+  $$SmsTopicPresetsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SmsTopicPresetsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SmsTopicPresetsTable> {
+  $$SmsTopicPresetsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SmsTopicPresetsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SmsTopicPresetsTable> {
+  $$SmsTopicPresetsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$SmsTopicPresetsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SmsTopicPresetsTable,
+          SmsTopicPreset,
+          $$SmsTopicPresetsTableFilterComposer,
+          $$SmsTopicPresetsTableOrderingComposer,
+          $$SmsTopicPresetsTableAnnotationComposer,
+          $$SmsTopicPresetsTableCreateCompanionBuilder,
+          $$SmsTopicPresetsTableUpdateCompanionBuilder,
+          (
+            SmsTopicPreset,
+            BaseReferences<
+              _$AppDatabase,
+              $SmsTopicPresetsTable,
+              SmsTopicPreset
+            >,
+          ),
+          SmsTopicPreset,
+          PrefetchHooks Function()
+        > {
+  $$SmsTopicPresetsTableTableManager(
+    _$AppDatabase db,
+    $SmsTopicPresetsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SmsTopicPresetsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SmsTopicPresetsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SmsTopicPresetsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => SmsTopicPresetsCompanion(
+                id: id,
+                label: label,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String label,
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => SmsTopicPresetsCompanion.insert(
+                id: id,
+                label: label,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SmsTopicPresetsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SmsTopicPresetsTable,
+      SmsTopicPreset,
+      $$SmsTopicPresetsTableFilterComposer,
+      $$SmsTopicPresetsTableOrderingComposer,
+      $$SmsTopicPresetsTableAnnotationComposer,
+      $$SmsTopicPresetsTableCreateCompanionBuilder,
+      $$SmsTopicPresetsTableUpdateCompanionBuilder,
+      (
+        SmsTopicPreset,
+        BaseReferences<_$AppDatabase, $SmsTopicPresetsTable, SmsTopicPreset>,
+      ),
+      SmsTopicPreset,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$BrokersTableTableManager get brokers =>
       $$BrokersTableTableManager(_db, _db.brokers);
+  $$SmsSourcesTableTableManager get smsSources =>
+      $$SmsSourcesTableTableManager(_db, _db.smsSources);
   $$MetricsTableTableManager get metrics =>
       $$MetricsTableTableManager(_db, _db.metrics);
   $$DashboardsTableTableManager get dashboards =>
@@ -4814,4 +7110,8 @@ class $AppDatabaseManager {
       $$ChartSeriesTableTableManager(_db, _db.chartSeries);
   $$ReadingsTableTableManager get readings =>
       $$ReadingsTableTableManager(_db, _db.readings);
+  $$SmsMessagesTableTableManager get smsMessages =>
+      $$SmsMessagesTableTableManager(_db, _db.smsMessages);
+  $$SmsTopicPresetsTableTableManager get smsTopicPresets =>
+      $$SmsTopicPresetsTableTableManager(_db, _db.smsTopicPresets);
 }

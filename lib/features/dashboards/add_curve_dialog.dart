@@ -117,12 +117,18 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final metrics = ref.watch(allMetricsProvider);
-    // Metrics can come from several brokers, so map brokerId -> name to label
-    // each metric with its source and disambiguate same-named topics.
+    // Metrics can come from several data sources, so map each source's id to its
+    // name to label metrics and disambiguate same-named topics. Broker ids and
+    // SMS-source ids live in separate id spaces, so keep two maps.
     final sourceNames = {
       for (final b
           in ref.watch(brokersProvider).valueOrNull ?? const <Broker>[])
         b.id: b.name,
+    };
+    final smsSourceNames = {
+      for (final s
+          in ref.watch(smsSourcesProvider).valueOrNull ?? const <SmsSource>[])
+        s.id: s.name,
     };
 
     return metrics.when(
@@ -164,6 +170,7 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
                         key: ValueKey(_drafts[i]),
                         metrics: list,
                         sourceNames: sourceNames,
+                        smsSourceNames: smsSourceNames,
                         draft: _drafts[i],
                         expanded: _expanded == i,
                         onToggle: () => _toggle(i),

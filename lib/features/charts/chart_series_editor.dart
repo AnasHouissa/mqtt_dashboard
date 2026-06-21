@@ -35,23 +35,30 @@ class ChartSeriesEditor extends StatelessWidget {
     required this.expanded,
     required this.onToggle,
     this.sourceNames = const {},
+    this.smsSourceNames = const {},
     this.onRemove,
   });
 
   final List<Metric> metrics;
 
-  /// brokerId -> data-source name, used to label metrics so same-named topics
+  /// brokerId -> broker name, used to label MQTT metrics so same-named topics
   /// from different sources stay distinguishable.
   final Map<int, String> sourceNames;
+
+  /// smsSourceId -> SMS source name, the equivalent for SMS metrics.
+  final Map<int, String> smsSourceNames;
   final SeriesDraft draft;
   final VoidCallback onChanged;
   final bool expanded;
   final VoidCallback onToggle;
   final VoidCallback? onRemove;
 
-  /// A metric label that includes its source, e.g. "temperature · Greenhouse".
+  /// A metric label that includes its source, e.g. "temperature · Greenhouse"
+  /// or "WATER ALERT · Site A", picking the map by the metric's source kind.
   String _label(Metric m) {
-    final source = sourceNames[m.brokerId];
+    final source = m.sourceKind == MetricSourceKind.sms
+        ? smsSourceNames[m.smsSourceId]
+        : sourceNames[m.brokerId];
     return source == null ? m.name : '${m.name} · $source';
   }
 

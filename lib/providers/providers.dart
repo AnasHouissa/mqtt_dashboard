@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -9,8 +10,14 @@ import '../data/repositories/broker_repository.dart';
 import '../data/repositories/dashboard_repository.dart';
 import '../data/repositories/metric_repository.dart';
 import '../data/repositories/reading_repository.dart';
+import '../data/repositories/sms_message_repository.dart';
+import '../data/repositories/sms_source_repository.dart';
+import '../data/repositories/sms_topic_preset_repository.dart';
 import '../services/export_service.dart';
 import '../services/mqtt_service.dart';
+import '../services/sms_parser.dart';
+import '../services/sms_service.dart';
+import '../services/tn_phone.dart';
 
 // --- Infrastructure ---
 
@@ -28,11 +35,23 @@ final dashboardRepositoryProvider = Provider(
     (ref) => DashboardRepository(ref.watch(databaseProvider)));
 final readingRepositoryProvider = Provider(
     (ref) => ReadingRepository(ref.watch(databaseProvider)));
+final smsSourceRepositoryProvider = Provider(
+    (ref) => SmsSourceRepository(ref.watch(databaseProvider)));
+final smsMessageRepositoryProvider = Provider(
+    (ref) => SmsMessageRepository(ref.watch(databaseProvider)));
+final smsTopicPresetRepositoryProvider = Provider(
+    (ref) => SmsTopicPresetRepository(ref.watch(databaseProvider)));
 
 final exportServiceProvider = Provider((ref) => ExportService());
 
 final mqttServiceProvider = Provider<MqttService>((ref) {
   final service = MqttService();
+  ref.onDispose(service.dispose);
+  return service;
+});
+
+final smsServiceProvider = Provider<SmsService>((ref) {
+  final service = SmsService();
   ref.onDispose(service.dispose);
   return service;
 });
@@ -49,6 +68,26 @@ final metricsProvider =
 /// Every metric across all brokers — used by the global dashboard chart editor.
 final allMetricsProvider = StreamProvider.autoDispose<List<Metric>>((ref) =>
     ref.watch(metricRepositoryProvider).watchAll());
+
+/// All SMS data sources.
+final smsSourcesProvider = StreamProvider.autoDispose((ref) =>
+    ref.watch(smsSourceRepositoryProvider).watchAll());
+
+/// Reusable SMS topic presets, offered as a dropdown in the SMS metric form
+/// and managed from Settings.
+final smsTopicPresetsProvider =
+    StreamProvider.autoDispose<List<SmsTopicPreset>>((ref) =>
+        ref.watch(smsTopicPresetRepositoryProvider).watchAll());
+
+/// Metrics belonging to one SMS source.
+final smsMetricsProvider =
+    StreamProvider.autoDispose.family<List<Metric>, int>((ref, smsSourceId) =>
+        ref.watch(metricRepositoryProvider).watchForSmsSource(smsSourceId));
+
+/// Raw-log messages for one SMS source (debug inbox).
+final smsMessagesProvider = StreamProvider.autoDispose
+    .family<List<SmsMessage>, int>((ref, smsSourceId) =>
+        ref.watch(smsMessageRepositoryProvider).watchForSource(smsSourceId));
 
 /// Dashboards are global (not scoped to a broker).
 final dashboardsProvider = StreamProvider.autoDispose<List<Dashboard>>((ref) =>
@@ -165,6 +204,148 @@ class ConnectionController extends StateNotifier<MqttStatus> {
 final connectionProvider =
     StateNotifierProvider<ConnectionController, MqttStatus>(
         (ref) => ConnectionController(ref));
+
+// --- SMS ingestion ---
+
+/// Listens to incoming SMS, routes each message from a tracked sender number to
+/// its [SmsSource], parses it, persists matching values as readings, and logs
+/// every message (matched or not) to the raw inbox. The SMS analogue of
+/// [ConnectionController] — but with no connect step: it just listens.
+class SmsIngestionController {
+  SmsIngestionController(this._ref) {
+    final service = _ref.read(smsServiceProvider);
+    _sub = service.messages.listen(_onSms);
+    // Register the foreground receiver eagerly (no-op until permission is
+    // granted, and a no-op on non-Android platforms).
+    service.startListening();
+  }
+
+  final Ref _ref;
+  StreamSubscription<IncomingSms>? _sub;
+
+  /// Matches a sender address to a source by its 8-digit subscriber number,
+  /// tolerating +216 / 00216 / bare-local / spaced sender formats.
+  SmsSource? _matchSource(List<SmsSource> sources, String sender) {
+    final key = TnPhone.matchKey(sender);
+    if (key == null) return null;
+    for (final src in sources) {
+      if (TnPhone.matchKey(src.phoneNumber) == key) return src;
+    }
+    return null;
+  }
+
+  Metric? _matchMetric(List<Metric> metrics, String name, String topic) {
+    final n = name.trim().toLowerCase();
+    final t = topic.trim().toLowerCase();
+    for (final m in metrics) {
+      if (m.name.trim().toLowerCase() == n &&
+          m.topic.trim().toLowerCase() == t) {
+        return m;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _onSms(IncomingSms sms) async {
+    final sources = await _ref.read(smsSourceRepositoryProvider).getAll();
+    final source = _matchSource(sources, sms.sender);
+    if (source == null) return; // not from a tracked number — ignore entirely
+
+    final result = SmsParser.parse(sms.body);
+    final metricRepo = _ref.read(metricRepositoryProvider);
+    final readingRepo = _ref.read(readingRepositoryProvider);
+
+    var readingsCreated = 0;
+    SmsParseStatus status;
+    if (result.isEmpty) {
+      status = SmsParseStatus.error;
+    } else {
+      final metrics = await metricRepo.getForSmsSource(source.id);
+      for (final line in result.lines) {
+        final metric = _matchMetric(metrics, result.name, line.topic);
+        if (metric == null) continue;
+        final mode = metric.smsValueMode ?? SmsParser.detectMode(line.rawValue);
+        final value = SmsParser.toValue(line.rawValue, mode);
+        if (value == null) continue;
+        await readingRepo.insert(metric.id, value, sms.timestamp);
+        readingsCreated++;
+        await _maybeSeedRange(metricRepo, metric, line);
+      }
+      status = readingsCreated > 0
+          ? SmsParseStatus.matched
+          : SmsParseStatus.unmatched;
+    }
+
+    await _ref.read(smsMessageRepositoryProvider).insert(
+          smsSourceId: source.id,
+          sender: sms.sender,
+          body: sms.body,
+          receivedAt: sms.timestamp,
+          status: status,
+          readingsCreated: readingsCreated,
+        );
+  }
+
+  /// Auto-populate a metric's chart bounds from a `Min .. Max` prefix the first
+  /// time we see one (only when the user hasn't set bounds themselves).
+  Future<void> _maybeSeedRange(
+    MetricRepository repo,
+    Metric metric,
+    SmsTopicLine line,
+  ) async {
+    if (line.min == null || line.max == null) return;
+    if (metric.minValue != null || metric.maxValue != null) return;
+    await repo.update(
+      metric.copyWith(
+        minValue: Value(line.min),
+        maxValue: Value(line.max),
+      ),
+    );
+  }
+
+  void dispose() => _sub?.cancel();
+}
+
+/// Eagerly created at app start so SMS listening begins as soon as permission
+/// allows. Read once during app init to instantiate it.
+final smsIngestionProvider = Provider<SmsIngestionController>((ref) {
+  final controller = SmsIngestionController(ref);
+  ref.onDispose(controller.dispose);
+  return controller;
+});
+
+/// Whether the SMS permission has been granted this session. The UI calls
+/// [SmsPermissionController.request] to prompt and starts listening on grant.
+class SmsPermissionController extends StateNotifier<bool> {
+  SmsPermissionController(this._ref) : super(false) {
+    // Seed from the OS so the banner stays hidden when access was already
+    // granted (in a prior session or via system settings).
+    refresh();
+  }
+
+  final Ref _ref;
+
+  bool get isSupported => _ref.read(smsServiceProvider).isSupported;
+
+  /// Re-syncs state with the current OS permission status without prompting.
+  /// Call on app resume so granting via system settings reflects immediately.
+  Future<void> refresh() async {
+    final granted = await _ref.read(smsServiceProvider).hasPermission();
+    if (mounted) state = granted;
+  }
+
+  Future<bool> request() async {
+    final service = _ref.read(smsServiceProvider);
+    final granted = await service.requestPermission();
+    state = granted;
+    if (granted) service.startListening();
+    return granted;
+  }
+}
+
+final smsPermissionProvider =
+    StateNotifierProvider<SmsPermissionController, bool>(
+        (ref) => SmsPermissionController(ref));
 
 // --- App locale ---
 

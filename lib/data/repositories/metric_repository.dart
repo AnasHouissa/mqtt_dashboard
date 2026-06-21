@@ -20,8 +20,22 @@ class MetricRepository {
             ..orderBy([(m) => OrderingTerm(expression: m.name)]))
           .watch();
 
+  /// Metrics belonging to an SMS source, ordered by name then topic.
+  Stream<List<Metric>> watchForSmsSource(int smsSourceId) =>
+      (_db.select(_db.metrics)
+            ..where((m) => m.smsSourceId.equals(smsSourceId))
+            ..orderBy([
+              (m) => OrderingTerm(expression: m.name),
+              (m) => OrderingTerm(expression: m.topic),
+            ]))
+          .watch();
+
   Future<List<Metric>> getForBroker(int brokerId) =>
       (_db.select(_db.metrics)..where((m) => m.brokerId.equals(brokerId))).get();
+
+  Future<List<Metric>> getForSmsSource(int smsSourceId) =>
+      (_db.select(_db.metrics)..where((m) => m.smsSourceId.equals(smsSourceId)))
+          .get();
 
   Future<Metric> getById(int id) =>
       (_db.select(_db.metrics)..where((m) => m.id.equals(id))).getSingle();

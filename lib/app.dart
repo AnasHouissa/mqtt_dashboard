@@ -13,6 +13,9 @@ class MqttDashApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
+    // Instantiate the SMS ingestion controller so it starts listening for
+    // incoming messages (no-op on non-Android platforms).
+    ref.watch(smsIngestionProvider);
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,

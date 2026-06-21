@@ -70,7 +70,8 @@ class _MetricFormState extends ConsumerState<MetricForm> {
     if (widget.metric == null) {
       await repo.insert(
         MetricsCompanion.insert(
-          brokerId: widget.brokerId,
+          sourceKind: const Value(MetricSourceKind.mqtt),
+          brokerId: Value(widget.brokerId),
           name: _name.text.trim(),
           topic: _topic.text.trim(),
           publishEnabled: Value(_publishEnabled),
