@@ -63,6 +63,7 @@ dependencies:
 
   # App metadata (version display in Settings)
   package_info_plus: ^8.0.0
+  another_telephony: ^0.4.1
 
 dev_dependencies:
   flutter_test:
