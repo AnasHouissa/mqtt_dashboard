@@ -10,6 +10,20 @@ enum ChartType { line, histogram, spline, area, scatter }
 /// Time bucket used to aggregate readings for histograms / filtering.
 enum TimeBucket { today, day, month, year }
 
+/// Which kind of data source a metric draws its readings from. Stored as an
+/// int index; new values are appended (never reordered). `mqtt` must stay first
+/// (index 0) — it is the migration default for pre-existing broker metrics.
+enum MetricSourceKind { mqtt, sms }
+
+/// How the bracket value of an SMS line is turned into a numeric reading:
+/// - [number]: parse the first numeric token (e.g. `TEMP ALERT [21.62]` -> 21.62).
+/// - [activeCount]: count active input tokens (e.g. `[IN1, IN2, IN4]` -> 3, `[OK]` -> 0).
+/// - [presence]: 1 when not cleared (`OK`/none), else 0.
+enum SmsValueMode { number, activeCount, presence }
+
+/// Outcome of parsing/matching a received SMS, recorded on the raw-log row.
+enum SmsParseStatus { matched, unmatched, error }
+
 @DataClassName('Broker')
 class Brokers extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -40,9 +54,28 @@ class Brokers extends Table {
 @DataClassName('Metric')
 class Metrics extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get brokerId =>
-      integer().references(Brokers, #id, onDelete: KeyAction.cascade)();
+
+  /// Which kind of data source feeds this metric. Defaults to `mqtt` (index 0)
+  /// so pre-existing broker metrics keep working after migration.
+  IntColumn get sourceKind =>
+      intEnum<MetricSourceKind>().withDefault(const Constant(0))();
+
+  /// Owning broker when [sourceKind] is mqtt; null for SMS metrics.
+  IntColumn get brokerId => integer()
+      .nullable()
+      .references(Brokers, #id, onDelete: KeyAction.cascade)();
+
+  /// Owning SMS source when [sourceKind] is sms; null for broker metrics.
+  IntColumn get smsSourceId => integer()
+      .nullable()
+      .references(SmsSources, #id, onDelete: KeyAction.cascade)();
+
+  /// For MQTT this is the display name; for SMS it is the station NAME line we
+  /// match against (the first line of the message body).
   TextColumn get name => text().withLength(min: 1, max: 100)();
+
+  /// For MQTT this is the subscription topic; for SMS it is the TOPIC label we
+  /// match against (the text before the trailing `[ value ]`).
   TextColumn get topic => text()();
   BoolColumn get publishEnabled =>
       boolean().withDefault(const Constant(false))();
@@ -53,6 +86,9 @@ class Metrics extends Table {
   /// When false, the axis auto-scales to the received readings.
   BoolColumn get useFixedRange =>
       boolean().withDefault(const Constant(false))();
+
+  /// How to convert an SMS bracket value to a number; null for MQTT metrics.
+  IntColumn get smsValueMode => intEnum<SmsValueMode>().nullable()();
 }
 
 /// Dashboards are global: a dashboard groups charts that may visualize metrics
@@ -100,6 +136,56 @@ class Readings extends Table {
   DateTimeColumn get timestamp => dateTime()();
 }
 
+/// An SMS data source: a sender phone number whose incoming messages we capture
+/// and turn into readings. The number is the *sender* (a field device texting
+/// the phone running the app), validated as a Tunisian E.164 number (+216...).
+@DataClassName('SmsSource')
+class SmsSources extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
+  TextColumn get phoneNumber => text()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Raw log of every SMS received from a source's number (matched or not), used
+/// as a per-source debug inbox to verify parsing and tune metric name/topic.
+@DataClassName('SmsMessage')
+class SmsMessages extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get smsSourceId =>
+      integer().references(SmsSources, #id, onDelete: KeyAction.cascade)();
+
+  /// Raw sender address as reported by the OS.
+  TextColumn get sender => text()();
+
+  /// Full, unmodified SMS body.
+  TextColumn get body => text()();
+  DateTimeColumn get receivedAt => dateTime()();
+
+  /// Outcome of parsing/matching this message.
+  IntColumn get status => intEnum<SmsParseStatus>()();
+
+  /// How many readings this message produced (0 when unmatched).
+  IntColumn get readingsCreated => integer().withDefault(const Constant(0))();
+}
+
+/// User-defined, reusable SMS topic labels (e.g. `DOOR ALERT`, `TEMP ALERT`)
+/// offered as a dropdown when creating SMS metrics. Purely a UI convenience: the
+/// chosen label is copied onto the metric's `topic`, so deleting a preset never
+/// affects metrics already using that label.
+@DataClassName('SmsTopicPreset')
+class SmsTopicPresets extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get label => text().withLength(min: 1, max: 100)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  /// No two presets may share the same label.
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {label},
+      ];
+}
+
 /// A single aggregated point: a time bucket label and the average value in it.
 class AggregatedPoint {
   final DateTime time;
@@ -107,14 +193,23 @@ class AggregatedPoint {
   const AggregatedPoint(this.time, this.value);
 }
 
-@DriftDatabase(
-    tables: [Brokers, Metrics, Dashboards, Charts, ChartSeries, Readings])
+@DriftDatabase(tables: [
+  Brokers,
+  Metrics,
+  Dashboards,
+  Charts,
+  ChartSeries,
+  Readings,
+  SmsSources,
+  SmsMessages,
+  SmsTopicPresets,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ?? driftDatabase(name: 'mqtt_dash'));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -127,6 +222,10 @@ class AppDatabase extends _$AppDatabase {
           await customStatement(
             'CREATE INDEX IF NOT EXISTS idx_readings_metric_time '
             'ON readings (metric_id, timestamp)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_sms_messages_source_time '
+            'ON sms_messages (sms_source_id, received_at)',
           );
         },
         onUpgrade: (m, from, to) async {
@@ -158,6 +257,39 @@ class AppDatabase extends _$AppDatabase {
             // Dashboards became global: drop the broker_id column (and its FK)
             // while preserving existing dashboards (id + name copy over).
             await m.alterTable(TableMigration(dashboards));
+          }
+          if (from < 6) {
+            // SMS data source. Create its tables first so the recreated metrics
+            // table can resolve its new FK to sms_sources.
+            await m.createTable(smsSources);
+            await m.createTable(smsMessages);
+            // Make metrics polymorphic: broker_id becomes nullable and three
+            // columns are added (source_kind defaults to mqtt, the sms columns
+            // default to null). SQLite can't relax a NOT NULL constraint in
+            // place, so the table is recreated. Foreign keys are still OFF here
+            // (they're only enabled in beforeOpen, which runs after migrations),
+            // so dropping the old metrics table does NOT cascade-delete the
+            // existing readings / chart_series rows — their metric ids are
+            // preserved by the copy.
+            await m.alterTable(
+              TableMigration(
+                metrics,
+                newColumns: [
+                  metrics.sourceKind,
+                  metrics.smsSourceId,
+                  metrics.smsValueMode,
+                ],
+              ),
+            );
+            await customStatement(
+              'CREATE INDEX IF NOT EXISTS idx_sms_messages_source_time '
+              'ON sms_messages (sms_source_id, received_at)',
+            );
+          }
+          if (from < 7) {
+            // Reusable SMS topic presets shown as a dropdown in the SMS metric
+            // form and managed from Settings.
+            await m.createTable(smsTopicPresets);
           }
         },
       );
