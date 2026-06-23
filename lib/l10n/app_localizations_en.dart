@@ -194,19 +194,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chartType => 'Chart type';
 
   @override
-  String get curve => 'Line';
-
-  @override
   String get histogram => 'Histogram';
 
   @override
-  String get spline => 'Spline';
+  String get column => 'Column';
 
   @override
-  String get area => 'Area';
+  String get bar => 'Bar';
 
   @override
-  String get scatter => 'Scatter';
+  String get rangeArea => 'Range area';
+
+  @override
+  String get stackedColumn => 'Stacked column';
+
+  @override
+  String get stackedBar => 'Stacked bar';
+
+  @override
+  String get stackedColumn100 => '100% stacked column';
+
+  @override
+  String get boxAndWhisker => 'Box & whisker';
+
+  @override
+  String get radialBar => 'Radial bar';
+
+  @override
+  String get doughnut => 'Doughnut';
+
+  @override
+  String get pie => 'Pie';
+
+  @override
+  String get errorBar => 'Error bar';
 
   @override
   String get color => 'Color';

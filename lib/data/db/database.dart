@@ -3,9 +3,22 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 part 'database.g.dart';
 
-/// Chart visualization style. New values are appended (never reordered) so the
-/// integer indexes already persisted in the database stay valid.
-enum ChartType { line, histogram, spline, area, scatter }
+/// Chart visualization style. The integer index is persisted, so values are
+/// only ever appended (never reordered) to keep stored charts valid.
+enum ChartType {
+  column,
+  bar,
+  rangeArea,
+  stackedColumn,
+  stackedBar,
+  stackedColumn100,
+  histogram,
+  boxAndWhisker,
+  radialBar,
+  doughnut,
+  pie,
+  errorBar,
+}
 
 /// Time bucket used to aggregate readings for histograms / filtering.
 enum TimeBucket { today, day, month, year }

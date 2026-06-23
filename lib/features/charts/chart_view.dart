@@ -7,6 +7,7 @@ import '../../data/db/database.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
+import 'chart_type_ui.dart';
 
 /// Renders one Syncfusion chart for a set of series sharing a time [bucket].
 /// Each visible series is drawn with its own type and color. Reused in the
@@ -44,12 +45,25 @@ class MetricChart extends ConsumerWidget {
     );
     if (error.$2.hasError) return Center(child: Text('${error.$2.error}'));
 
-    final cartesian = <CartesianSeries<AggregatedPoint, DateTime>>[
+    // Keep only series that actually have points to plot.
+    final plottable = [
       for (final (s, data) in resolved)
-        if ((data.valueOrNull ?? const []).isNotEmpty)
-          _buildSeries(s, data.value!),
+        if ((data.valueOrNull ?? const []).isNotEmpty) (s, data.value!),
     ];
-    if (cartesian.isEmpty) return Center(child: Text(l.noData));
+    if (plottable.isEmpty) return Center(child: Text(l.noData));
+
+    // Pie / doughnut / radial-bar can't share a cartesian plot. If every
+    // visible series is circular we render a circular chart; otherwise the
+    // cartesian series win and any circular ones are skipped.
+    final cartesianInputs =
+        plottable.where((e) => !e.$1.series.type.isCircular).toList();
+    if (cartesianInputs.isEmpty) {
+      return _buildCircularChart(context, plottable);
+    }
+
+    final cartesian = <CartesianSeries<AggregatedPoint, DateTime>>[
+      for (final (s, points) in cartesianInputs) _buildSeries(s, points),
+    ];
 
     // Series whose metric opted into a fixed range contribute explicit Y-axis
     // bounds; we take the widest span so every fixed series fits. If none opt
@@ -90,42 +104,86 @@ class MetricChart extends ConsumerWidget {
     final name = s.metric.name;
     DateTime x(AggregatedPoint p, int _) => p.time;
     double y(AggregatedPoint p, int _) => p.value;
-    const marker = MarkerSettings(isVisible: true);
 
     return switch (s.series.type) {
-      ChartType.line => LineSeries<AggregatedPoint, DateTime>(
+      ChartType.column => ColumnSeries<AggregatedPoint, DateTime>(
           dataSource: points,
           xValueMapper: x,
           yValueMapper: y,
           name: name,
           color: color,
-          markerSettings: marker,
         ),
-      ChartType.spline => SplineSeries<AggregatedPoint, DateTime>(
+      ChartType.bar => BarSeries<AggregatedPoint, DateTime>(
           dataSource: points,
           xValueMapper: x,
           yValueMapper: y,
           name: name,
           color: color,
-          markerSettings: marker,
         ),
-      ChartType.area => AreaSeries<AggregatedPoint, DateTime>(
+      // No high/low dimension in the aggregated data, so the band spans from
+      // the baseline (0) up to the value.
+      ChartType.rangeArea => RangeAreaSeries<AggregatedPoint, DateTime>(
           dataSource: points,
           xValueMapper: x,
-          yValueMapper: y,
+          highValueMapper: y,
+          lowValueMapper: (p, _) => 0,
           name: name,
           color: color.withValues(alpha: 0.4),
           borderColor: color,
           borderWidth: 2,
         ),
+      ChartType.stackedColumn => StackedColumnSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+        ),
+      ChartType.stackedBar => StackedBarSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+        ),
+      ChartType.stackedColumn100 =>
+        StackedColumn100Series<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+        ),
+      // Rendered as tightly-packed columns (spacing 0) for a histogram look.
       ChartType.histogram => ColumnSeries<AggregatedPoint, DateTime>(
           dataSource: points,
           xValueMapper: x,
           yValueMapper: y,
           name: name,
           color: color,
+          spacing: 0,
         ),
-      ChartType.scatter => ScatterSeries<AggregatedPoint, DateTime>(
+      // Each bucket carries a single value, so the box collapses to that value.
+      ChartType.boxAndWhisker =>
+        BoxAndWhiskerSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: (p, _) => <num?>[p.value],
+          name: name,
+          color: color,
+        ),
+      ChartType.errorBar => ErrorBarSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+        ),
+      // Circular types never reach here; they are handled by the circular chart.
+      ChartType.radialBar ||
+      ChartType.doughnut ||
+      ChartType.pie =>
+        ColumnSeries<AggregatedPoint, DateTime>(
           dataSource: points,
           xValueMapper: x,
           yValueMapper: y,
@@ -133,6 +191,50 @@ class MetricChart extends ConsumerWidget {
           color: color,
         ),
     };
+  }
+
+  /// Renders pie / doughnut / radial-bar series. Each metric's time buckets
+  /// become the slices/segments of its own ring; multiple circular series stack
+  /// as concentric rings.
+  Widget _buildCircularChart(
+    BuildContext context,
+    List<(ChartSeriesWithMetric, List<AggregatedPoint>)> plottable,
+  ) {
+    final circular = plottable.where((e) => e.$1.series.type.isCircular);
+    final fmt = _axisFormat(bucket);
+    String label(AggregatedPoint p, int _) => fmt.format(p.time);
+    double value(AggregatedPoint p, int _) => p.value;
+
+    final series = <CircularSeries<AggregatedPoint, String>>[
+      for (final (s, points) in circular)
+        switch (s.series.type) {
+          ChartType.pie => PieSeries<AggregatedPoint, String>(
+              dataSource: points,
+              xValueMapper: label,
+              yValueMapper: value,
+              name: s.metric.name,
+            ),
+          ChartType.doughnut => DoughnutSeries<AggregatedPoint, String>(
+              dataSource: points,
+              xValueMapper: label,
+              yValueMapper: value,
+              name: s.metric.name,
+            ),
+          _ => RadialBarSeries<AggregatedPoint, String>(
+              dataSource: points,
+              xValueMapper: label,
+              yValueMapper: value,
+              name: s.metric.name,
+              cornerStyle: CornerStyle.bothCurve,
+            ),
+        },
+    ];
+
+    return SfCircularChart(
+      legend: const Legend(isVisible: true, overflowMode: LegendItemOverflowMode.wrap),
+      tooltipBehavior: TooltipBehavior(enable: true),
+      series: series,
+    );
   }
 
   static DateFormat _axisFormat(TimeBucket bucket) {
