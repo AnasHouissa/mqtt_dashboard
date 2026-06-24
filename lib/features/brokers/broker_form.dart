@@ -266,12 +266,14 @@ class _BrokerFormState extends ConsumerState<BrokerForm> {
                       child: ExpansionTile(
                         tilePadding: EdgeInsets.zero,
                         childrenPadding: const EdgeInsets.only(
+                          top: AppSpacing.sm,
                           bottom: AppSpacing.sm,
                         ),
                         title: Text(l.advanced),
                         children: [
                           DropdownButtonFormField<int>(
                             initialValue: _qos,
+                            isExpanded: true,
                             decoration: InputDecoration(labelText: l.qos),
                             items: const [
                               DropdownMenuItem(
