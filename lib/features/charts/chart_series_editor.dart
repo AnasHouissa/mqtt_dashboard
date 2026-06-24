@@ -12,7 +12,7 @@ import 'chart_type_ui.dart';
 class SeriesDraft {
   SeriesDraft({
     this.metricId,
-    this.type = ChartType.line,
+    this.type = ChartType.column,
     required this.color,
     this.visible = true,
   });

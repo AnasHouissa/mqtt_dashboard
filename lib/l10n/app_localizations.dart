@@ -458,35 +458,77 @@ abstract class AppLocalizations {
   /// **'Chart type'**
   String get chartType;
 
-  /// No description provided for @curve.
-  ///
-  /// In en, this message translates to:
-  /// **'Line'**
-  String get curve;
-
   /// No description provided for @histogram.
   ///
   /// In en, this message translates to:
   /// **'Histogram'**
   String get histogram;
 
-  /// No description provided for @spline.
+  /// No description provided for @column.
   ///
   /// In en, this message translates to:
-  /// **'Spline'**
-  String get spline;
+  /// **'Column'**
+  String get column;
 
-  /// No description provided for @area.
+  /// No description provided for @bar.
   ///
   /// In en, this message translates to:
-  /// **'Area'**
-  String get area;
+  /// **'Bar'**
+  String get bar;
 
-  /// No description provided for @scatter.
+  /// No description provided for @rangeArea.
   ///
   /// In en, this message translates to:
-  /// **'Scatter'**
-  String get scatter;
+  /// **'Range area'**
+  String get rangeArea;
+
+  /// No description provided for @stackedColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Stacked column'**
+  String get stackedColumn;
+
+  /// No description provided for @stackedBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Stacked bar'**
+  String get stackedBar;
+
+  /// No description provided for @stackedColumn100.
+  ///
+  /// In en, this message translates to:
+  /// **'100% stacked column'**
+  String get stackedColumn100;
+
+  /// No description provided for @boxAndWhisker.
+  ///
+  /// In en, this message translates to:
+  /// **'Box & whisker'**
+  String get boxAndWhisker;
+
+  /// No description provided for @radialBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Radial bar'**
+  String get radialBar;
+
+  /// No description provided for @doughnut.
+  ///
+  /// In en, this message translates to:
+  /// **'Doughnut'**
+  String get doughnut;
+
+  /// No description provided for @pie.
+  ///
+  /// In en, this message translates to:
+  /// **'Pie'**
+  String get pie;
+
+  /// No description provided for @errorBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Error bar'**
+  String get errorBar;
 
   /// No description provided for @color.
   ///
