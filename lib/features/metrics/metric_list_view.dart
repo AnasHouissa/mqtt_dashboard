@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../services/mqtt_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/entity_card.dart';
@@ -103,9 +104,7 @@ class MetricListView extends ConsumerWidget {
     final status = ref.read(connectionProvider);
     if (status != MqttStatus.connected ||
         ref.read(connectionProvider.notifier).activeBrokerId != metric.brokerId) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.disconnected)),
-      );
+      showAppSnackBar(context, l.disconnected);
       return;
     }
 
@@ -135,8 +134,7 @@ class MetricListView extends ConsumerWidget {
 
     if (value != null && value.isNotEmpty && context.mounted) {
       ref.read(connectionProvider.notifier).publish(metric.topic, value);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l.published)));
+      showAppSnackBar(context, l.published);
     }
   }
 }

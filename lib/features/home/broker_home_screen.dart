@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../services/mqtt_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../widgets/labeled_add_button.dart';
 import '../metrics/metric_form.dart';
 import '../metrics/metric_list_view.dart';
@@ -57,14 +58,10 @@ class BrokerHomeScreen extends ConsumerWidget {
                     MqttFailureReason.network => l.reasonNetwork,
                     MqttFailureReason.unknown || null => l.reasonUnknown,
                   };
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: Colors.red.shade600,
-                      content: Text(
-                        l.unableToConnect(reason),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
+                  showAppSnackBar(
+                    context,
+                    l.unableToConnect(reason),
+                    isError: true,
                   );
                 }
               },

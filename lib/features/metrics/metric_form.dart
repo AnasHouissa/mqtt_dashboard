@@ -6,6 +6,7 @@ import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../widgets/sheet_header.dart';
 
 /// Bottom-sheet form to create or edit a metric.
@@ -58,10 +59,9 @@ class _MetricFormState extends ConsumerState<MetricForm> {
     final maxV = _parseOptional(_max.text);
     // A fixed chart range needs both bounds; block save with a clear message.
     if (_useFixedRange && (minV == null || maxV == null)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).rangeRequiresMinMax),
-        ),
+      showAppSnackBar(
+        context,
+        AppLocalizations.of(context).rangeRequiresMinMax,
       );
       return;
     }

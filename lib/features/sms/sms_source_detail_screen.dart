@@ -5,6 +5,7 @@ import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/entity_card.dart';
@@ -120,9 +121,7 @@ class _SmsPermissionBannerState extends ConsumerState<_SmsPermissionBanner>
         onPressed: () async {
           final ok = await controller.request();
           if (!ok && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l.smsPermissionDenied)),
-            );
+            showAppSnackBar(context, l.smsPermissionDenied);
           }
         },
         child: Text(l.grantPermission),
