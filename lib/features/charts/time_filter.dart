@@ -24,19 +24,39 @@ class TimeFilter extends StatelessWidget {
         segments: [
           ButtonSegment(
             value: TimeBucket.today,
-            label: Text(l.today, style: labelStyle),
+            label: Text(
+              l.today,
+              style: labelStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           ButtonSegment(
             value: TimeBucket.day,
-            label: Text(l.day, style: labelStyle),
+            label: Text(
+              l.day,
+              style: labelStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           ButtonSegment(
             value: TimeBucket.month,
-            label: Text(l.month, style: labelStyle),
+            label: Text(
+              l.month,
+              style: labelStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           ButtonSegment(
             value: TimeBucket.year,
-            label: Text(l.year, style: labelStyle),
+            label: Text(
+              l.year,
+              style: labelStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
         selected: {value},
