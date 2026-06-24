@@ -179,6 +179,16 @@ class MetricChart extends ConsumerWidget {
           name: name,
           color: color,
         ),
+      // Smooth curve through the points.
+      ChartType.spline => SplineSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+          width: 2,
+          markerSettings: const MarkerSettings(isVisible: true),
+        ),
       // Circular types never reach here; they are handled by the circular chart.
       ChartType.radialBar ||
       ChartType.doughnut ||

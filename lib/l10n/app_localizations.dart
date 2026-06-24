@@ -536,6 +536,12 @@ abstract class AppLocalizations {
   /// **'Error bar'**
   String get errorBar;
 
+  /// No description provided for @spline.
+  ///
+  /// In en, this message translates to:
+  /// **'Spline'**
+  String get spline;
+
   /// No description provided for @color.
   ///
   /// In en, this message translates to:
@@ -955,12 +961,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Publishing is disabled for this metric'**
   String get publishDisabled;
-
-  /// No description provided for @messageSent.
-  ///
-  /// In en, this message translates to:
-  /// **'Message published'**
-  String get messageSent;
 }
 
 class _AppLocalizationsDelegate

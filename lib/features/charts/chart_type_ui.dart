@@ -19,6 +19,7 @@ extension ChartTypeUi on ChartType {
         ChartType.doughnut => l.doughnut,
         ChartType.pie => l.pie,
         ChartType.errorBar => l.errorBar,
+        ChartType.spline => l.spline,
       };
 
   IconData get icon => switch (this) {
@@ -34,6 +35,7 @@ extension ChartTypeUi on ChartType {
         ChartType.doughnut => Icons.donut_large,
         ChartType.pie => Icons.pie_chart,
         ChartType.errorBar => Icons.error_outline,
+        ChartType.spline => Icons.show_chart,
       };
 
   /// Whether this type renders in a circular chart (pie/doughnut/radial bar)

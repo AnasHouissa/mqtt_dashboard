@@ -236,6 +236,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errorBar => 'Barre d\'erreur';
 
   @override
+  String get spline => 'Courbe (spline)';
+
+  @override
   String get color => 'Couleur';
 
   @override
@@ -461,7 +464,4 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get publishDisabled =>
       'La publication est désactivée pour cette métrique';
-
-  @override
-  String get messageSent => 'Message publié';
 }

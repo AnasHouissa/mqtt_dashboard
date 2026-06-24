@@ -83,6 +83,7 @@
   "doughnut": "Doughnut",
   "pie": "Pie",
   "errorBar": "Error bar",
+  "spline": "Spline",
   "color": "Color",
   "showInChart": "Show in chart",
   "addMetricSeries": "Add metric",
@@ -177,6 +178,5 @@
   "consoleWaiting": "Waiting for messages…",
   "clear": "Clear",
   "publishMessage": "Publish a message",
-  "publishDisabled": "Publishing is disabled for this metric",
-  "messageSent": "Message published"
+  "publishDisabled": "Publishing is disabled for this metric"
 }

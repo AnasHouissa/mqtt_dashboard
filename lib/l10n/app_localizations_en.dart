@@ -233,6 +233,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorBar => 'Error bar';
 
   @override
+  String get spline => 'Spline';
+
+  @override
   String get color => 'Color';
 
   @override
@@ -455,7 +458,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get publishDisabled => 'Publishing is disabled for this metric';
-
-  @override
-  String get messageSent => 'Message published';
 }

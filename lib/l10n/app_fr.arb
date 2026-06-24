@@ -83,6 +83,7 @@
   "doughnut": "Anneau",
   "pie": "Camembert",
   "errorBar": "Barre d'erreur",
+  "spline": "Courbe (spline)",
   "color": "Couleur",
   "showInChart": "Afficher dans le graphique",
   "addMetricSeries": "Ajouter une métrique",
@@ -177,6 +178,5 @@
   "consoleWaiting": "En attente de messages…",
   "clear": "Effacer",
   "publishMessage": "Publier un message",
-  "publishDisabled": "La publication est désactivée pour cette métrique",
-  "messageSent": "Message publié"
+  "publishDisabled": "La publication est désactivée pour cette métrique"
 }
