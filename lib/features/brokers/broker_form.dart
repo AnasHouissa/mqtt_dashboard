@@ -29,13 +29,6 @@ class _BrokerFormState extends ConsumerState<BrokerForm> {
   late final TextEditingController _keepAlive;
   late final TextEditingController _timeout;
   bool _obscurePassword = true;
-  bool _testing = false;
-
-  /// Inline result of the last connection test: the message and whether it
-  /// succeeded. Null until a test has run. Shown in the sheet because a
-  /// ScaffoldMessenger snackbar would render behind this modal bottom sheet.
-  String? _testMessage;
-  bool _testOk = false;
   late bool _secure;
   late bool _retain;
   late int _qos;
@@ -128,47 +121,29 @@ class _BrokerFormState extends ConsumerState<BrokerForm> {
     if (mounted) Navigator.pop(context);
   }
 
-  /// Validates only the fields needed to reach the broker, then attempts a
-  /// throwaway connection and reports the result inline.
+  /// Validates only the fields needed to reach the broker, then opens a dialog
+  /// (on the root navigator, so it sits above this bottom sheet) that shows a
+  /// loading spinner while attempting a throwaway connection and then reports
+  /// success or failure.
   Future<void> _test() async {
-    final l = AppLocalizations.of(context);
     // Surface inline errors on every required field before attempting a connect.
     if (!_formKey.currentState!.validate()) return;
-    final address = _address.text.trim();
-    final port = int.parse(_port.text);
-
-    setState(() {
-      _testing = true;
-      _testMessage = null;
-    });
-    final username = _username.text.trim().isEmpty
-        ? null
-        : _username.text.trim();
-    final reason = await testBrokerConnection(
-      address: address,
-      port: port,
-      username: username,
-      password: _password.text.isEmpty ? null : _password.text,
-      secure: _secure,
-      keepAlive: int.tryParse(_keepAlive.text) ?? 30,
-      connectTimeout: int.tryParse(_timeout.text) ?? 10,
+    await showDialog<void>(
+      context: context,
+      useRootNavigator: true,
+      barrierDismissible: false,
+      builder: (_) => _ConnectionTestDialog(
+        address: _address.text.trim(),
+        port: int.parse(_port.text),
+        username: _username.text.trim().isEmpty
+            ? null
+            : _username.text.trim(),
+        password: _password.text.isEmpty ? null : _password.text,
+        secure: _secure,
+        keepAlive: int.tryParse(_keepAlive.text) ?? 30,
+        connectTimeout: int.tryParse(_timeout.text) ?? 10,
+      ),
     );
-    if (!mounted) return;
-
-    final message = reason == null
-        ? l.connectionSuccessful
-        : l.unableToConnect(switch (reason) {
-            MqttFailureReason.badCredentials => l.reasonBadCredentials,
-            MqttFailureReason.brokerUnavailable => l.reasonBrokerUnavailable,
-            MqttFailureReason.rejected => l.reasonRejected,
-            MqttFailureReason.network => l.reasonNetwork,
-            MqttFailureReason.unknown => l.reasonUnknown,
-          });
-    setState(() {
-      _testing = false;
-      _testOk = reason == null;
-      _testMessage = message;
-    });
   }
 
   String? _positiveIntValidator(String? v) {
@@ -328,41 +303,10 @@ class _BrokerFormState extends ConsumerState<BrokerForm> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     OutlinedButton.icon(
-                      onPressed: _testing ? null : _test,
-                      icon: _testing
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.wifi_tethering),
-                      label: Text(_testing ? l.testing : l.testConnection),
+                      onPressed: _test,
+                      icon: const Icon(Icons.wifi_tethering),
+                      label: Text(l.testConnection),
                     ),
-                    if (_testMessage != null) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Row(
-                        children: [
-                          Icon(
-                            _testOk ? Icons.check_circle : Icons.error,
-                            color: _testOk
-                                ? AppColors.success
-                                : AppColors.danger,
-                            size: 18,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: Text(
-                              _testMessage!,
-                              style: TextStyle(
-                                color: _testOk
-                                    ? AppColors.success
-                                    : AppColors.danger,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -384,6 +328,111 @@ class _BrokerFormState extends ConsumerState<BrokerForm> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Dialog that runs a throwaway connection test and reports the result. Shown
+/// on the root navigator so it sits above the broker-form bottom sheet. Starts
+/// in a loading state and resolves to a success/failure message with a single
+/// Close button.
+class _ConnectionTestDialog extends StatefulWidget {
+  const _ConnectionTestDialog({
+    required this.address,
+    required this.port,
+    required this.username,
+    required this.password,
+    required this.secure,
+    required this.keepAlive,
+    required this.connectTimeout,
+  });
+
+  final String address;
+  final int port;
+  final String? username;
+  final String? password;
+  final bool secure;
+  final int keepAlive;
+  final int connectTimeout;
+
+  @override
+  State<_ConnectionTestDialog> createState() => _ConnectionTestDialogState();
+}
+
+class _ConnectionTestDialogState extends State<_ConnectionTestDialog> {
+  MqttFailureReason? _reason;
+  bool _done = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _run();
+  }
+
+  Future<void> _run() async {
+    final reason = await testBrokerConnection(
+      address: widget.address,
+      port: widget.port,
+      username: widget.username,
+      password: widget.password,
+      secure: widget.secure,
+      keepAlive: widget.keepAlive,
+      connectTimeout: widget.connectTimeout,
+    );
+    if (!mounted) return;
+    setState(() {
+      _reason = reason;
+      _done = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    if (!_done) {
+      return AlertDialog(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: Text(l.testing)),
+          ],
+        ),
+      );
+    }
+    final ok = _reason == null;
+    final message = ok
+        ? l.connectionSuccessful
+        : l.unableToConnect(switch (_reason!) {
+            MqttFailureReason.badCredentials => l.reasonBadCredentials,
+            MqttFailureReason.brokerUnavailable => l.reasonBrokerUnavailable,
+            MqttFailureReason.rejected => l.reasonRejected,
+            MqttFailureReason.network => l.reasonNetwork,
+            MqttFailureReason.unknown => l.reasonUnknown,
+          });
+    return AlertDialog(
+      content: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            ok ? Icons.check_circle : Icons.error,
+            color: ok ? AppColors.success : AppColors.danger,
+            size: 24,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(child: Text(message)),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l.close),
+        ),
+      ],
     );
   }
 }

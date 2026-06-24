@@ -12,6 +12,7 @@
   "password": "Password (optional)",
   "save": "Save",
   "cancel": "Cancel",
+  "close": "Close",
   "delete": "Delete",
   "connect": "Connect",
   "disconnect": "Disconnect",

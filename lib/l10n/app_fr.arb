@@ -12,6 +12,7 @@
   "password": "Mot de passe (optionnel)",
   "save": "Enregistrer",
   "cancel": "Annuler",
+  "close": "Fermer",
   "delete": "Supprimer",
   "connect": "Connecter",
   "disconnect": "Déconnecter",
