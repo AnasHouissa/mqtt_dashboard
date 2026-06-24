@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/color_swatch_picker.dart';
+import '../../widgets/marquee_text.dart';
 import 'chart_type_ui.dart';
 
 /// Mutable description of one chart series while it is being edited. Shared
@@ -38,7 +39,7 @@ class ChartSeriesEditor extends StatelessWidget {
     this.smsSourceNames = const {},
     this.onRemove,
   });
-
+ 
   final List<Metric> metrics;
 
   /// brokerId -> broker name, used to label MQTT metrics so same-named topics
@@ -53,13 +54,18 @@ class ChartSeriesEditor extends StatelessWidget {
   final VoidCallback onToggle;
   final VoidCallback? onRemove;
 
-  /// A metric label that includes its source, e.g. "temperature · Greenhouse"
-  /// or "WATER ALERT · Site A", picking the map by the metric's source kind.
+  /// A metric label of the form "name · topic · source", e.g.
+  /// "temperature · sensors/temp · Greenhouse". The source is picked by the
+  /// metric's source kind and dropped when it can't be resolved.
   String _label(Metric m) {
     final source = m.sourceKind == MetricSourceKind.sms
         ? smsSourceNames[m.smsSourceId]
         : sourceNames[m.brokerId];
-    return source == null ? m.name : '${m.name} · $source';
+    return [
+      m.name,
+      m.topic,
+      ?source,
+    ].join(' · ');
   }
 
   String? get _metricName {
@@ -168,7 +174,7 @@ class ChartSeriesEditor extends StatelessWidget {
           decoration: InputDecoration(labelText: l.selectMetric),
           items: [
             for (final m in metrics)
-              DropdownMenuItem(value: m.id, child: Text(_label(m))),
+              DropdownMenuItem(value: m.id, child: MarqueeText(_label(m))),
           ],
           onChanged: (v) {
             draft.metricId = v;
