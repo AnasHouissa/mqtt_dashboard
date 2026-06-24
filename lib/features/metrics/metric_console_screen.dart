@@ -30,6 +30,7 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
   final _scrollController = ScrollController();
   final _timeFormat = DateFormat('HH:mm:ss.SSS');
   final _publishController = TextEditingController();
+  final _publishFocus = FocusNode();
   StreamSubscription<RawMessage>? _sub;
 
   @override
@@ -53,15 +54,14 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
     _scrollToBottom();
   }
 
-  /// Publishes the current input on the metric's topic, then clears the field.
+  /// Publishes the current input on the metric's topic, clears the field, and
+  /// keeps the keyboard up so the user can send another message right away.
   void _publish() {
     final text = _publishController.text.trim();
     if (text.isEmpty) return;
     ref.read(connectionProvider.notifier).publish(widget.metric.topic, text);
     _publishController.clear();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context).messageSent)),
-    );
+    _publishFocus.requestFocus();
   }
 
   void _scrollToBottom() {
@@ -77,6 +77,7 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
     _sub?.cancel();
     _scrollController.dispose();
     _publishController.dispose();
+    _publishFocus.dispose();
     super.dispose();
   }
 
@@ -228,6 +229,7 @@ class _MetricConsoleScreenState extends ConsumerState<MetricConsoleScreen> {
                   Expanded(
                     child: TextField(
                       controller: _publishController,
+                      focusNode: _publishFocus,
                       enabled: connectedHere,
                       onSubmitted: (_) => canPublish ? _publish() : null,
                       textInputAction: TextInputAction.send,
