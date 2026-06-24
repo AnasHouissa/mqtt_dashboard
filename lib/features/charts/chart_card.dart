@@ -26,7 +26,7 @@ class ChartCard extends ConsumerStatefulWidget {
 }
 
 class _ChartCardState extends ConsumerState<ChartCard> {
-  TimeBucket _bucket = TimeBucket.day;
+  TimeBucket _bucket = TimeBucket.today;
 
   ChartConfig get _chart => widget.item.chart;
   List<ChartSeriesWithMetric> get _series => widget.item.series;
