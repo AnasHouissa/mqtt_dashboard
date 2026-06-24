@@ -76,6 +76,12 @@ class MetricChart extends ConsumerWidget {
       axisMax = axisMax == null ? m.maxValue : (m.maxValue! > axisMax ? m.maxValue : axisMax);
     }
 
+    // Draw the metric's min/max (when set) as dashed horizontal reference lines,
+    // colored to match the series. Independent of useFixedRange — a band shows
+    // whenever a bound exists. When several series share the plot we prefix the
+    // metric name so the lines stay distinguishable.
+    final plotBands = _referenceLines(cartesianInputs, l);
+
     return SfCartesianChart(
       primaryXAxis: DateTimeAxis(
         dateFormat: _axisFormat(bucket),
@@ -85,7 +91,11 @@ class MetricChart extends ConsumerWidget {
       ),
       // Fixed bounds when a series opted in via the metric's useFixedRange;
       // otherwise null minimum/maximum lets the axis auto-scale to the data.
-      primaryYAxis: NumericAxis(minimum: axisMin, maximum: axisMax),
+      primaryYAxis: NumericAxis(
+        minimum: axisMin,
+        maximum: axisMax,
+        plotBands: plotBands,
+      ),
       legend: Legend(isVisible: cartesian.length > 1),
       tooltipBehavior: TooltipBehavior(enable: true),
       zoomPanBehavior: ZoomPanBehavior(
@@ -201,6 +211,41 @@ class MetricChart extends ConsumerWidget {
           color: color,
         ),
     };
+  }
+
+  /// Builds dashed Y-axis reference lines for each cartesian metric's min/max
+  /// bounds (when set). `PlotBand` with `start == end` renders as a single line.
+  List<PlotBand> _referenceLines(
+    List<(ChartSeriesWithMetric, List<AggregatedPoint>)> cartesianInputs,
+    AppLocalizations l,
+  ) {
+    final multi = cartesianInputs.length > 1;
+    final bands = <PlotBand>[];
+    for (final (s, _) in cartesianInputs) {
+      final color = Color(s.series.color);
+      final lineColor = color.withValues(alpha: 0.45);
+      final prefix = multi ? '${s.metric.name} ' : '';
+      PlotBand line(double value, String label, TextAnchor vAlign) => PlotBand(
+            isVisible: true,
+            start: value,
+            end: value,
+            borderColor: lineColor,
+            borderWidth: 1,
+            // Tight dash pattern reads as a dotted line.
+            dashArray: const <double>[1, 3],
+            text: '$prefix$label',
+            textStyle: TextStyle(fontSize: 9, color: lineColor),
+            horizontalTextAlignment: TextAnchor.end,
+            verticalTextAlignment: vAlign,
+          );
+      if (s.metric.minValue != null) {
+        bands.add(line(s.metric.minValue!, l.minValue, TextAnchor.end));
+      }
+      if (s.metric.maxValue != null) {
+        bands.add(line(s.metric.maxValue!, l.maxValue, TextAnchor.start));
+      }
+    }
+    return bands;
   }
 
   /// Renders pie / doughnut / radial-bar series. Each metric's time buckets
