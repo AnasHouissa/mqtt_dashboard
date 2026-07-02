@@ -189,7 +189,9 @@ class MetricChart extends ConsumerWidget {
           name: name,
           color: color,
         ),
-      // Smooth curve through the points.
+      // Smooth curve through the points. Monotonic spline so sharp jumps (e.g.
+      // 1500 → 10) don't overshoot far above/below the actual data range the way
+      // a natural cubic spline does.
       ChartType.spline => SplineSeries<AggregatedPoint, DateTime>(
           dataSource: points,
           xValueMapper: x,
@@ -197,6 +199,7 @@ class MetricChart extends ConsumerWidget {
           name: name,
           color: color,
           width: 2,
+          splineType: SplineType.monotonic,
           markerSettings: const MarkerSettings(isVisible: true),
         ),
       // Straight segments between the points.
