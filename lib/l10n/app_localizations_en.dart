@@ -24,6 +24,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editBroker => 'Edit broker';
 
   @override
+  String get duplicate => 'Duplicate';
+
+  @override
+  String copyOf(String name) {
+    return '$name (copy)';
+  }
+
+  @override
   String get brokerName => 'Broker name';
 
   @override

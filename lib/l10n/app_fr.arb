@@ -5,6 +5,13 @@
   "noBrokers": "Aucun broker. Appuyez sur + pour en ajouter un.",
   "addBroker": "Ajouter un broker",
   "editBroker": "Modifier le broker",
+  "duplicate": "Dupliquer",
+  "copyOf": "{name} (copie)",
+  "@copyOf": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "brokerName": "Nom du broker",
   "brokerAddress": "Adresse",
   "brokerPort": "Port",

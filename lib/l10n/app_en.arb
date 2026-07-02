@@ -5,6 +5,13 @@
   "noBrokers": "No brokers yet. Tap + to add one.",
   "addBroker": "Add broker",
   "editBroker": "Edit broker",
+  "duplicate": "Duplicate",
+  "copyOf": "{name} (copy)",
+  "@copyOf": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "brokerName": "Broker name",
   "brokerAddress": "Address",
   "brokerPort": "Port",

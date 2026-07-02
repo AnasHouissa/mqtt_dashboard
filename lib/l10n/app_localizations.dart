@@ -128,6 +128,18 @@ abstract class AppLocalizations {
   /// **'Edit broker'**
   String get editBroker;
 
+  /// No description provided for @duplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get duplicate;
+
+  /// No description provided for @copyOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (copy)'**
+  String copyOf(String name);
+
   /// No description provided for @brokerName.
   ///
   /// In en, this message translates to:

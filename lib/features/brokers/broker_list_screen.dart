@@ -54,6 +54,10 @@ class BrokersTab extends ConsumerWidget {
                   onSelected: (value) async {
                     if (value == 'edit') {
                       await showBrokerForm(context, broker: broker);
+                    } else if (value == 'duplicate') {
+                      await showBrokerForm(context,
+                          template:
+                              broker.copyWith(name: l.copyOf(broker.name)));
                     } else if (value == 'delete') {
                       if (await confirmDelete(context,
                           message: l.deleteBrokerBody(broker.name))) {
@@ -65,6 +69,8 @@ class BrokersTab extends ConsumerWidget {
                   },
                   itemBuilder: (context) => [
                     PopupMenuItem(value: 'edit', child: Text(l.editBroker)),
+                    PopupMenuItem(
+                        value: 'duplicate', child: Text(l.duplicate)),
                     PopupMenuItem(
                       value: 'delete',
                       child: Text(l.delete,
