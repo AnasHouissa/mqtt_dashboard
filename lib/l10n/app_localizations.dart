@@ -542,6 +542,12 @@ abstract class AppLocalizations {
   /// **'Spline'**
   String get spline;
 
+  /// No description provided for @line.
+  ///
+  /// In en, this message translates to:
+  /// **'Line'**
+  String get line;
+
   /// No description provided for @color.
   ///
   /// In en, this message translates to:

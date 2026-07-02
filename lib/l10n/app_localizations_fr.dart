@@ -239,6 +239,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get spline => 'Courbe (spline)';
 
   @override
+  String get line => 'Ligne';
+
+  @override
   String get color => 'Couleur';
 
   @override

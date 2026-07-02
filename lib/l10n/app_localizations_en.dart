@@ -236,6 +236,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spline => 'Spline';
 
   @override
+  String get line => 'Line';
+
+  @override
   String get color => 'Color';
 
   @override

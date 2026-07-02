@@ -19,6 +19,7 @@ enum ChartType {
   pie,
   errorBar,
   spline,
+  line,
 }
 
 /// Time bucket used to aggregate readings for histograms / filtering.

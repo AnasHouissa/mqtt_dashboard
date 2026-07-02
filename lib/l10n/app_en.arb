@@ -84,6 +84,7 @@
   "pie": "Pie",
   "errorBar": "Error bar",
   "spline": "Spline",
+  "line": "Line",
   "color": "Color",
   "showInChart": "Show in chart",
   "addMetricSeries": "Add metric",

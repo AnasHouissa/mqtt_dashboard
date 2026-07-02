@@ -199,6 +199,16 @@ class MetricChart extends ConsumerWidget {
           width: 2,
           markerSettings: const MarkerSettings(isVisible: true),
         ),
+      // Straight segments between the points.
+      ChartType.line => LineSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+          width: 2,
+          markerSettings: const MarkerSettings(isVisible: true),
+        ),
       // Circular types never reach here; they are handled by the circular chart.
       ChartType.radialBar ||
       ChartType.doughnut ||

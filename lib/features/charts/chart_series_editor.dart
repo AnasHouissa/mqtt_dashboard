@@ -186,7 +186,7 @@ class ChartSeriesEditor extends StatelessWidget {
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
-            for (final type in ChartType.values)
+            for (final type in ChartTypeUi.displayOrder)
               ChoiceChip(
                 selected: draft.type == type,
                 showCheckmark: false,

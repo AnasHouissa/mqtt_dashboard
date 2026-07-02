@@ -84,6 +84,7 @@
   "pie": "Camembert",
   "errorBar": "Barre d'erreur",
   "spline": "Courbe (spline)",
+  "line": "Ligne",
   "color": "Couleur",
   "showInChart": "Afficher dans le graphique",
   "addMetricSeries": "Ajouter une métrique",
