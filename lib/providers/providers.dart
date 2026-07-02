@@ -98,13 +98,15 @@ final chartsProvider = StreamProvider.autoDispose
     .family<List<ChartWithSeries>, int>((ref, dashboardId) =>
         ref.watch(dashboardRepositoryProvider).watchCharts(dashboardId));
 
-/// Aggregated chart data, keyed by metric + time bucket.
-typedef AggKey = ({int metricId, TimeBucket bucket});
+/// Aggregated chart data, keyed by metric + time bucket + the selected period.
+/// [anchor] must be normalized to the period start by the caller so identical
+/// selections share a cache entry (records compare by value).
+typedef AggKey = ({int metricId, TimeBucket bucket, DateTime anchor});
 
 final aggregatedProvider = StreamProvider.autoDispose
     .family<List<AggregatedPoint>, AggKey>((ref, key) => ref
         .watch(readingRepositoryProvider)
-        .watchAggregated(key.metricId, key.bucket));
+        .watchAggregated(key.metricId, key.bucket, key.anchor));
 
 // --- Active connection ---
 

@@ -578,12 +578,6 @@ abstract class AppLocalizations {
   /// **'Chart title (optional)'**
   String get chartTitle;
 
-  /// No description provided for @today.
-  ///
-  /// In en, this message translates to:
-  /// **'Today'**
-  String get today;
-
   /// No description provided for @day.
   ///
   /// In en, this message translates to:
@@ -601,6 +595,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Year'**
   String get year;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @pickPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Select period'**
+  String get pickPeriod;
+
+  /// No description provided for @selectMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Select month'**
+  String get selectMonth;
+
+  /// No description provided for @selectYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Select year'**
+  String get selectYear;
 
   /// No description provided for @exportCsv.
   ///

@@ -26,7 +26,20 @@ class ChartCard extends ConsumerStatefulWidget {
 }
 
 class _ChartCardState extends ConsumerState<ChartCard> {
-  TimeBucket _bucket = TimeBucket.today;
+  TimeBucket _bucket = TimeBucket.day;
+  DateTime _anchor = defaultAnchor(TimeBucket.day);
+
+  bool get _isDefault => _anchor == defaultAnchor(_bucket);
+
+  void _selectBucket(TimeBucket b) => setState(() {
+    _bucket = b;
+    _anchor = defaultAnchor(b); // start each tab at its current period
+  });
+
+  Future<void> _pickPeriod() async {
+    final picked = await pickPeriod(context, _bucket, _anchor);
+    if (picked != null) setState(() => _anchor = picked);
+  }
 
   ChartConfig get _chart => widget.item.chart;
   List<ChartSeriesWithMetric> get _series => widget.item.series;
@@ -99,6 +112,7 @@ class _ChartCardState extends ConsumerState<ChartCard> {
         builder: (_) => ChartFullscreenScreen(
           series: _series,
           initialBucket: _bucket,
+          initialAnchor: _anchor,
           title: _title,
         ),
       ),
@@ -182,13 +196,28 @@ class _ChartCardState extends ConsumerState<ChartCard> {
             alignment: Alignment.centerLeft,
             child: TimeFilter(
               value: _bucket,
-              onChanged: (b) => setState(() => _bucket = b),
+              onChanged: _selectBucket,
+              onPickPeriod: _pickPeriod,
             ),
           ),
+          if (!_isDefault) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: PeriodChip(
+                label: formatPeriod(context, _bucket, _anchor),
+                onReset: () => setState(() => _anchor = defaultAnchor(_bucket)),
+              ),
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
           SizedBox(
             height: 240,
-            child: MetricChart(series: _series, bucket: _bucket),
+            child: MetricChart(
+              series: _series,
+              bucket: _bucket,
+              anchor: _anchor,
+            ),
           ),
         ],
       ),

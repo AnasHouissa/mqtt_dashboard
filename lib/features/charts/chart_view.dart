@@ -13,10 +13,18 @@ import 'chart_type_ui.dart';
 /// Each visible series is drawn with its own type and color. Reused in the
 /// dashboard card and the fullscreen view.
 class MetricChart extends ConsumerWidget {
-  const MetricChart({super.key, required this.series, required this.bucket});
+  const MetricChart({
+    super.key,
+    required this.series,
+    required this.bucket,
+    required this.anchor,
+  });
 
   final List<ChartSeriesWithMetric> series;
   final TimeBucket bucket;
+
+  /// Start of the selected period (day/month/year) the chart is scoped to.
+  final DateTime anchor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,7 +38,9 @@ class MetricChart extends ConsumerWidget {
         (
           s,
           ref.watch(
-            aggregatedProvider((metricId: s.metric.id, bucket: bucket)),
+            aggregatedProvider(
+              (metricId: s.metric.id, bucket: bucket, anchor: anchor),
+            ),
           ),
         ),
     ];
@@ -307,29 +317,25 @@ class MetricChart extends ConsumerWidget {
 
   static DateFormat _axisFormat(TimeBucket bucket) {
     switch (bucket) {
-      case TimeBucket.today:
-        return DateFormat.Hm(); // hour:minute
       case TimeBucket.day:
-        return DateFormat.MMMd();
+        return DateFormat.Hm(); // hour:minute within the chosen day
       case TimeBucket.month:
-        return DateFormat.yMMM();
+        return DateFormat.MMMd(); // day-of-month within the chosen month
       case TimeBucket.year:
-        return DateFormat.y();
+        return DateFormat.MMM(); // month name across the chosen year
     }
   }
 
   static DateTimeIntervalType _intervalType(TimeBucket bucket) {
     switch (bucket) {
-      case TimeBucket.today:
+      case TimeBucket.day:
         // Raw readings can span minutes or hours; let the axis pick the unit so
         // ticks/labels always fall inside the visible range.
         return DateTimeIntervalType.auto;
-      case TimeBucket.day:
-        return DateTimeIntervalType.days;
       case TimeBucket.month:
-        return DateTimeIntervalType.months;
+        return DateTimeIntervalType.days;
       case TimeBucket.year:
-        return DateTimeIntervalType.years;
+        return DateTimeIntervalType.months;
     }
   }
 }
