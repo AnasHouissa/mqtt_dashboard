@@ -20,6 +20,7 @@ extension ChartTypeUi on ChartType {
         ChartType.pie => l.pie,
         ChartType.errorBar => l.errorBar,
         ChartType.spline => l.spline,
+        ChartType.line => l.line,
       };
 
   IconData get icon => switch (this) {
@@ -36,6 +37,7 @@ extension ChartTypeUi on ChartType {
         ChartType.pie => Icons.pie_chart,
         ChartType.errorBar => Icons.error_outline,
         ChartType.spline => Icons.show_chart,
+        ChartType.line => Icons.timeline,
       };
 
   /// Whether this type renders in a circular chart (pie/doughnut/radial bar)
@@ -44,4 +46,15 @@ extension ChartTypeUi on ChartType {
       this == ChartType.pie ||
       this == ChartType.doughnut ||
       this == ChartType.radialBar;
+
+  /// Order the type chips are offered in the selector. Line and spline lead
+  /// (the most common choices); the rest follow in their enum order. Kept
+  /// separate from [ChartType.values] so display order stays independent of the
+  /// enum's storage order.
+  static List<ChartType> get displayOrder => [
+        ChartType.line,
+        ChartType.spline,
+        for (final t in ChartType.values)
+          if (t != ChartType.line && t != ChartType.spline) t,
+      ];
 }

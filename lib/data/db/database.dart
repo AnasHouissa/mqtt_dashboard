@@ -19,10 +19,11 @@ enum ChartType {
   pie,
   errorBar,
   spline,
+  line,
 }
 
 /// Time bucket used to aggregate readings for histograms / filtering.
-enum TimeBucket { today, day, month, year }
+enum TimeBucket { day, month, year }
 
 /// Which kind of data source a metric draws its readings from. Stored as an
 /// int index; new values are appended (never reordered). `mqtt` must stay first

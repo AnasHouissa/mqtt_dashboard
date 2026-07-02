@@ -13,11 +13,13 @@ class ChartFullscreenScreen extends StatefulWidget {
     super.key,
     required this.series,
     required this.initialBucket,
+    required this.initialAnchor,
     this.title,
   });
 
   final List<ChartSeriesWithMetric> series;
   final TimeBucket initialBucket;
+  final DateTime initialAnchor;
   final String? title;
 
   @override
@@ -26,6 +28,19 @@ class ChartFullscreenScreen extends StatefulWidget {
 
 class _ChartFullscreenScreenState extends State<ChartFullscreenScreen> {
   late TimeBucket _bucket = widget.initialBucket;
+  late DateTime _anchor = widget.initialAnchor;
+
+  bool get _isDefault => _anchor == defaultAnchor(_bucket);
+
+  void _selectBucket(TimeBucket b) => setState(() {
+    _bucket = b;
+    _anchor = defaultAnchor(b);
+  });
+
+  Future<void> _pickPeriod() async {
+    final picked = await pickPeriod(context, _bucket, _anchor);
+    if (picked != null) setState(() => _anchor = picked);
+  }
 
   @override
   void initState() {
@@ -68,7 +83,8 @@ class _ChartFullscreenScreenState extends State<ChartFullscreenScreen> {
                   ),
                   TimeFilter(
                     value: _bucket,
-                    onChanged: (b) => setState(() => _bucket = b),
+                    onChanged: _selectBucket,
+                    onPickPeriod: _pickPeriod,
                   ),
                   IconButton(
                     tooltip: l.cancel,
@@ -77,9 +93,22 @@ class _ChartFullscreenScreenState extends State<ChartFullscreenScreen> {
                   ),
                 ],
               ),
+              if (!_isDefault)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: PeriodChip(
+                    label: formatPeriod(context, _bucket, _anchor),
+                    onReset: () =>
+                        setState(() => _anchor = defaultAnchor(_bucket)),
+                  ),
+                ),
               const SizedBox(height: 8),
               Expanded(
-                child: MetricChart(series: widget.series, bucket: _bucket),
+                child: MetricChart(
+                  series: widget.series,
+                  bucket: _bucket,
+                  anchor: _anchor,
+                ),
               ),
             ],
           ),

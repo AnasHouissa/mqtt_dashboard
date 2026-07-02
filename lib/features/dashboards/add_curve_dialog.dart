@@ -32,8 +32,9 @@ class _AddCurveSheetState extends ConsumerState<AddCurveSheet> {
   final _drafts = <SeriesDraft>[];
 
   /// Index of the currently expanded series card (-1 = all collapsed). Only one
-  /// is open at a time to keep the list short.
-  int _expanded = 0;
+  /// is open at a time to keep the list short. Starts collapsed so both adding
+  /// and editing open with a compact overview.
+  int _expanded = -1;
 
   bool get _isEditing => widget.existing != null;
 

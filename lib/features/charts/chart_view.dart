@@ -13,10 +13,18 @@ import 'chart_type_ui.dart';
 /// Each visible series is drawn with its own type and color. Reused in the
 /// dashboard card and the fullscreen view.
 class MetricChart extends ConsumerWidget {
-  const MetricChart({super.key, required this.series, required this.bucket});
+  const MetricChart({
+    super.key,
+    required this.series,
+    required this.bucket,
+    required this.anchor,
+  });
 
   final List<ChartSeriesWithMetric> series;
   final TimeBucket bucket;
+
+  /// Start of the selected period (day/month/year) the chart is scoped to.
+  final DateTime anchor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,7 +38,9 @@ class MetricChart extends ConsumerWidget {
         (
           s,
           ref.watch(
-            aggregatedProvider((metricId: s.metric.id, bucket: bucket)),
+            aggregatedProvider(
+              (metricId: s.metric.id, bucket: bucket, anchor: anchor),
+            ),
           ),
         ),
     ];
@@ -189,7 +199,11 @@ class MetricChart extends ConsumerWidget {
           name: name,
           color: color,
         ),
-      // Smooth curve through the points.
+      // Smooth curve through the points. Monotonic spline so sharp jumps (e.g.
+      // 1500 → 10) don't overshoot far above/below the actual data range the way
+      // a natural cubic spline does. `animationDuration: 0` skips the slow
+      // draw-in so the curve appears as soon as its data is ready (also cheaper
+      // for the large raw month/year datasets).
       ChartType.spline => SplineSeries<AggregatedPoint, DateTime>(
           dataSource: points,
           xValueMapper: x,
@@ -197,6 +211,19 @@ class MetricChart extends ConsumerWidget {
           name: name,
           color: color,
           width: 2,
+          splineType: SplineType.monotonic,
+          animationDuration: 0,
+          markerSettings: const MarkerSettings(isVisible: true),
+        ),
+      // Straight segments between the points.
+      ChartType.line => LineSeries<AggregatedPoint, DateTime>(
+          dataSource: points,
+          xValueMapper: x,
+          yValueMapper: y,
+          name: name,
+          color: color,
+          width: 2,
+          animationDuration: 0,
           markerSettings: const MarkerSettings(isVisible: true),
         ),
       // Circular types never reach here; they are handled by the circular chart.
@@ -294,29 +321,25 @@ class MetricChart extends ConsumerWidget {
 
   static DateFormat _axisFormat(TimeBucket bucket) {
     switch (bucket) {
-      case TimeBucket.today:
-        return DateFormat.Hm(); // hour:minute
       case TimeBucket.day:
-        return DateFormat.MMMd();
+        return DateFormat.Hm(); // hour:minute within the chosen day
       case TimeBucket.month:
-        return DateFormat.yMMM();
+        return DateFormat.MMMd(); // day-of-month within the chosen month
       case TimeBucket.year:
-        return DateFormat.y();
+        return DateFormat.MMM(); // month name across the chosen year
     }
   }
 
   static DateTimeIntervalType _intervalType(TimeBucket bucket) {
     switch (bucket) {
-      case TimeBucket.today:
+      case TimeBucket.day:
         // Raw readings can span minutes or hours; let the axis pick the unit so
         // ticks/labels always fall inside the visible range.
         return DateTimeIntervalType.auto;
-      case TimeBucket.day:
-        return DateTimeIntervalType.days;
       case TimeBucket.month:
-        return DateTimeIntervalType.months;
+        return DateTimeIntervalType.days;
       case TimeBucket.year:
-        return DateTimeIntervalType.years;
+        return DateTimeIntervalType.months;
     }
   }
 }

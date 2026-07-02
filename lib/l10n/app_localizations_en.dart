@@ -236,6 +236,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spline => 'Spline';
 
   @override
+  String get line => 'Line';
+
+  @override
   String get color => 'Color';
 
   @override
@@ -251,9 +254,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chartTitle => 'Chart title (optional)';
 
   @override
-  String get today => 'Today';
-
-  @override
   String get day => 'Day';
 
   @override
@@ -261,6 +261,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get year => 'Year';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get pickPeriod => 'Select period';
+
+  @override
+  String get selectMonth => 'Select month';
+
+  @override
+  String get selectYear => 'Select year';
 
   @override
   String get exportCsv => 'Export CSV';

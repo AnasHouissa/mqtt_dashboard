@@ -27,64 +27,61 @@ class ReadingRepository {
             ..orderBy([(r) => OrderingTerm(expression: r.timestamp)]))
           .get();
 
-  /// SQLite strftime format string for a bucket.
-  static String _format(TimeBucket bucket) {
+  /// The `[start, end)` unix-second range covered by [bucket] anchored at
+  /// [anchor]. Bounds are built from *local* calendar boundaries (Dart's
+  /// `DateTime(y, m, d)` is local), so `millisecondsSinceEpoch` yields the
+  /// correct absolute unix second to compare against the stored `timestamp`
+  /// column. Using `d + 1` / `month + 1` lets Dart handle month lengths and
+  /// DST rollover.
+  static ({int start, int end}) _range(TimeBucket bucket, DateTime anchor) {
+    final DateTime start, end;
     switch (bucket) {
-      case TimeBucket.today:
-        return '%Y-%m-%d %H'; // group by hour within the day
       case TimeBucket.day:
-        return '%Y-%m-%d';
+        start = DateTime(anchor.year, anchor.month, anchor.day);
+        end = DateTime(anchor.year, anchor.month, anchor.day + 1);
       case TimeBucket.month:
-        return '%Y-%m';
+        start = DateTime(anchor.year, anchor.month, 1);
+        end = DateTime(anchor.year, anchor.month + 1, 1);
       case TimeBucket.year:
-        return '%Y';
+        start = DateTime(anchor.year, 1, 1);
+        end = DateTime(anchor.year + 1, 1, 1);
     }
+    return (
+      start: start.millisecondsSinceEpoch ~/ 1000,
+      end: end.millisecondsSinceEpoch ~/ 1000,
+    );
   }
 
-  /// Reactive aggregation: average value per [bucket] for a metric.
+  /// Reactive chart data for a metric over the period identified by [bucket] +
+  /// [anchor]. Every bucket (Day / Month / Year) plots the raw readings in its
+  /// window exactly as received — no averaging — so each value shows up
+  /// distinctly. The buckets differ only in how wide the window is.
   ///
-  /// `timestamp` is stored as unix seconds by Drift, so we convert with
-  /// `datetime(timestamp, 'unixepoch', 'localtime')` before formatting.
+  /// `timestamp` is stored as unix seconds by Drift; the window is filtered on
+  /// that raw column so the query stays index-friendly.
   Stream<List<AggregatedPoint>> watchAggregated(
     int metricId,
     TimeBucket bucket,
+    DateTime anchor,
   ) {
-    // "Today" plots each individual reading as its own point (no averaging), so
-    // several values sent within the same hour each show up distinctly. The
-    // Day/Month/Year views instead summarise with a per-bucket average.
-    if (bucket == TimeBucket.today) return _watchTodayRaw(metricId);
-
-    final fmt = _format(bucket);
-    final query = _db.customSelect(
-      "SELECT strftime('$fmt', datetime(timestamp, 'unixepoch', 'localtime')) "
-      "AS bucket, AVG(value) AS avg_value "
-      "FROM readings WHERE metric_id = ?1 "
-      "GROUP BY bucket ORDER BY bucket",
-      variables: [Variable.withInt(metricId)],
-      readsFrom: {_db.readings},
-    );
-
-    return query.watch().map((rows) {
-      return rows.map((row) {
-        final bucketLabel = row.read<String>('bucket');
-        return AggregatedPoint(
-          _parseBucket(bucketLabel, bucket),
-          row.read<double>('avg_value'),
-        );
-      }).toList();
-    });
+    return _watchRaw(metricId, _range(bucket, anchor));
   }
 
-  /// Every raw reading for the current local day, each as its own point at its
-  /// exact timestamp (ordered oldest → newest).
-  Stream<List<AggregatedPoint>> _watchTodayRaw(int metricId) {
+  /// Every raw reading in `[range.start, range.end)`, each as its own point at
+  /// its exact timestamp (ordered oldest → newest).
+  Stream<List<AggregatedPoint>> _watchRaw(
+    int metricId,
+    ({int start, int end}) range,
+  ) {
     final query = _db.customSelect(
-      "SELECT datetime(timestamp, 'unixepoch', 'localtime') AS ts, value "
-      "FROM readings WHERE metric_id = ?1 "
-      "AND date(datetime(timestamp, 'unixepoch', 'localtime')) "
-      "= date('now', 'localtime') "
+      "SELECT timestamp AS ts, value FROM readings "
+      "WHERE metric_id = ?1 AND timestamp >= ?2 AND timestamp < ?3 "
       "ORDER BY timestamp",
-      variables: [Variable.withInt(metricId)],
+      variables: [
+        Variable.withInt(metricId),
+        Variable.withInt(range.start),
+        Variable.withInt(range.end),
+      ],
       readsFrom: {_db.readings},
     );
 
@@ -92,24 +89,11 @@ class ReadingRepository {
       return rows
           .map(
             (row) => AggregatedPoint(
-              DateTime.parse(row.read<String>('ts')),
+              DateTime.fromMillisecondsSinceEpoch(row.read<int>('ts') * 1000),
               row.read<double>('value'),
             ),
           )
           .toList();
     });
-  }
-
-  static DateTime _parseBucket(String label, TimeBucket bucket) {
-    switch (bucket) {
-      case TimeBucket.today:
-        return DateTime.parse('$label:00:00'); // "YYYY-MM-DD HH" -> on the hour
-      case TimeBucket.day:
-        return DateTime.parse(label); // YYYY-MM-DD
-      case TimeBucket.month:
-        return DateTime.parse('$label-01'); // YYYY-MM
-      case TimeBucket.year:
-        return DateTime(int.parse(label)); // YYYY
-    }
   }
 }

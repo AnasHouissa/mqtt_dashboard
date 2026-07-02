@@ -4,6 +4,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/db/database.dart';
 import '../data/repositories/broker_repository.dart';
@@ -97,13 +98,15 @@ final chartsProvider = StreamProvider.autoDispose
     .family<List<ChartWithSeries>, int>((ref, dashboardId) =>
         ref.watch(dashboardRepositoryProvider).watchCharts(dashboardId));
 
-/// Aggregated chart data, keyed by metric + time bucket.
-typedef AggKey = ({int metricId, TimeBucket bucket});
+/// Aggregated chart data, keyed by metric + time bucket + the selected period.
+/// [anchor] must be normalized to the period start by the caller so identical
+/// selections share a cache entry (records compare by value).
+typedef AggKey = ({int metricId, TimeBucket bucket, DateTime anchor});
 
 final aggregatedProvider = StreamProvider.autoDispose
     .family<List<AggregatedPoint>, AggKey>((ref, key) => ref
         .watch(readingRepositoryProvider)
-        .watchAggregated(key.metricId, key.bucket));
+        .watchAggregated(key.metricId, key.bucket, key.anchor));
 
 // --- Active connection ---
 
@@ -349,13 +352,40 @@ final smsPermissionProvider =
 
 // --- App locale ---
 
+/// Holds the [SharedPreferences] instance. Overridden in `main()` once prefs
+/// have loaded, so it can be read synchronously everywhere else.
+final sharedPreferencesProvider = Provider<SharedPreferences>(
+  (ref) => throw UnimplementedError('sharedPreferencesProvider must be overridden'),
+);
+
+/// Persisted app-locale selection. `null` means "follow the system locale".
+/// The chosen language code is stored under [_localeKey] so it survives
+/// restarts.
 class LocaleController extends StateNotifier<Locale?> {
-  LocaleController() : super(null); // null => follow system
-  void setLocale(Locale? locale) => state = locale;
+  LocaleController(this._prefs) : super(_read(_prefs));
+
+  static const _localeKey = 'app_locale';
+
+  final SharedPreferences _prefs;
+
+  static Locale? _read(SharedPreferences prefs) {
+    final code = prefs.getString(_localeKey);
+    return code == null ? null : Locale(code);
+  }
+
+  void setLocale(Locale? locale) {
+    state = locale;
+    if (locale == null) {
+      _prefs.remove(_localeKey);
+    } else {
+      _prefs.setString(_localeKey, locale.languageCode);
+    }
+  }
 }
 
-final localeProvider =
-    StateNotifierProvider<LocaleController, Locale?>((ref) => LocaleController());
+final localeProvider = StateNotifierProvider<LocaleController, Locale?>(
+  (ref) => LocaleController(ref.watch(sharedPreferencesProvider)),
+);
 
 // --- App metadata ---
 
