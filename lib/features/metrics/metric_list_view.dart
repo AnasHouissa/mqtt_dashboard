@@ -66,6 +66,11 @@ class MetricListView extends ConsumerWidget {
                         if (value == 'edit') {
                           await showMetricForm(context,
                               brokerId: broker.id, metric: metric);
+                        } else if (value == 'duplicate') {
+                          await showMetricForm(context,
+                              brokerId: broker.id,
+                              template: metric.copyWith(
+                                  name: l.copyOf(metric.name)));
                         } else if (value == 'delete') {
                           if (await confirmDelete(context,
                               message: l.deleteNamedBody(metric.name))) {
@@ -80,6 +85,8 @@ class MetricListView extends ConsumerWidget {
                       },
                       itemBuilder: (context) => [
                         PopupMenuItem(value: 'edit', child: Text(l.editMetric)),
+                        PopupMenuItem(
+                            value: 'duplicate', child: Text(l.duplicate)),
                         PopupMenuItem(
                           value: 'delete',
                           child: Text(l.delete,

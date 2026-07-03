@@ -24,6 +24,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get editBroker => 'Modifier le broker';
 
   @override
+  String get duplicate => 'Dupliquer';
+
+  @override
+  String copyOf(String name) {
+    return '$name (copie)';
+  }
+
+  @override
   String get brokerName => 'Nom du broker';
 
   @override

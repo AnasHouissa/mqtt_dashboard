@@ -11,10 +11,21 @@ import '../../widgets/sheet_header.dart';
 
 /// Bottom-sheet form to create or edit a metric.
 class MetricForm extends ConsumerStatefulWidget {
-  const MetricForm({super.key, required this.brokerId, this.metric});
+  const MetricForm({
+    super.key,
+    required this.brokerId,
+    this.metric,
+    this.template,
+  });
 
   final int brokerId;
+
+  /// Non-null → editing an existing metric (save runs an update).
   final Metric? metric;
+
+  /// Non-null → seed the fields from this metric but still save as a new one
+  /// (used by "Duplicate"). Ignored when [metric] is non-null.
+  final Metric? template;
 
   @override
   ConsumerState<MetricForm> createState() => _MetricFormState();
@@ -32,7 +43,7 @@ class _MetricFormState extends ConsumerState<MetricForm> {
   @override
   void initState() {
     super.initState();
-    final m = widget.metric;
+    final m = widget.metric ?? widget.template;
     _name = TextEditingController(text: m?.name ?? '');
     _topic = TextEditingController(text: m?.topic ?? '');
     _min = TextEditingController(text: m?.minValue?.toString() ?? '');
@@ -219,10 +230,12 @@ Future<void> showMetricForm(
   BuildContext context, {
   required int brokerId,
   Metric? metric,
+  Metric? template,
 }) {
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    builder: (_) => MetricForm(brokerId: brokerId, metric: metric),
+    builder: (_) =>
+        MetricForm(brokerId: brokerId, metric: metric, template: template),
   );
 }

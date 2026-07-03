@@ -11,9 +11,14 @@ import '../../widgets/sheet_header.dart';
 
 /// Bottom-sheet form to create or edit a broker.
 class BrokerForm extends ConsumerStatefulWidget {
-  const BrokerForm({super.key, this.broker});
+  const BrokerForm({super.key, this.broker, this.template});
 
+  /// Non-null → editing an existing broker (save runs an update).
   final Broker? broker;
+
+  /// Non-null → seed the fields from this broker but still save as a new one
+  /// (used by "Duplicate"). Ignored when [broker] is non-null.
+  final Broker? template;
 
   @override
   ConsumerState<BrokerForm> createState() => _BrokerFormState();
@@ -36,7 +41,7 @@ class _BrokerFormState extends ConsumerState<BrokerForm> {
   @override
   void initState() {
     super.initState();
-    final b = widget.broker;
+    final b = widget.broker ?? widget.template;
     _name = TextEditingController(text: b?.name ?? '');
     _address = TextEditingController(text: b?.address ?? '');
     _port = TextEditingController(text: b?.port.toString() ?? '1883');
@@ -438,10 +443,14 @@ class _ConnectionTestDialogState extends State<_ConnectionTestDialog> {
 }
 
 /// Helper to present the form as a modal bottom sheet.
-Future<void> showBrokerForm(BuildContext context, {Broker? broker}) {
+Future<void> showBrokerForm(
+  BuildContext context, {
+  Broker? broker,
+  Broker? template,
+}) {
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    builder: (_) => BrokerForm(broker: broker),
+    builder: (_) => BrokerForm(broker: broker, template: template),
   );
 }
