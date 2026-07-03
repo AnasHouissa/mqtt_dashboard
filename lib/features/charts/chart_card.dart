@@ -10,9 +10,13 @@ import '../../widgets/app_card.dart';
 import '../../widgets/circle_icon.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../dashboards/add_curve_dialog.dart';
+import '../dashboards/leak_grid_form.dart';
+import '../dashboards/stat_tile_form.dart';
 import 'chart_fullscreen.dart';
 import 'chart_type_ui.dart';
 import 'chart_view.dart';
+import 'sensor_grid_view.dart';
+import 'stat_tile_view.dart';
 import 'time_filter.dart';
 
 /// A dashboard chart with its own time filter, fullscreen + export + edit/delete.
@@ -44,9 +48,38 @@ class _ChartCardState extends ConsumerState<ChartCard> {
   ChartConfig get _chart => widget.item.chart;
   List<ChartSeriesWithMetric> get _series => widget.item.series;
 
+  /// Custom "current-state" component (sensor grid / stat tile) rather than a
+  /// time-series chart. Such a chart always has exactly one series.
+  ChartType get _type => _series.first.series.type;
+  bool get _isCustom => _type.isCustomComponent;
+
   String get _title {
     if (_chart.title?.isNotEmpty == true) return _chart.title!;
     return _series.map((s) => s.metric.name).join(', ');
+  }
+
+  /// Open the right editor for this card's kind.
+  Future<void> _edit() async {
+    switch (_type) {
+      case ChartType.sensorGrid:
+        await showLeakGridForm(
+          context,
+          dashboardId: _chart.dashboardId,
+          existing: widget.item,
+        );
+      case ChartType.statTile:
+        await showStatTileForm(
+          context,
+          dashboardId: _chart.dashboardId,
+          existing: widget.item,
+        );
+      default:
+        await showAddCurveSheet(
+          context,
+          dashboardId: _chart.dashboardId,
+          existing: widget.item,
+        );
+    }
   }
 
   Future<void> _exportCsv(Metric metric) async {
@@ -119,6 +152,14 @@ class _ChartCardState extends ConsumerState<ChartCard> {
     );
   }
 
+  Widget _buildCustom() {
+    return switch (_type) {
+      ChartType.sensorGrid => SensorGridView(item: _series.first),
+      ChartType.statTile => StatTileView(item: _series.first),
+      _ => const SizedBox.shrink(),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -130,7 +171,7 @@ class _ChartCardState extends ConsumerState<ChartCard> {
         children: [
           Row(
             children: [
-              CircleIcon(icon: _series.first.series.type.icon, size: 38),
+              CircleIcon(icon: _type.icon, size: 38),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
@@ -144,21 +185,18 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                   ),
                 ),
               ),
-              IconButton(
-                tooltip: l.fullscreen,
-                icon: const Icon(Icons.fullscreen),
-                onPressed: _openFullscreen,
-              ),
+              if (!_isCustom)
+                IconButton(
+                  tooltip: l.fullscreen,
+                  icon: const Icon(Icons.fullscreen),
+                  onPressed: _openFullscreen,
+                ),
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
                 onSelected: (value) async {
                   switch (value) {
                     case 'edit':
-                      await showAddCurveSheet(
-                        context,
-                        dashboardId: _chart.dashboardId,
-                        existing: widget.item,
-                      );
+                      await _edit();
                     case 'csv':
                       final m = await _resolveMetric();
                       if (m != null) await _exportCsv(m);
@@ -178,8 +216,11 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 },
                 itemBuilder: (context) => [
                   PopupMenuItem(value: 'edit', child: Text(l.editCurve)),
-                  PopupMenuItem(value: 'csv', child: Text(l.exportCsv)),
-                  PopupMenuItem(value: 'pdf', child: Text(l.exportPdf)),
+                  // Export is time-series only; custom components have no series.
+                  if (!_isCustom) ...[
+                    PopupMenuItem(value: 'csv', child: Text(l.exportCsv)),
+                    PopupMenuItem(value: 'pdf', child: Text(l.exportPdf)),
+                  ],
                   PopupMenuItem(
                     value: 'delete',
                     child: Text(
@@ -192,33 +233,40 @@ class _ChartCardState extends ConsumerState<ChartCard> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TimeFilter(
-              value: _bucket,
-              onChanged: _selectBucket,
-              onPickPeriod: _pickPeriod,
-            ),
-          ),
-          if (!_isDefault) ...[
-            const SizedBox(height: AppSpacing.sm),
+          // Custom components show their live state; the time filter and
+          // aggregated chart only apply to time-series charts.
+          if (_isCustom)
+            _buildCustom()
+          else ...[
             Align(
               alignment: Alignment.centerLeft,
-              child: PeriodChip(
-                label: formatPeriod(context, _bucket, _anchor),
-                onReset: () => setState(() => _anchor = defaultAnchor(_bucket)),
+              child: TimeFilter(
+                value: _bucket,
+                onChanged: _selectBucket,
+                onPickPeriod: _pickPeriod,
+              ),
+            ),
+            if (!_isDefault) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: PeriodChip(
+                  label: formatPeriod(context, _bucket, _anchor),
+                  onReset: () =>
+                      setState(() => _anchor = defaultAnchor(_bucket)),
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              height: 240,
+              child: MetricChart(
+                series: _series,
+                bucket: _bucket,
+                anchor: _anchor,
               ),
             ),
           ],
-          const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            height: 240,
-            child: MetricChart(
-              series: _series,
-              bucket: _bucket,
-              anchor: _anchor,
-            ),
-          ),
         ],
       ),
     );
