@@ -997,6 +997,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Publishing is disabled for this metric'**
   String get publishDisabled;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// No description provided for @leakGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Leak grid'**
+  String get leakGrid;
+
+  /// No description provided for @statTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Stat tile'**
+  String get statTile;
+
+  /// No description provided for @addLeakGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Add leak grid'**
+  String get addLeakGrid;
+
+  /// No description provided for @editLeakGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit leak grid'**
+  String get editLeakGrid;
+
+  /// No description provided for @addStatTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Add stat tile'**
+  String get addStatTile;
+
+  /// No description provided for @editStatTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit stat tile'**
+  String get editStatTile;
+
+  /// No description provided for @sensorCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of sensors'**
+  String get sensorCount;
+
+  /// No description provided for @fillColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert (fill) color'**
+  String get fillColor;
+
+  /// No description provided for @emptyColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty / OK color'**
+  String get emptyColor;
+
+  /// No description provided for @unit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get unit;
+
+  /// No description provided for @backgroundColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Background color'**
+  String get backgroundColor;
+
+  /// No description provided for @foregroundColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Text color'**
+  String get foregroundColor;
+
+  /// No description provided for @noInternet.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get noInternet;
+
+  /// No description provided for @noInternetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your network and try again.'**
+  String get noInternetBody;
 }
 
 class _AppLocalizationsDelegate

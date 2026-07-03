@@ -478,4 +478,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get publishDisabled => 'Publishing is disabled for this metric';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get leakGrid => 'Leak grid';
+
+  @override
+  String get statTile => 'Stat tile';
+
+  @override
+  String get addLeakGrid => 'Add leak grid';
+
+  @override
+  String get editLeakGrid => 'Edit leak grid';
+
+  @override
+  String get addStatTile => 'Add stat tile';
+
+  @override
+  String get editStatTile => 'Edit stat tile';
+
+  @override
+  String get sensorCount => 'Number of sensors';
+
+  @override
+  String get fillColor => 'Alert (fill) color';
+
+  @override
+  String get emptyColor => 'Empty / OK color';
+
+  @override
+  String get unit => 'Unit';
+
+  @override
+  String get backgroundColor => 'Background color';
+
+  @override
+  String get foregroundColor => 'Text color';
+
+  @override
+  String get noInternet => 'No internet connection';
+
+  @override
+  String get noInternetBody => 'Check your network and try again.';
 }

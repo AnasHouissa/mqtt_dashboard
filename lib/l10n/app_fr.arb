@@ -189,5 +189,21 @@
   "consoleWaiting": "En attente de messages…",
   "clear": "Effacer",
   "publishMessage": "Publier un message",
-  "publishDisabled": "La publication est désactivée pour cette métrique"
+  "publishDisabled": "La publication est désactivée pour cette métrique",
+  "add": "Ajouter",
+  "name": "Nom",
+  "leakGrid": "Grille de capteurs",
+  "statTile": "Tuile de statistique",
+  "addLeakGrid": "Ajouter une grille",
+  "editLeakGrid": "Modifier la grille",
+  "addStatTile": "Ajouter une tuile",
+  "editStatTile": "Modifier la tuile",
+  "sensorCount": "Nombre de capteurs",
+  "fillColor": "Couleur d'alerte",
+  "emptyColor": "Couleur vide / OK",
+  "unit": "Unité",
+  "backgroundColor": "Couleur de fond",
+  "foregroundColor": "Couleur du texte",
+  "noInternet": "Pas de connexion Internet",
+  "noInternetBody": "Vérifiez votre réseau et réessayez."
 }

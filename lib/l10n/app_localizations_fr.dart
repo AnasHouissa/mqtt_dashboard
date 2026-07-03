@@ -484,4 +484,52 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get publishDisabled =>
       'La publication est désactivée pour cette métrique';
+
+  @override
+  String get add => 'Ajouter';
+
+  @override
+  String get name => 'Nom';
+
+  @override
+  String get leakGrid => 'Grille de capteurs';
+
+  @override
+  String get statTile => 'Tuile de statistique';
+
+  @override
+  String get addLeakGrid => 'Ajouter une grille';
+
+  @override
+  String get editLeakGrid => 'Modifier la grille';
+
+  @override
+  String get addStatTile => 'Ajouter une tuile';
+
+  @override
+  String get editStatTile => 'Modifier la tuile';
+
+  @override
+  String get sensorCount => 'Nombre de capteurs';
+
+  @override
+  String get fillColor => 'Couleur d\'alerte';
+
+  @override
+  String get emptyColor => 'Couleur vide / OK';
+
+  @override
+  String get unit => 'Unité';
+
+  @override
+  String get backgroundColor => 'Couleur de fond';
+
+  @override
+  String get foregroundColor => 'Couleur du texte';
+
+  @override
+  String get noInternet => 'Pas de connexion Internet';
+
+  @override
+  String get noInternetBody => 'Vérifiez votre réseau et réessayez.';
 }
