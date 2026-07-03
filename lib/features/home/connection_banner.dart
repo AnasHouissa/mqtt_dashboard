@@ -9,6 +9,10 @@ import '../../theme/app_theme.dart';
 /// App-wide shell that pins a "connected" banner to the very top of every
 /// screen whenever an MQTT connection is live. Wire it through
 /// [MaterialApp.builder] so it sits above all routes.
+///
+/// The "no internet" state is intentionally NOT shown here: only the broker
+/// section needs a live network (to connect/publish), so that overlay lives in
+/// the broker screens. SMS, dashboards and history all work offline.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
 
