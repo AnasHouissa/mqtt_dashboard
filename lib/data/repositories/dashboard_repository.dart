@@ -93,6 +93,12 @@ class DashboardRepository {
                 color: s.color,
                 visible: Value(s.visible),
                 position: Value(i),
+                sensorCount: Value(s.sensorCount),
+                fillColor: Value(s.fillColor),
+                emptyColor: Value(s.emptyColor),
+                unit: Value(s.unit),
+                bgColor: Value(s.bgColor),
+                fgColor: Value(s.fgColor),
               ),
             );
       }
@@ -126,6 +132,12 @@ class DashboardRepository {
                 color: s.color,
                 visible: Value(s.visible),
                 position: Value(i),
+                sensorCount: Value(s.sensorCount),
+                fillColor: Value(s.fillColor),
+                emptyColor: Value(s.emptyColor),
+                unit: Value(s.unit),
+                bgColor: Value(s.bgColor),
+                fgColor: Value(s.fgColor),
               ),
             );
       }
@@ -150,16 +162,31 @@ class ChartWithSeries {
   const ChartWithSeries({required this.chart, required this.series});
 }
 
-/// Plain value object describing a series to create, before it has an id.
+/// Plain value object describing a series to create, before it has an id. The
+/// trailing fields carry per-component config for custom "current-state" types
+/// ([ChartType.sensorGrid] / [ChartType.statTile]); they stay null for ordinary
+/// time-series series.
 class ChartSeriesDraft {
   final int metricId;
   final ChartType type;
   final int color;
   final bool visible;
+  final int? sensorCount;
+  final int? fillColor;
+  final int? emptyColor;
+  final String? unit;
+  final int? bgColor;
+  final int? fgColor;
   const ChartSeriesDraft({
     required this.metricId,
     required this.type,
     required this.color,
     required this.visible,
+    this.sensorCount,
+    this.fillColor,
+    this.emptyColor,
+    this.unit,
+    this.bgColor,
+    this.fgColor,
   });
 }
