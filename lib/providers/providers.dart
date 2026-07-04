@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +16,7 @@ import '../data/repositories/reading_repository.dart';
 import '../data/repositories/sms_message_repository.dart';
 import '../data/repositories/sms_source_repository.dart';
 import '../data/repositories/sms_topic_preset_repository.dart';
+import '../services/background_service.dart';
 import '../services/export_service.dart';
 import '../services/mqtt_service.dart';
 import '../services/sms_parser.dart';
@@ -413,6 +415,58 @@ class LocaleController extends StateNotifier<Locale?> {
 final localeProvider = StateNotifierProvider<LocaleController, Locale?>(
   (ref) => LocaleController(ref.watch(sharedPreferencesProvider)),
 );
+
+// --- Background mode (Android) ---
+
+/// Persisted "keep brokers connected in background" preference plus the
+/// start/stop control of the foreground service that hosts the background MQTT
+/// connection. State is the toggle value; default OFF (it drains battery).
+///
+/// The service runs in its own isolate with no access to Riverpod, so the
+/// broker to connect and the localized notification text are handed across via
+/// SharedPreferences (see keys in `background_service.dart`).
+class BackgroundServiceController extends StateNotifier<bool> {
+  BackgroundServiceController(this._prefs)
+      : super(_prefs.getBool(kBgKeepConnected) ?? false);
+
+  final SharedPreferences _prefs;
+
+  Future<void> setKeepConnected(bool value) async {
+    state = value;
+    await _prefs.setBool(kBgKeepConnected, value);
+    // Turning it off should tear down a running service immediately.
+    if (!value && await FlutterBackgroundService().isRunning()) {
+      FlutterBackgroundService().invoke('stop');
+      await _prefs.remove(kBgActiveBrokerId);
+    }
+  }
+
+  /// Persists the target broker + localized notification strings, then starts
+  /// the foreground service. Called from the app lifecycle observer when the app
+  /// is backgrounded while a broker is connected.
+  Future<void> startForBroker(
+    int brokerId, {
+    required String notifTitle,
+    required String notifBody,
+  }) async {
+    await _prefs.setInt(kBgActiveBrokerId, brokerId);
+    await _prefs.setString(kBgNotifTitle, notifTitle);
+    await _prefs.setString(kBgNotifBody, notifBody);
+    await FlutterBackgroundService().startService();
+  }
+
+  /// Stops the service (if running) and forgets the target broker.
+  Future<void> stop() async {
+    if (await FlutterBackgroundService().isRunning()) {
+      FlutterBackgroundService().invoke('stop');
+    }
+    await _prefs.remove(kBgActiveBrokerId);
+  }
+}
+
+final backgroundServiceProvider =
+    StateNotifierProvider<BackgroundServiceController, bool>(
+        (ref) => BackgroundServiceController(ref.watch(sharedPreferencesProvider)));
 
 // --- App metadata ---
 
