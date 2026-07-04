@@ -526,4 +526,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noInternetBody => 'Check your network and try again.';
+
+  @override
+  String get background => 'Background';
+
+  @override
+  String get bgKeepConnected => 'Keep brokers connected in background';
+
+  @override
+  String get bgKeepConnectedSubtitle =>
+      'Keep receiving readings while the app is closed. Uses more battery.';
+
+  @override
+  String get bgNotificationTitle => 'TEKKIM Dash running';
+
+  @override
+  String bgNotificationBody(String broker) {
+    return 'Keeping $broker connected';
+  }
 }

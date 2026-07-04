@@ -205,5 +205,15 @@
   "backgroundColor": "Background color",
   "foregroundColor": "Text color",
   "noInternet": "No internet connection",
-  "noInternetBody": "Check your network and try again."
+  "noInternetBody": "Check your network and try again.",
+  "background": "Background",
+  "bgKeepConnected": "Keep brokers connected in background",
+  "bgKeepConnectedSubtitle": "Keep receiving readings while the app is closed. Uses more battery.",
+  "bgNotificationTitle": "TEKKIM Dash running",
+  "bgNotificationBody": "Keeping {broker} connected",
+  "@bgNotificationBody": {
+    "placeholders": {
+      "broker": { "type": "String" }
+    }
+  }
 }

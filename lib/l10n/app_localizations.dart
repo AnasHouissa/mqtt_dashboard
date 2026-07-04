@@ -1093,6 +1093,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check your network and try again.'**
   String get noInternetBody;
+
+  /// No description provided for @background.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get background;
+
+  /// No description provided for @bgKeepConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep brokers connected in background'**
+  String get bgKeepConnected;
+
+  /// No description provided for @bgKeepConnectedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep receiving readings while the app is closed. Uses more battery.'**
+  String get bgKeepConnectedSubtitle;
+
+  /// No description provided for @bgNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'TEKKIM Dash running'**
+  String get bgNotificationTitle;
+
+  /// No description provided for @bgNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping {broker} connected'**
+  String bgNotificationBody(String broker);
 }
 
 class _AppLocalizationsDelegate

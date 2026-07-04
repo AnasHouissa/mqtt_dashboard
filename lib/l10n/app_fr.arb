@@ -4,7 +4,7 @@
   "brokers": "Brokers",
   "noBrokers": "Aucun broker. Appuyez sur + pour en ajouter un.",
   "addBroker": "Ajouter un broker",
-  "editBroker": "Modifier le broker",
+  "editBroker": "Modifier",
   "duplicate": "Dupliquer",
   "copyOf": "{name} (copie)",
   "@copyOf": {
@@ -57,7 +57,7 @@
   "metrics": "Métriques",
   "noMetrics": "Aucune métrique. Appuyez sur + pour en ajouter une.",
   "addMetric": "Ajouter une métrique",
-  "editMetric": "Modifier la métrique",
+  "editMetric": "Modifier",
   "metricName": "Nom de la métrique",
   "topic": "Topic",
   "enablePublishing": "Activer la publication",
@@ -75,7 +75,7 @@
   "addDashboard": "Ajouter un tableau de bord",
   "dashboardName": "Nom du tableau de bord",
   "addCurve": "Ajouter courbe",
-  "editCurve": "Modifier courbe",
+  "editCurve": "Modifier",
   "noCharts": "Aucun graphique. Appuyez sur « Ajouter courbe ».",
   "chartType": "Type de graphique",
   "histogram": "Histogramme",
@@ -195,9 +195,9 @@
   "leakGrid": "Grille de capteurs",
   "statTile": "Tuile de statistique",
   "addLeakGrid": "Ajouter une grille",
-  "editLeakGrid": "Modifier la grille",
+  "editLeakGrid": "Modifier",
   "addStatTile": "Ajouter une tuile",
-  "editStatTile": "Modifier la tuile",
+  "editStatTile": "Modifier",
   "sensorCount": "Nombre de capteurs",
   "fillColor": "Couleur d'alerte",
   "emptyColor": "Couleur vide / OK",
@@ -205,5 +205,15 @@
   "backgroundColor": "Couleur de fond",
   "foregroundColor": "Couleur du texte",
   "noInternet": "Pas de connexion Internet",
-  "noInternetBody": "Vérifiez votre réseau et réessayez."
+  "noInternetBody": "Vérifiez votre réseau et réessayez.",
+  "background": "Arrière-plan",
+  "bgKeepConnected": "Garder les brokers connectés en arrière-plan",
+  "bgKeepConnectedSubtitle": "Continuer à recevoir des lectures quand l’application est fermée. Consomme plus de batterie.",
+  "bgNotificationTitle": "TEKKIM Dash actif",
+  "bgNotificationBody": "Connexion à {broker} maintenue",
+  "@bgNotificationBody": {
+    "placeholders": {
+      "broker": { "type": "String" }
+    }
+  }
 }

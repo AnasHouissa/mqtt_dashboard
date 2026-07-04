@@ -21,7 +21,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addBroker => 'Ajouter un broker';
 
   @override
-  String get editBroker => 'Modifier le broker';
+  String get editBroker => 'Modifier';
 
   @override
   String get duplicate => 'Dupliquer';
@@ -143,7 +143,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addMetric => 'Ajouter une métrique';
 
   @override
-  String get editMetric => 'Modifier la métrique';
+  String get editMetric => 'Modifier';
 
   @override
   String get metricName => 'Nom de la métrique';
@@ -199,7 +199,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addCurve => 'Ajouter courbe';
 
   @override
-  String get editCurve => 'Modifier courbe';
+  String get editCurve => 'Modifier';
 
   @override
   String get noCharts => 'Aucun graphique. Appuyez sur « Ajouter courbe ».';
@@ -501,13 +501,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addLeakGrid => 'Ajouter une grille';
 
   @override
-  String get editLeakGrid => 'Modifier la grille';
+  String get editLeakGrid => 'Modifier';
 
   @override
   String get addStatTile => 'Ajouter une tuile';
 
   @override
-  String get editStatTile => 'Modifier la tuile';
+  String get editStatTile => 'Modifier';
 
   @override
   String get sensorCount => 'Nombre de capteurs';
@@ -532,4 +532,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noInternetBody => 'Vérifiez votre réseau et réessayez.';
+
+  @override
+  String get background => 'Arrière-plan';
+
+  @override
+  String get bgKeepConnected => 'Garder les brokers connectés en arrière-plan';
+
+  @override
+  String get bgKeepConnectedSubtitle =>
+      'Continuer à recevoir des lectures quand l’application est fermée. Consomme plus de batterie.';
+
+  @override
+  String get bgNotificationTitle => 'TEKKIM Dash actif';
+
+  @override
+  String bgNotificationBody(String broker) {
+    return 'Connexion à $broker maintenue';
+  }
 }
