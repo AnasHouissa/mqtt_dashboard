@@ -8,7 +8,12 @@ class ReadingRepository {
 
   final AppDatabase _db;
 
-  Future<int> insert(int metricId, double value, DateTime timestamp) {
+  Future<int> insert(
+    int metricId,
+    double value,
+    DateTime timestamp, {
+    String? raw,
+  }) {
     return _db
         .into(_db.readings)
         .insert(
@@ -16,8 +21,24 @@ class ReadingRepository {
             metricId: metricId,
             value: value,
             timestamp: timestamp,
+            raw: Value(raw),
           ),
         );
+  }
+
+  /// The most recent reading for a metric, or null if none exist yet. Reactive
+  /// so state components (sensor grid / stat tile) refresh as messages arrive.
+  Stream<Reading?> watchLatest(int metricId) {
+    return (_db.select(_db.readings)
+          ..where((r) => r.metricId.equals(metricId))
+          ..orderBy([
+            (r) => OrderingTerm(
+              expression: r.timestamp,
+              mode: OrderingMode.desc,
+            ),
+          ])
+          ..limit(1))
+        .watchSingleOrNull();
   }
 
   /// All raw readings for a metric (newest first), used for CSV/PDF export.

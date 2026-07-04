@@ -205,8 +205,7 @@ class _SmsMetricList extends ConsumerWidget {
             return EntityCard(
               icon: Icons.sensors,
               title: metric.name,
-              subtitle:
-                  '${metric.topic} · ${smsValueModeLabel(l, metric.smsValueMode)}',
+              subtitle: metric.topic,
               onTap: () => showSmsMetricForm(
                 context,
                 smsSourceId: source.id,

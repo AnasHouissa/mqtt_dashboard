@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,6 +109,25 @@ final aggregatedProvider = StreamProvider.autoDispose
         .watch(readingRepositoryProvider)
         .watchAggregated(key.metricId, key.bucket, key.anchor));
 
+/// The latest reading for a metric, used by "current-state" components (sensor
+/// grid / stat tile). Null until the first message for that metric arrives.
+final latestReadingProvider = StreamProvider.autoDispose
+    .family<Reading?, int>((ref, metricId) =>
+        ref.watch(readingRepositoryProvider).watchLatest(metricId));
+
+// --- Device connectivity ---
+
+/// Whether the device currently has a network connection. Drives the global
+/// "no internet" overlay. Emits the current state immediately, then updates as
+/// connectivity changes. Defaults to online while the first check is pending.
+final connectivityProvider = StreamProvider<bool>((ref) async* {
+  final connectivity = Connectivity();
+  bool isOnline(List<ConnectivityResult> results) =>
+      results.any((r) => r != ConnectivityResult.none);
+  yield isOnline(await connectivity.checkConnectivity());
+  yield* connectivity.onConnectivityChanged.map(isOnline);
+});
+
 // --- Active connection ---
 
 /// Tracks the currently connected broker, subscribes to its metrics, and
@@ -187,7 +207,7 @@ class ConnectionController extends StateNotifier<MqttStatus> {
     if (metricId == null) return;
     _ref
         .read(readingRepositoryProvider)
-        .insert(metricId, msg.value, msg.timestamp);
+        .insert(metricId, msg.value, msg.timestamp, raw: msg.raw);
   }
 
   Future<void> disconnect() async {
@@ -267,10 +287,17 @@ class SmsIngestionController {
       for (final line in result.lines) {
         final metric = _matchMetric(metrics, result.name, line.topic);
         if (metric == null) continue;
-        final mode = metric.smsValueMode ?? SmsParser.detectMode(line.rawValue);
+        // Value mode is always auto-detected from the message (the manual
+        // per-metric mode was removed from the UI).
+        final mode = SmsParser.detectMode(line.rawValue);
         final value = SmsParser.toValue(line.rawValue, mode);
         if (value == null) continue;
-        await readingRepo.insert(metric.id, value, sms.timestamp);
+        await readingRepo.insert(
+          metric.id,
+          value,
+          sms.timestamp,
+          raw: line.rawValue,
+        );
         readingsCreated++;
         await _maybeSeedRange(metricRepo, metric, line);
       }

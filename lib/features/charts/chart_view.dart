@@ -226,10 +226,14 @@ class MetricChart extends ConsumerWidget {
           animationDuration: 0,
           markerSettings: const MarkerSettings(isVisible: true),
         ),
-      // Circular types never reach here; they are handled by the circular chart.
+      // Circular types never reach here; they are handled by the circular
+      // chart. Custom "current-state" components (sensor grid / stat tile) are
+      // rendered by their own widgets and never routed through MetricChart.
       ChartType.radialBar ||
       ChartType.doughnut ||
-      ChartType.pie =>
+      ChartType.pie ||
+      ChartType.sensorGrid ||
+      ChartType.statTile =>
         ColumnSeries<AggregatedPoint, DateTime>(
           dataSource: points,
           xValueMapper: x,

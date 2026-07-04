@@ -2251,6 +2251,70 @@ class $ChartSeriesTable extends ChartSeries
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _sensorCountMeta = const VerificationMeta(
+    'sensorCount',
+  );
+  @override
+  late final GeneratedColumn<int> sensorCount = GeneratedColumn<int>(
+    'sensor_count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fillColorMeta = const VerificationMeta(
+    'fillColor',
+  );
+  @override
+  late final GeneratedColumn<int> fillColor = GeneratedColumn<int>(
+    'fill_color',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _emptyColorMeta = const VerificationMeta(
+    'emptyColor',
+  );
+  @override
+  late final GeneratedColumn<int> emptyColor = GeneratedColumn<int>(
+    'empty_color',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bgColorMeta = const VerificationMeta(
+    'bgColor',
+  );
+  @override
+  late final GeneratedColumn<int> bgColor = GeneratedColumn<int>(
+    'bg_color',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fgColorMeta = const VerificationMeta(
+    'fgColor',
+  );
+  @override
+  late final GeneratedColumn<int> fgColor = GeneratedColumn<int>(
+    'fg_color',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2260,6 +2324,12 @@ class $ChartSeriesTable extends ChartSeries
     color,
     visible,
     position,
+    sensorCount,
+    fillColor,
+    emptyColor,
+    unit,
+    bgColor,
+    fgColor,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2312,6 +2382,45 @@ class $ChartSeriesTable extends ChartSeries
         position.isAcceptableOrUnknown(data['position']!, _positionMeta),
       );
     }
+    if (data.containsKey('sensor_count')) {
+      context.handle(
+        _sensorCountMeta,
+        sensorCount.isAcceptableOrUnknown(
+          data['sensor_count']!,
+          _sensorCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fill_color')) {
+      context.handle(
+        _fillColorMeta,
+        fillColor.isAcceptableOrUnknown(data['fill_color']!, _fillColorMeta),
+      );
+    }
+    if (data.containsKey('empty_color')) {
+      context.handle(
+        _emptyColorMeta,
+        emptyColor.isAcceptableOrUnknown(data['empty_color']!, _emptyColorMeta),
+      );
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    }
+    if (data.containsKey('bg_color')) {
+      context.handle(
+        _bgColorMeta,
+        bgColor.isAcceptableOrUnknown(data['bg_color']!, _bgColorMeta),
+      );
+    }
+    if (data.containsKey('fg_color')) {
+      context.handle(
+        _fgColorMeta,
+        fgColor.isAcceptableOrUnknown(data['fg_color']!, _fgColorMeta),
+      );
+    }
     return context;
   }
 
@@ -2351,6 +2460,30 @@ class $ChartSeriesTable extends ChartSeries
         DriftSqlType.int,
         data['${effectivePrefix}position'],
       )!,
+      sensorCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sensor_count'],
+      ),
+      fillColor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fill_color'],
+      ),
+      emptyColor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}empty_color'],
+      ),
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      ),
+      bgColor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}bg_color'],
+      ),
+      fgColor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fg_color'],
+      ),
     );
   }
 
@@ -2375,6 +2508,24 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
 
   /// Display order within the chart.
   final int position;
+
+  /// Number of sensor cells for a [ChartType.sensorGrid] (a multiple of 4).
+  final int? sensorCount;
+
+  /// ARGB fill color used when a sensor is in alert (sensorGrid).
+  final int? fillColor;
+
+  /// ARGB color used for a cleared/OK sensor cell (sensorGrid default color).
+  final int? emptyColor;
+
+  /// Unit label shown next to the value in a [ChartType.statTile].
+  final String? unit;
+
+  /// ARGB background color of a stat tile.
+  final int? bgColor;
+
+  /// ARGB foreground (text + border) color of a stat tile.
+  final int? fgColor;
   const ChartSeriesRow({
     required this.id,
     required this.chartId,
@@ -2383,6 +2534,12 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     required this.color,
     required this.visible,
     required this.position,
+    this.sensorCount,
+    this.fillColor,
+    this.emptyColor,
+    this.unit,
+    this.bgColor,
+    this.fgColor,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2396,6 +2553,24 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     map['color'] = Variable<int>(color);
     map['visible'] = Variable<bool>(visible);
     map['position'] = Variable<int>(position);
+    if (!nullToAbsent || sensorCount != null) {
+      map['sensor_count'] = Variable<int>(sensorCount);
+    }
+    if (!nullToAbsent || fillColor != null) {
+      map['fill_color'] = Variable<int>(fillColor);
+    }
+    if (!nullToAbsent || emptyColor != null) {
+      map['empty_color'] = Variable<int>(emptyColor);
+    }
+    if (!nullToAbsent || unit != null) {
+      map['unit'] = Variable<String>(unit);
+    }
+    if (!nullToAbsent || bgColor != null) {
+      map['bg_color'] = Variable<int>(bgColor);
+    }
+    if (!nullToAbsent || fgColor != null) {
+      map['fg_color'] = Variable<int>(fgColor);
+    }
     return map;
   }
 
@@ -2408,6 +2583,22 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       color: Value(color),
       visible: Value(visible),
       position: Value(position),
+      sensorCount: sensorCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sensorCount),
+      fillColor: fillColor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fillColor),
+      emptyColor: emptyColor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(emptyColor),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      bgColor: bgColor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bgColor),
+      fgColor: fgColor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fgColor),
     );
   }
 
@@ -2426,6 +2617,12 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       color: serializer.fromJson<int>(json['color']),
       visible: serializer.fromJson<bool>(json['visible']),
       position: serializer.fromJson<int>(json['position']),
+      sensorCount: serializer.fromJson<int?>(json['sensorCount']),
+      fillColor: serializer.fromJson<int?>(json['fillColor']),
+      emptyColor: serializer.fromJson<int?>(json['emptyColor']),
+      unit: serializer.fromJson<String?>(json['unit']),
+      bgColor: serializer.fromJson<int?>(json['bgColor']),
+      fgColor: serializer.fromJson<int?>(json['fgColor']),
     );
   }
   @override
@@ -2441,6 +2638,12 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       'color': serializer.toJson<int>(color),
       'visible': serializer.toJson<bool>(visible),
       'position': serializer.toJson<int>(position),
+      'sensorCount': serializer.toJson<int?>(sensorCount),
+      'fillColor': serializer.toJson<int?>(fillColor),
+      'emptyColor': serializer.toJson<int?>(emptyColor),
+      'unit': serializer.toJson<String?>(unit),
+      'bgColor': serializer.toJson<int?>(bgColor),
+      'fgColor': serializer.toJson<int?>(fgColor),
     };
   }
 
@@ -2452,6 +2655,12 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     int? color,
     bool? visible,
     int? position,
+    Value<int?> sensorCount = const Value.absent(),
+    Value<int?> fillColor = const Value.absent(),
+    Value<int?> emptyColor = const Value.absent(),
+    Value<String?> unit = const Value.absent(),
+    Value<int?> bgColor = const Value.absent(),
+    Value<int?> fgColor = const Value.absent(),
   }) => ChartSeriesRow(
     id: id ?? this.id,
     chartId: chartId ?? this.chartId,
@@ -2460,6 +2669,12 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     color: color ?? this.color,
     visible: visible ?? this.visible,
     position: position ?? this.position,
+    sensorCount: sensorCount.present ? sensorCount.value : this.sensorCount,
+    fillColor: fillColor.present ? fillColor.value : this.fillColor,
+    emptyColor: emptyColor.present ? emptyColor.value : this.emptyColor,
+    unit: unit.present ? unit.value : this.unit,
+    bgColor: bgColor.present ? bgColor.value : this.bgColor,
+    fgColor: fgColor.present ? fgColor.value : this.fgColor,
   );
   ChartSeriesRow copyWithCompanion(ChartSeriesCompanion data) {
     return ChartSeriesRow(
@@ -2470,6 +2685,16 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       color: data.color.present ? data.color.value : this.color,
       visible: data.visible.present ? data.visible.value : this.visible,
       position: data.position.present ? data.position.value : this.position,
+      sensorCount: data.sensorCount.present
+          ? data.sensorCount.value
+          : this.sensorCount,
+      fillColor: data.fillColor.present ? data.fillColor.value : this.fillColor,
+      emptyColor: data.emptyColor.present
+          ? data.emptyColor.value
+          : this.emptyColor,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      bgColor: data.bgColor.present ? data.bgColor.value : this.bgColor,
+      fgColor: data.fgColor.present ? data.fgColor.value : this.fgColor,
     );
   }
 
@@ -2482,14 +2707,33 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
           ..write('type: $type, ')
           ..write('color: $color, ')
           ..write('visible: $visible, ')
-          ..write('position: $position')
+          ..write('position: $position, ')
+          ..write('sensorCount: $sensorCount, ')
+          ..write('fillColor: $fillColor, ')
+          ..write('emptyColor: $emptyColor, ')
+          ..write('unit: $unit, ')
+          ..write('bgColor: $bgColor, ')
+          ..write('fgColor: $fgColor')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, chartId, metricId, type, color, visible, position);
+  int get hashCode => Object.hash(
+    id,
+    chartId,
+    metricId,
+    type,
+    color,
+    visible,
+    position,
+    sensorCount,
+    fillColor,
+    emptyColor,
+    unit,
+    bgColor,
+    fgColor,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2500,7 +2744,13 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
           other.type == this.type &&
           other.color == this.color &&
           other.visible == this.visible &&
-          other.position == this.position);
+          other.position == this.position &&
+          other.sensorCount == this.sensorCount &&
+          other.fillColor == this.fillColor &&
+          other.emptyColor == this.emptyColor &&
+          other.unit == this.unit &&
+          other.bgColor == this.bgColor &&
+          other.fgColor == this.fgColor);
 }
 
 class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
@@ -2511,6 +2761,12 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
   final Value<int> color;
   final Value<bool> visible;
   final Value<int> position;
+  final Value<int?> sensorCount;
+  final Value<int?> fillColor;
+  final Value<int?> emptyColor;
+  final Value<String?> unit;
+  final Value<int?> bgColor;
+  final Value<int?> fgColor;
   const ChartSeriesCompanion({
     this.id = const Value.absent(),
     this.chartId = const Value.absent(),
@@ -2519,6 +2775,12 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     this.color = const Value.absent(),
     this.visible = const Value.absent(),
     this.position = const Value.absent(),
+    this.sensorCount = const Value.absent(),
+    this.fillColor = const Value.absent(),
+    this.emptyColor = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.bgColor = const Value.absent(),
+    this.fgColor = const Value.absent(),
   });
   ChartSeriesCompanion.insert({
     this.id = const Value.absent(),
@@ -2528,6 +2790,12 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     required int color,
     this.visible = const Value.absent(),
     this.position = const Value.absent(),
+    this.sensorCount = const Value.absent(),
+    this.fillColor = const Value.absent(),
+    this.emptyColor = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.bgColor = const Value.absent(),
+    this.fgColor = const Value.absent(),
   }) : chartId = Value(chartId),
        metricId = Value(metricId),
        type = Value(type),
@@ -2540,6 +2808,12 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     Expression<int>? color,
     Expression<bool>? visible,
     Expression<int>? position,
+    Expression<int>? sensorCount,
+    Expression<int>? fillColor,
+    Expression<int>? emptyColor,
+    Expression<String>? unit,
+    Expression<int>? bgColor,
+    Expression<int>? fgColor,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2549,6 +2823,12 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
       if (color != null) 'color': color,
       if (visible != null) 'visible': visible,
       if (position != null) 'position': position,
+      if (sensorCount != null) 'sensor_count': sensorCount,
+      if (fillColor != null) 'fill_color': fillColor,
+      if (emptyColor != null) 'empty_color': emptyColor,
+      if (unit != null) 'unit': unit,
+      if (bgColor != null) 'bg_color': bgColor,
+      if (fgColor != null) 'fg_color': fgColor,
     });
   }
 
@@ -2560,6 +2840,12 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     Value<int>? color,
     Value<bool>? visible,
     Value<int>? position,
+    Value<int?>? sensorCount,
+    Value<int?>? fillColor,
+    Value<int?>? emptyColor,
+    Value<String?>? unit,
+    Value<int?>? bgColor,
+    Value<int?>? fgColor,
   }) {
     return ChartSeriesCompanion(
       id: id ?? this.id,
@@ -2569,6 +2855,12 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
       color: color ?? this.color,
       visible: visible ?? this.visible,
       position: position ?? this.position,
+      sensorCount: sensorCount ?? this.sensorCount,
+      fillColor: fillColor ?? this.fillColor,
+      emptyColor: emptyColor ?? this.emptyColor,
+      unit: unit ?? this.unit,
+      bgColor: bgColor ?? this.bgColor,
+      fgColor: fgColor ?? this.fgColor,
     );
   }
 
@@ -2598,6 +2890,24 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     if (position.present) {
       map['position'] = Variable<int>(position.value);
     }
+    if (sensorCount.present) {
+      map['sensor_count'] = Variable<int>(sensorCount.value);
+    }
+    if (fillColor.present) {
+      map['fill_color'] = Variable<int>(fillColor.value);
+    }
+    if (emptyColor.present) {
+      map['empty_color'] = Variable<int>(emptyColor.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (bgColor.present) {
+      map['bg_color'] = Variable<int>(bgColor.value);
+    }
+    if (fgColor.present) {
+      map['fg_color'] = Variable<int>(fgColor.value);
+    }
     return map;
   }
 
@@ -2610,7 +2920,13 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
           ..write('type: $type, ')
           ..write('color: $color, ')
           ..write('visible: $visible, ')
-          ..write('position: $position')
+          ..write('position: $position, ')
+          ..write('sensorCount: $sensorCount, ')
+          ..write('fillColor: $fillColor, ')
+          ..write('emptyColor: $emptyColor, ')
+          ..write('unit: $unit, ')
+          ..write('bgColor: $bgColor, ')
+          ..write('fgColor: $fgColor')
           ..write(')'))
         .toString();
   }
@@ -2668,8 +2984,17 @@ class $ReadingsTable extends Readings with TableInfo<$ReadingsTable, Reading> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _rawMeta = const VerificationMeta('raw');
   @override
-  List<GeneratedColumn> get $columns => [id, metricId, value, timestamp];
+  late final GeneratedColumn<String> raw = GeneratedColumn<String>(
+    'raw',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, metricId, value, timestamp, raw];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2709,6 +3034,12 @@ class $ReadingsTable extends Readings with TableInfo<$ReadingsTable, Reading> {
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
+    if (data.containsKey('raw')) {
+      context.handle(
+        _rawMeta,
+        raw.isAcceptableOrUnknown(data['raw']!, _rawMeta),
+      );
+    }
     return context;
   }
 
@@ -2734,6 +3065,10 @@ class $ReadingsTable extends Readings with TableInfo<$ReadingsTable, Reading> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}timestamp'],
       )!,
+      raw: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}raw'],
+      ),
     );
   }
 
@@ -2748,11 +3083,17 @@ class Reading extends DataClass implements Insertable<Reading> {
   final int metricId;
   final double value;
   final DateTime timestamp;
+
+  /// The raw payload / bracket value this reading was parsed from (e.g.
+  /// `IN1, IN2, IN4`, `OK`, `21.62`). Kept so state components (sensor grid)
+  /// can recover *which* inputs are active, which the numeric [value] loses.
+  final String? raw;
   const Reading({
     required this.id,
     required this.metricId,
     required this.value,
     required this.timestamp,
+    this.raw,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2761,6 +3102,9 @@ class Reading extends DataClass implements Insertable<Reading> {
     map['metric_id'] = Variable<int>(metricId);
     map['value'] = Variable<double>(value);
     map['timestamp'] = Variable<DateTime>(timestamp);
+    if (!nullToAbsent || raw != null) {
+      map['raw'] = Variable<String>(raw);
+    }
     return map;
   }
 
@@ -2770,6 +3114,7 @@ class Reading extends DataClass implements Insertable<Reading> {
       metricId: Value(metricId),
       value: Value(value),
       timestamp: Value(timestamp),
+      raw: raw == null && nullToAbsent ? const Value.absent() : Value(raw),
     );
   }
 
@@ -2783,6 +3128,7 @@ class Reading extends DataClass implements Insertable<Reading> {
       metricId: serializer.fromJson<int>(json['metricId']),
       value: serializer.fromJson<double>(json['value']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      raw: serializer.fromJson<String?>(json['raw']),
     );
   }
   @override
@@ -2793,6 +3139,7 @@ class Reading extends DataClass implements Insertable<Reading> {
       'metricId': serializer.toJson<int>(metricId),
       'value': serializer.toJson<double>(value),
       'timestamp': serializer.toJson<DateTime>(timestamp),
+      'raw': serializer.toJson<String?>(raw),
     };
   }
 
@@ -2801,11 +3148,13 @@ class Reading extends DataClass implements Insertable<Reading> {
     int? metricId,
     double? value,
     DateTime? timestamp,
+    Value<String?> raw = const Value.absent(),
   }) => Reading(
     id: id ?? this.id,
     metricId: metricId ?? this.metricId,
     value: value ?? this.value,
     timestamp: timestamp ?? this.timestamp,
+    raw: raw.present ? raw.value : this.raw,
   );
   Reading copyWithCompanion(ReadingsCompanion data) {
     return Reading(
@@ -2813,6 +3162,7 @@ class Reading extends DataClass implements Insertable<Reading> {
       metricId: data.metricId.present ? data.metricId.value : this.metricId,
       value: data.value.present ? data.value.value : this.value,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      raw: data.raw.present ? data.raw.value : this.raw,
     );
   }
 
@@ -2822,13 +3172,14 @@ class Reading extends DataClass implements Insertable<Reading> {
           ..write('id: $id, ')
           ..write('metricId: $metricId, ')
           ..write('value: $value, ')
-          ..write('timestamp: $timestamp')
+          ..write('timestamp: $timestamp, ')
+          ..write('raw: $raw')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, metricId, value, timestamp);
+  int get hashCode => Object.hash(id, metricId, value, timestamp, raw);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2836,7 +3187,8 @@ class Reading extends DataClass implements Insertable<Reading> {
           other.id == this.id &&
           other.metricId == this.metricId &&
           other.value == this.value &&
-          other.timestamp == this.timestamp);
+          other.timestamp == this.timestamp &&
+          other.raw == this.raw);
 }
 
 class ReadingsCompanion extends UpdateCompanion<Reading> {
@@ -2844,17 +3196,20 @@ class ReadingsCompanion extends UpdateCompanion<Reading> {
   final Value<int> metricId;
   final Value<double> value;
   final Value<DateTime> timestamp;
+  final Value<String?> raw;
   const ReadingsCompanion({
     this.id = const Value.absent(),
     this.metricId = const Value.absent(),
     this.value = const Value.absent(),
     this.timestamp = const Value.absent(),
+    this.raw = const Value.absent(),
   });
   ReadingsCompanion.insert({
     this.id = const Value.absent(),
     required int metricId,
     required double value,
     required DateTime timestamp,
+    this.raw = const Value.absent(),
   }) : metricId = Value(metricId),
        value = Value(value),
        timestamp = Value(timestamp);
@@ -2863,12 +3218,14 @@ class ReadingsCompanion extends UpdateCompanion<Reading> {
     Expression<int>? metricId,
     Expression<double>? value,
     Expression<DateTime>? timestamp,
+    Expression<String>? raw,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (metricId != null) 'metric_id': metricId,
       if (value != null) 'value': value,
       if (timestamp != null) 'timestamp': timestamp,
+      if (raw != null) 'raw': raw,
     });
   }
 
@@ -2877,12 +3234,14 @@ class ReadingsCompanion extends UpdateCompanion<Reading> {
     Value<int>? metricId,
     Value<double>? value,
     Value<DateTime>? timestamp,
+    Value<String?>? raw,
   }) {
     return ReadingsCompanion(
       id: id ?? this.id,
       metricId: metricId ?? this.metricId,
       value: value ?? this.value,
       timestamp: timestamp ?? this.timestamp,
+      raw: raw ?? this.raw,
     );
   }
 
@@ -2901,6 +3260,9 @@ class ReadingsCompanion extends UpdateCompanion<Reading> {
     if (timestamp.present) {
       map['timestamp'] = Variable<DateTime>(timestamp.value);
     }
+    if (raw.present) {
+      map['raw'] = Variable<String>(raw.value);
+    }
     return map;
   }
 
@@ -2910,7 +3272,8 @@ class ReadingsCompanion extends UpdateCompanion<Reading> {
           ..write('id: $id, ')
           ..write('metricId: $metricId, ')
           ..write('value: $value, ')
-          ..write('timestamp: $timestamp')
+          ..write('timestamp: $timestamp, ')
+          ..write('raw: $raw')
           ..write(')'))
         .toString();
   }
@@ -5852,6 +6215,12 @@ typedef $$ChartSeriesTableCreateCompanionBuilder =
       required int color,
       Value<bool> visible,
       Value<int> position,
+      Value<int?> sensorCount,
+      Value<int?> fillColor,
+      Value<int?> emptyColor,
+      Value<String?> unit,
+      Value<int?> bgColor,
+      Value<int?> fgColor,
     });
 typedef $$ChartSeriesTableUpdateCompanionBuilder =
     ChartSeriesCompanion Function({
@@ -5862,6 +6231,12 @@ typedef $$ChartSeriesTableUpdateCompanionBuilder =
       Value<int> color,
       Value<bool> visible,
       Value<int> position,
+      Value<int?> sensorCount,
+      Value<int?> fillColor,
+      Value<int?> emptyColor,
+      Value<String?> unit,
+      Value<int?> bgColor,
+      Value<int?> fgColor,
     });
 
 final class $$ChartSeriesTableReferences
@@ -5938,6 +6313,36 @@ class $$ChartSeriesTableFilterComposer
 
   ColumnFilters<int> get position => $composableBuilder(
     column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sensorCount => $composableBuilder(
+    column: $table.sensorCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fillColor => $composableBuilder(
+    column: $table.fillColor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get emptyColor => $composableBuilder(
+    column: $table.emptyColor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get bgColor => $composableBuilder(
+    column: $table.bgColor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fgColor => $composableBuilder(
+    column: $table.fgColor,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6022,6 +6427,36 @@ class $$ChartSeriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sensorCount => $composableBuilder(
+    column: $table.sensorCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fillColor => $composableBuilder(
+    column: $table.fillColor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get emptyColor => $composableBuilder(
+    column: $table.emptyColor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get bgColor => $composableBuilder(
+    column: $table.bgColor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fgColor => $composableBuilder(
+    column: $table.fgColor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ChartsTableOrderingComposer get chartId {
     final $$ChartsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6092,6 +6527,28 @@ class $$ChartSeriesTableAnnotationComposer
 
   GeneratedColumn<int> get position =>
       $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<int> get sensorCount => $composableBuilder(
+    column: $table.sensorCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get fillColor =>
+      $composableBuilder(column: $table.fillColor, builder: (column) => column);
+
+  GeneratedColumn<int> get emptyColor => $composableBuilder(
+    column: $table.emptyColor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<int> get bgColor =>
+      $composableBuilder(column: $table.bgColor, builder: (column) => column);
+
+  GeneratedColumn<int> get fgColor =>
+      $composableBuilder(column: $table.fgColor, builder: (column) => column);
 
   $$ChartsTableAnnotationComposer get chartId {
     final $$ChartsTableAnnotationComposer composer = $composerBuilder(
@@ -6175,6 +6632,12 @@ class $$ChartSeriesTableTableManager
                 Value<int> color = const Value.absent(),
                 Value<bool> visible = const Value.absent(),
                 Value<int> position = const Value.absent(),
+                Value<int?> sensorCount = const Value.absent(),
+                Value<int?> fillColor = const Value.absent(),
+                Value<int?> emptyColor = const Value.absent(),
+                Value<String?> unit = const Value.absent(),
+                Value<int?> bgColor = const Value.absent(),
+                Value<int?> fgColor = const Value.absent(),
               }) => ChartSeriesCompanion(
                 id: id,
                 chartId: chartId,
@@ -6183,6 +6646,12 @@ class $$ChartSeriesTableTableManager
                 color: color,
                 visible: visible,
                 position: position,
+                sensorCount: sensorCount,
+                fillColor: fillColor,
+                emptyColor: emptyColor,
+                unit: unit,
+                bgColor: bgColor,
+                fgColor: fgColor,
               ),
           createCompanionCallback:
               ({
@@ -6193,6 +6662,12 @@ class $$ChartSeriesTableTableManager
                 required int color,
                 Value<bool> visible = const Value.absent(),
                 Value<int> position = const Value.absent(),
+                Value<int?> sensorCount = const Value.absent(),
+                Value<int?> fillColor = const Value.absent(),
+                Value<int?> emptyColor = const Value.absent(),
+                Value<String?> unit = const Value.absent(),
+                Value<int?> bgColor = const Value.absent(),
+                Value<int?> fgColor = const Value.absent(),
               }) => ChartSeriesCompanion.insert(
                 id: id,
                 chartId: chartId,
@@ -6201,6 +6676,12 @@ class $$ChartSeriesTableTableManager
                 color: color,
                 visible: visible,
                 position: position,
+                sensorCount: sensorCount,
+                fillColor: fillColor,
+                emptyColor: emptyColor,
+                unit: unit,
+                bgColor: bgColor,
+                fgColor: fgColor,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -6288,6 +6769,7 @@ typedef $$ReadingsTableCreateCompanionBuilder =
       required int metricId,
       required double value,
       required DateTime timestamp,
+      Value<String?> raw,
     });
 typedef $$ReadingsTableUpdateCompanionBuilder =
     ReadingsCompanion Function({
@@ -6295,6 +6777,7 @@ typedef $$ReadingsTableUpdateCompanionBuilder =
       Value<int> metricId,
       Value<double> value,
       Value<DateTime> timestamp,
+      Value<String?> raw,
     });
 
 final class $$ReadingsTableReferences
@@ -6340,6 +6823,11 @@ class $$ReadingsTableFilterComposer
 
   ColumnFilters<DateTime> get timestamp => $composableBuilder(
     column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get raw => $composableBuilder(
+    column: $table.raw,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6391,6 +6879,11 @@ class $$ReadingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get raw => $composableBuilder(
+    column: $table.raw,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$MetricsTableOrderingComposer get metricId {
     final $$MetricsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6432,6 +6925,9 @@ class $$ReadingsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get timestamp =>
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<String> get raw =>
+      $composableBuilder(column: $table.raw, builder: (column) => column);
 
   $$MetricsTableAnnotationComposer get metricId {
     final $$MetricsTableAnnotationComposer composer = $composerBuilder(
@@ -6489,11 +6985,13 @@ class $$ReadingsTableTableManager
                 Value<int> metricId = const Value.absent(),
                 Value<double> value = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
+                Value<String?> raw = const Value.absent(),
               }) => ReadingsCompanion(
                 id: id,
                 metricId: metricId,
                 value: value,
                 timestamp: timestamp,
+                raw: raw,
               ),
           createCompanionCallback:
               ({
@@ -6501,11 +6999,13 @@ class $$ReadingsTableTableManager
                 required int metricId,
                 required double value,
                 required DateTime timestamp,
+                Value<String?> raw = const Value.absent(),
               }) => ReadingsCompanion.insert(
                 id: id,
                 metricId: metricId,
                 value: value,
                 timestamp: timestamp,
+                raw: raw,
               ),
           withReferenceMapper: (p0) => p0
               .map(

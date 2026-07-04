@@ -8,6 +8,7 @@ import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/entity_card.dart';
 import '../home/broker_home_screen.dart';
+import '../home/offline_overlay.dart';
 import 'broker_form.dart';
 
 /// The "Brokers" tab inside the Data source destination: lists saved brokers
@@ -20,6 +21,15 @@ class BrokersTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final brokers = ref.watch(brokersProvider);
+
+    // Brokers are the only network-dependent section (connecting / publishing
+    // over MQTT needs a live network). When offline, gate the whole tab behind
+    // the "no internet" state. SMS, dashboards and history work offline, so
+    // they never see this. Default to online while the first check is pending.
+    final online = ref.watch(connectivityProvider).valueOrNull ?? true;
+    if (!online) {
+      return const Scaffold(body: OfflineOverlay());
+    }
 
     return Scaffold(
       body: brokers.when(

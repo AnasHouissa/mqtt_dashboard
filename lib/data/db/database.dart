@@ -20,6 +20,11 @@ enum ChartType {
   errorBar,
   spline,
   line,
+
+  /// Custom "current-state" components (single metric, latest reading only —
+  /// not time-series). Rendered by dedicated widgets, not Syncfusion.
+  sensorGrid,
+  statTile,
 }
 
 /// Time bucket used to aggregate readings for histograms / filtering.
@@ -140,6 +145,26 @@ class ChartSeries extends Table {
 
   /// Display order within the chart.
   IntColumn get position => integer().withDefault(const Constant(0))();
+
+  // --- Custom-component config (all null for time-series series) ---
+
+  /// Number of sensor cells for a [ChartType.sensorGrid] (a multiple of 4).
+  IntColumn get sensorCount => integer().nullable()();
+
+  /// ARGB fill color used when a sensor is in alert (sensorGrid).
+  IntColumn get fillColor => integer().nullable()();
+
+  /// ARGB color used for a cleared/OK sensor cell (sensorGrid default color).
+  IntColumn get emptyColor => integer().nullable()();
+
+  /// Unit label shown next to the value in a [ChartType.statTile].
+  TextColumn get unit => text().nullable()();
+
+  /// ARGB background color of a stat tile.
+  IntColumn get bgColor => integer().nullable()();
+
+  /// ARGB foreground (text + border) color of a stat tile.
+  IntColumn get fgColor => integer().nullable()();
 }
 
 @DataClassName('Reading')
@@ -149,6 +174,11 @@ class Readings extends Table {
       integer().references(Metrics, #id, onDelete: KeyAction.cascade)();
   RealColumn get value => real()();
   DateTimeColumn get timestamp => dateTime()();
+
+  /// The raw payload / bracket value this reading was parsed from (e.g.
+  /// `IN1, IN2, IN4`, `OK`, `21.62`). Kept so state components (sensor grid)
+  /// can recover *which* inputs are active, which the numeric [value] loses.
+  TextColumn get raw => text().nullable()();
 }
 
 /// An SMS data source: a sender phone number whose incoming messages we capture
@@ -224,7 +254,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mqtt_dash'));
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -305,6 +335,18 @@ class AppDatabase extends _$AppDatabase {
             // Reusable SMS topic presets shown as a dropdown in the SMS metric
             // form and managed from Settings.
             await m.createTable(smsTopicPresets);
+          }
+          if (from < 8) {
+            // Custom "current-state" dashboard components (sensor grid + stat
+            // tile). New chart-series config columns are all nullable, and the
+            // readings.raw column is nullable, so existing rows are untouched.
+            await m.addColumn(chartSeries, chartSeries.sensorCount);
+            await m.addColumn(chartSeries, chartSeries.fillColor);
+            await m.addColumn(chartSeries, chartSeries.emptyColor);
+            await m.addColumn(chartSeries, chartSeries.unit);
+            await m.addColumn(chartSeries, chartSeries.bgColor);
+            await m.addColumn(chartSeries, chartSeries.fgColor);
+            await m.addColumn(readings, readings.raw);
           }
         },
       );

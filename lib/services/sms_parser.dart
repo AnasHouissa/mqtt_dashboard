@@ -68,7 +68,26 @@ class SmsParser {
   /// An active input token such as `IN1`, `IN12`.
   static final RegExp _inputToken = RegExp(r'^IN\d+$', caseSensitive: false);
 
+  /// Captures the numeric index of an input token, e.g. `IN12` -> `12`.
+  static final RegExp _inputIndex = RegExp(r'^IN(\d+)$', caseSensitive: false);
+
   static const _clearedTokens = {'OK', 'NONE', 'CLEAR', ''};
+
+  /// The set of active input indices in a raw bracket value, e.g.
+  /// `"IN1, IN2, IN4"` -> `{1, 2, 4}`. A cleared value (`OK`/`NONE`/`CLEAR`/
+  /// empty) or any non-input token yields an empty set. Used by the sensor-grid
+  /// component to decide which cells are in alert.
+  static Set<int> activeInputs(String raw) {
+    final result = <int>{};
+    for (final token in raw.split(',')) {
+      final match = _inputIndex.firstMatch(token.trim());
+      if (match != null) {
+        final index = int.tryParse(match.group(1)!);
+        if (index != null) result.add(index);
+      }
+    }
+    return result;
+  }
 
   static SmsParseResult parse(String body) {
     final rawLines = body

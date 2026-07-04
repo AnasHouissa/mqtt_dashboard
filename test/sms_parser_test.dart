@@ -118,6 +118,21 @@ void main() {
     });
   });
 
+  group('SmsParser.activeInputs', () {
+    test('extracts input indices from a list', () {
+      expect(SmsParser.activeInputs('IN1, IN2, IN4'), {1, 2, 4});
+      expect(SmsParser.activeInputs('IN12'), {12});
+    });
+    test('is case-insensitive and tolerant of spacing', () {
+      expect(SmsParser.activeInputs(' in3 ,IN4'), {3, 4});
+    });
+    test('cleared / non-input values yield an empty set', () {
+      expect(SmsParser.activeInputs('OK'), isEmpty);
+      expect(SmsParser.activeInputs(''), isEmpty);
+      expect(SmsParser.activeInputs('Err 111'), isEmpty);
+    });
+  });
+
   group('end-to-end over all real example messages', () {
     // (name, content, expected topic, expected numeric value under the value
     // mode auto-detected from the raw bracket value).

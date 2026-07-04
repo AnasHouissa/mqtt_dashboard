@@ -189,5 +189,21 @@
   "consoleWaiting": "Waiting for messages…",
   "clear": "Clear",
   "publishMessage": "Publish a message",
-  "publishDisabled": "Publishing is disabled for this metric"
+  "publishDisabled": "Publishing is disabled for this metric",
+  "add": "Add",
+  "name": "Name",
+  "leakGrid": "Leak grid",
+  "statTile": "Stat tile",
+  "addLeakGrid": "Add leak grid",
+  "editLeakGrid": "Edit leak grid",
+  "addStatTile": "Add stat tile",
+  "editStatTile": "Edit stat tile",
+  "sensorCount": "Number of sensors",
+  "fillColor": "Alert (fill) color",
+  "emptyColor": "Empty / OK color",
+  "unit": "Unit",
+  "backgroundColor": "Background color",
+  "foregroundColor": "Text color",
+  "noInternet": "No internet connection",
+  "noInternetBody": "Check your network and try again."
 }

@@ -4,6 +4,7 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 import '../data/db/database.dart';
+import 'sms_parser.dart';
 
 enum MqttStatus { disconnected, connecting, connected, failed }
 
@@ -25,12 +26,15 @@ enum MqttFailureReason {
   unknown,
 }
 
-/// A parsed numeric message received on a subscribed topic.
+/// A parsed numeric message received on a subscribed topic. [raw] carries the
+/// original payload (bracket contents for sensor-list payloads) so state
+/// components can recover which inputs were active.
 class TopicMessage {
   final String topic;
   final double value;
   final DateTime timestamp;
-  const TopicMessage(this.topic, this.value, this.timestamp);
+  final String? raw;
+  const TopicMessage(this.topic, this.value, this.timestamp, {this.raw});
 }
 
 /// A raw, unparsed message received on a subscribed topic. Emitted for every
@@ -151,7 +155,20 @@ class MqttService {
           _rawController.add(RawMessage(event.topic, payload, value, ts));
         }
         if (value != null) {
-          _messageController.add(TopicMessage(event.topic, value, ts));
+          _messageController.add(
+            TopicMessage(event.topic, value, ts, raw: payload),
+          );
+          continue;
+        }
+        // Non-numeric: accept sensor-list payloads (e.g. `IN1, IN2` / `[OK]`)
+        // so sensor-grid components work over MQTT. Stored value is the active
+        // count; the raw list is kept so the grid knows which inputs fired.
+        final sensor = _parseSensor(payload);
+        if (sensor != null) {
+          _messageController.add(
+            TopicMessage(event.topic, sensor.count.toDouble(), ts,
+                raw: sensor.raw),
+          );
         }
       }
     });
@@ -164,6 +181,21 @@ class MqttService {
     final match = RegExp(r'"value"\s*:\s*(-?\d+(\.\d+)?)').firstMatch(payload);
     if (match != null) return double.tryParse(match.group(1)!);
     return null;
+  }
+
+  /// Interprets a non-numeric payload as a sensor-input list. Strips optional
+  /// surrounding `[ ]`, then treats it as active if it names any `INx` token or
+  /// is an explicit cleared token (`OK`/`NONE`/`CLEAR`). Returns null for
+  /// anything else, so ordinary text messages are still ignored.
+  static ({int count, String raw})? _parseSensor(String payload) {
+    var body = payload.trim();
+    final bracket = RegExp(r'\[([^\]]*)\]\s*$').firstMatch(body);
+    if (bracket != null) body = bracket.group(1)!.trim();
+    final active = SmsParser.activeInputs(body);
+    final upper = body.toUpperCase();
+    final cleared = upper == 'OK' || upper == 'NONE' || upper == 'CLEAR';
+    if (active.isEmpty && !cleared) return null;
+    return (count: active.length, raw: body);
   }
 
   void subscribe(String topic) {
