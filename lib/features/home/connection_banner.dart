@@ -1,8 +1,12 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
+import '../../services/background_service.dart';
 import '../../services/mqtt_service.dart';
 import '../../theme/app_theme.dart';
 
@@ -10,18 +14,103 @@ import '../../theme/app_theme.dart';
 /// screen whenever an MQTT connection is live. Wire it through
 /// [MaterialApp.builder] so it sits above all routes.
 ///
+/// It also owns the background-mode handoff: when the app is backgrounded while
+/// a broker is connected and "keep connected" is on, it hands the connection to
+/// the foreground service; on resume it stops the service and reclaims the
+/// connection in the UI isolate. See `background_service.dart`.
+///
 /// The "no internet" state is intentionally NOT shown here: only the broker
 /// section needs a live network (to connect/publish), so that overlay lives in
 /// the broker screens. SMS, dashboards and history all work offline.
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!Platform.isAndroid) return;
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        _handoffToService();
+      case AppLifecycleState.resumed:
+        _reclaimFromService();
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+        break;
+    }
+  }
+
+  /// Backgrounding: if enabled and a broker is live, free the UI's MQTT client
+  /// and let the service take over so readings keep landing.
+  Future<void> _handoffToService() async {
+    if (!ref.read(backgroundServiceProvider)) return;
+    final connection = ref.read(connectionProvider.notifier);
+    final brokerId = connection.activeBrokerId;
+    if (brokerId == null ||
+        ref.read(connectionProvider) != MqttStatus.connected) {
+      return;
+    }
+
+    // Resolve the localized notification text now, while a BuildContext exists;
+    // the service isolate has none.
+    final l = AppLocalizations.of(context);
+    String brokerName = '';
+    try {
+      brokerName =
+          (await ref.read(brokerRepositoryProvider).getById(brokerId)).name;
+    } catch (_) {/* broker deleted — fall back to empty name */}
+
+    await connection.disconnect();
+    await ref.read(backgroundServiceProvider.notifier).startForBroker(
+          brokerId,
+          notifTitle: l.bgNotificationTitle,
+          notifBody: l.bgNotificationBody(brokerName),
+        );
+  }
+
+  /// Foregrounding: if the service is running, stop it and reconnect in the UI
+  /// isolate, then refresh the reading streams so charts show rows written while
+  /// backgrounded (cross-isolate writes don't notify Drift's `.watch()`).
+  Future<void> _reclaimFromService() async {
+    if (!await FlutterBackgroundService().isRunning()) return;
+    final brokerId =
+        ref.read(sharedPreferencesProvider).getInt(kBgActiveBrokerId);
+    await ref.read(backgroundServiceProvider.notifier).stop();
+    if (brokerId == null) return;
+
+    try {
+      final broker = await ref.read(brokerRepositoryProvider).getById(brokerId);
+      await ref.read(connectionProvider.notifier).connect(broker);
+    } catch (_) {/* broker deleted — nothing to reconnect */}
+
+    ref.invalidate(aggregatedProvider);
+    ref.invalidate(latestReadingProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final connected = ref.watch(connectionProvider) == MqttStatus.connected;
-    if (!connected) return child;
+    if (!connected) return widget.child;
 
     return Column(
       children: [
@@ -32,7 +121,7 @@ class AppShell extends ConsumerWidget {
           child: MediaQuery.removePadding(
             context: context,
             removeTop: true,
-            child: child,
+            child: widget.child,
           ),
         ),
       ],
