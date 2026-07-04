@@ -84,11 +84,16 @@ class MqttService {
     if (!_statusController.isClosed) _statusController.add(s);
   }
 
-  Future<bool> connect(Broker broker) async {
+  /// [clientIdSuffix] disambiguates the MQTT client id so the background-service
+  /// isolate (which passes `'bg'`) never collides with the UI isolate's client
+  /// during a foreground/background handoff — a duplicate id would make the
+  /// broker kick one of the two sessions.
+  Future<bool> connect(Broker broker, {String? clientIdSuffix}) async {
     await disconnect();
 
-    final clientId =
-        'mqtt_dash_${broker.id}_${broker.name.hashCode.toUnsigned(16)}';
+    final clientId = 'mqtt_dash_${broker.id}_'
+        '${broker.name.hashCode.toUnsigned(16)}'
+        '${clientIdSuffix != null ? '_$clientIdSuffix' : ''}';
     _qos = qosFromInt(broker.qos);
     _retain = broker.retain;
 
