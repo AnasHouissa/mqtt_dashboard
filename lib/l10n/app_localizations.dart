@@ -650,6 +650,18 @@ abstract class AppLocalizations {
   /// **'Fullscreen'**
   String get fullscreen;
 
+  /// No description provided for @moveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get moveUp;
+
+  /// No description provided for @moveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get moveDown;
+
   /// No description provided for @noData.
   ///
   /// In en, this message translates to:
@@ -1045,6 +1057,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit stat tile'**
   String get editStatTile;
+
+  /// No description provided for @alertDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert duration'**
+  String get alertDuration;
+
+  /// No description provided for @addAlertDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Add alert duration'**
+  String get addAlertDuration;
+
+  /// No description provided for @editAlertDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit alert duration'**
+  String get editAlertDuration;
+
+  /// No description provided for @totalAlertTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time in alert'**
+  String get totalAlertTime;
+
+  /// No description provided for @noAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'No alerts'**
+  String get noAlerts;
+
+  /// No description provided for @alertCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 alert} other{{count} alerts}}'**
+  String alertCount(int count);
+
+  /// No description provided for @openSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Open since {time}'**
+  String openSince(String time);
 
   /// No description provided for @sensorCount.
   ///

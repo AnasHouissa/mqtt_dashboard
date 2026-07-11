@@ -10,8 +10,10 @@ import '../../widgets/app_card.dart';
 import '../../widgets/circle_icon.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../dashboards/add_curve_dialog.dart';
+import '../dashboards/alert_duration_form.dart';
 import '../dashboards/leak_grid_form.dart';
 import '../dashboards/stat_tile_form.dart';
+import 'alert_duration_view.dart';
 import 'chart_fullscreen.dart';
 import 'chart_type_ui.dart';
 import 'chart_view.dart';
@@ -21,9 +23,20 @@ import 'time_filter.dart';
 
 /// A dashboard chart with its own time filter, fullscreen + export + edit/delete.
 class ChartCard extends ConsumerStatefulWidget {
-  const ChartCard({super.key, required this.item});
+  const ChartCard({
+    super.key,
+    required this.item,
+    this.onMoveUp,
+    this.onMoveDown,
+  });
 
   final ChartWithSeries item;
+
+  /// Swap this component with the one above it. Null when already at the top.
+  final VoidCallback? onMoveUp;
+
+  /// Swap this component with the one below it. Null when already at the bottom.
+  final VoidCallback? onMoveDown;
 
   @override
   ConsumerState<ChartCard> createState() => _ChartCardState();
@@ -53,6 +66,12 @@ class _ChartCardState extends ConsumerState<ChartCard> {
   ChartType get _type => _series.first.series.type;
   bool get _isCustom => _type.isCustomComponent;
 
+  /// The time filter applies to time-series charts and to the alert-duration
+  /// component (which sums over the selected period); the other custom
+  /// components (sensor grid / stat tile) only show the current live state.
+  bool get _showsTimeFilter =>
+      !_isCustom || _type == ChartType.alertDuration;
+
   String get _title {
     if (_chart.title?.isNotEmpty == true) return _chart.title!;
     return _series.map((s) => s.metric.name).join(', ');
@@ -69,6 +88,12 @@ class _ChartCardState extends ConsumerState<ChartCard> {
         );
       case ChartType.statTile:
         await showStatTileForm(
+          context,
+          dashboardId: _chart.dashboardId,
+          existing: widget.item,
+        );
+      case ChartType.alertDuration:
+        await showAlertDurationForm(
           context,
           dashboardId: _chart.dashboardId,
           existing: widget.item,
@@ -156,6 +181,11 @@ class _ChartCardState extends ConsumerState<ChartCard> {
     return switch (_type) {
       ChartType.sensorGrid => SensorGridView(item: _series.first),
       ChartType.statTile => StatTileView(item: _series.first),
+      ChartType.alertDuration => AlertDurationView(
+          item: _series.first,
+          bucket: _bucket,
+          anchor: _anchor,
+        ),
       _ => const SizedBox.shrink(),
     };
   }
@@ -185,6 +215,29 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                   ),
                 ),
               ),
+              // Reorder controls: swap this component with the one above /
+              // below. Shown whenever the card can move in that direction
+              // (i.e. the dashboard has more than one component).
+              if (widget.onMoveUp != null || widget.onMoveDown != null)
+                IconButton(
+                  tooltip: l.moveUp,
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  icon: const Icon(Icons.keyboard_arrow_up, size: 22),
+                  color: AppColors.textMuted,
+                  onPressed: widget.onMoveUp,
+                ),
+              if (widget.onMoveUp != null || widget.onMoveDown != null)
+                IconButton(
+                  tooltip: l.moveDown,
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  icon: const Icon(Icons.keyboard_arrow_down, size: 22),
+                  color: AppColors.textMuted,
+                  onPressed: widget.onMoveDown,
+                ),
               if (!_isCustom)
                 IconButton(
                   tooltip: l.fullscreen,
@@ -233,11 +286,10 @@ class _ChartCardState extends ConsumerState<ChartCard> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          // Custom components show their live state; the time filter and
-          // aggregated chart only apply to time-series charts.
-          if (_isCustom)
-            _buildCustom()
-          else ...[
+          // The time filter applies to time-series charts and the alert-duration
+          // component (both sum/plot over the selected period); the other custom
+          // components just show their current live state.
+          if (_showsTimeFilter) ...[
             Align(
               alignment: Alignment.centerLeft,
               child: TimeFilter(
@@ -258,6 +310,10 @@ class _ChartCardState extends ConsumerState<ChartCard> {
               ),
             ],
             const SizedBox(height: AppSpacing.md),
+          ],
+          if (_isCustom)
+            _buildCustom()
+          else
             SizedBox(
               height: 240,
               child: MetricChart(
@@ -266,7 +322,6 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 anchor: _anchor,
               ),
             ),
-          ],
         ],
       ),
     );

@@ -25,6 +25,11 @@ enum ChartType {
   /// not time-series). Rendered by dedicated widgets, not Syncfusion.
   sensorGrid,
   statTile,
+
+  /// Custom component showing how long a metric has been in alert (value > 0)
+  /// over the selected period: total time, episode count and a live timer while
+  /// currently open. Derived from readings, not a Syncfusion chart.
+  alertDuration,
 }
 
 /// Time bucket used to aggregate readings for histograms / filtering.
@@ -126,6 +131,10 @@ class Charts extends Table {
   IntColumn get dashboardId =>
       integer().references(Dashboards, #id, onDelete: KeyAction.cascade)();
   TextColumn get title => text().nullable()();
+
+  /// Display order of this component within its dashboard (ascending). Lower
+  /// values render higher up. Reordered by drag / move up-down in the UI.
+  IntColumn get position => integer().withDefault(const Constant(0))();
 }
 
 /// One plotted series within a [Charts] chart: a metric rendered with its own
@@ -254,7 +263,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mqtt_dash'));
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -347,6 +356,13 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(chartSeries, chartSeries.bgColor);
             await m.addColumn(chartSeries, chartSeries.fgColor);
             await m.addColumn(readings, readings.raw);
+          }
+          if (from < 9) {
+            // User-orderable dashboard components. The new column defaults to 0;
+            // seed each chart's position from its id so existing dashboards keep
+            // their current top-to-bottom order until the user reorders them.
+            await m.addColumn(charts, charts.position);
+            await customStatement('UPDATE charts SET position = id');
           }
         },
       );

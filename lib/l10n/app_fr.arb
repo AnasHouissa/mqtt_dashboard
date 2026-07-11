@@ -107,6 +107,8 @@
   "exportCsv": "Exporter CSV",
   "exportPdf": "Exporter PDF",
   "fullscreen": "Plein écran",
+  "moveUp": "Monter",
+  "moveDown": "Descendre",
   "noData": "Aucune donnée pour cette période",
   "fieldRequired": "Requis",
   "invalidNumber": "Entrez un nombre valide",
@@ -198,6 +200,23 @@
   "editLeakGrid": "Modifier",
   "addStatTile": "Ajouter une tuile",
   "editStatTile": "Modifier",
+  "alertDuration": "Durée d'alerte",
+  "addAlertDuration": "Ajouter une durée d'alerte",
+  "editAlertDuration": "Modifier la durée d'alerte",
+  "totalAlertTime": "Temps en alerte",
+  "noAlerts": "Aucune alerte",
+  "alertCount": "{count, plural, =1{1 alerte} other{{count} alertes}}",
+  "@alertCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "openSince": "Ouvert depuis {time}",
+  "@openSince": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
   "sensorCount": "Nombre de capteurs",
   "fillColor": "Couleur d'alerte",
   "emptyColor": "Couleur vide / OK",

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../services/alert_stats.dart';
 import '../db/database.dart';
 
 /// Stores incoming readings and aggregates them for charting/export.
@@ -86,6 +87,50 @@ class ReadingRepository {
     DateTime anchor,
   ) {
     return _watchRaw(metricId, _range(bucket, anchor));
+  }
+
+  /// Reactive alert-duration stats for a metric over the period identified by
+  /// [bucket] + [anchor]: total time in alert (value > 0), episode count and a
+  /// live "open since" when an episode is still ongoing. Derived from readings.
+  ///
+  /// The query fetches the single last reading *before* the window (so we know
+  /// if the metric was already in alert when the window opened) UNIONed with all
+  /// in-window readings — both index-friendly via `idx_readings_metric_time`.
+  Stream<AlertDurationStats> watchAlertDuration(
+    int metricId,
+    TimeBucket bucket,
+    DateTime anchor,
+  ) {
+    final range = _range(bucket, anchor);
+    final query = _db.customSelect(
+      "SELECT ts, value FROM ("
+      "  SELECT timestamp AS ts, value FROM readings "
+      "  WHERE metric_id = ?1 AND timestamp < ?2 "
+      "  ORDER BY timestamp DESC LIMIT 1"
+      ") "
+      "UNION ALL "
+      "SELECT timestamp AS ts, value FROM readings "
+      "WHERE metric_id = ?1 AND timestamp >= ?2 AND timestamp < ?3 "
+      "ORDER BY ts",
+      variables: [
+        Variable.withInt(metricId),
+        Variable.withInt(range.start),
+        Variable.withInt(range.end),
+      ],
+      readsFrom: {_db.readings},
+    );
+
+    return query.watch().map((rows) {
+      final data = rows
+          .map((row) => (ts: row.read<int>('ts'), value: row.read<double>('value')))
+          .toList();
+      return AlertDurationStats.fromRows(
+        data,
+        windowStartSec: range.start,
+        windowEndSec: range.end,
+        nowSec: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      );
+    });
   }
 
   /// Every raw reading in `[range.start, range.end)`, each as its own point at

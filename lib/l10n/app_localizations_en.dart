@@ -292,6 +292,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullscreen => 'Fullscreen';
 
   @override
+  String get moveUp => 'Move up';
+
+  @override
+  String get moveDown => 'Move down';
+
+  @override
   String get noData => 'No data for this period';
 
   @override
@@ -502,6 +508,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editStatTile => 'Edit stat tile';
+
+  @override
+  String get alertDuration => 'Alert duration';
+
+  @override
+  String get addAlertDuration => 'Add alert duration';
+
+  @override
+  String get editAlertDuration => 'Edit alert duration';
+
+  @override
+  String get totalAlertTime => 'Time in alert';
+
+  @override
+  String get noAlerts => 'No alerts';
+
+  @override
+  String alertCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count alerts',
+      one: '1 alert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String openSince(String time) {
+    return 'Open since $time';
+  }
 
   @override
   String get sensorCount => 'Number of sensors';

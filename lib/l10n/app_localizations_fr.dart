@@ -295,6 +295,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get fullscreen => 'Plein écran';
 
   @override
+  String get moveUp => 'Monter';
+
+  @override
+  String get moveDown => 'Descendre';
+
+  @override
   String get noData => 'Aucune donnée pour cette période';
 
   @override
@@ -508,6 +514,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get editStatTile => 'Modifier';
+
+  @override
+  String get alertDuration => 'Durée d\'alerte';
+
+  @override
+  String get addAlertDuration => 'Ajouter une durée d\'alerte';
+
+  @override
+  String get editAlertDuration => 'Modifier la durée d\'alerte';
+
+  @override
+  String get totalAlertTime => 'Temps en alerte';
+
+  @override
+  String get noAlerts => 'Aucune alerte';
+
+  @override
+  String alertCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count alertes',
+      one: '1 alerte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String openSince(String time) {
+    return 'Ouvert depuis $time';
+  }
 
   @override
   String get sensorCount => 'Nombre de capteurs';

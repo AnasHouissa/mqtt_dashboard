@@ -107,6 +107,8 @@
   "exportCsv": "Export CSV",
   "exportPdf": "Export PDF",
   "fullscreen": "Fullscreen",
+  "moveUp": "Move up",
+  "moveDown": "Move down",
   "noData": "No data for this period",
   "fieldRequired": "Required",
   "invalidNumber": "Enter a valid number",
@@ -198,6 +200,23 @@
   "editLeakGrid": "Edit leak grid",
   "addStatTile": "Add stat tile",
   "editStatTile": "Edit stat tile",
+  "alertDuration": "Alert duration",
+  "addAlertDuration": "Add alert duration",
+  "editAlertDuration": "Edit alert duration",
+  "totalAlertTime": "Time in alert",
+  "noAlerts": "No alerts",
+  "alertCount": "{count, plural, =1{1 alert} other{{count} alerts}}",
+  "@alertCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "openSince": "Open since {time}",
+  "@openSince": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
   "sensorCount": "Number of sensors",
   "fillColor": "Alert (fill) color",
   "emptyColor": "Empty / OK color",

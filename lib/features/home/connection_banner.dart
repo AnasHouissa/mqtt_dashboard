@@ -54,6 +54,10 @@ class _AppShellState extends ConsumerState<AppShell>
         _handoffToService();
       case AppLifecycleState.resumed:
         _reclaimFromService();
+        // SMS received while backgrounded is written by the plugin's own
+        // isolate; cross-isolate writes don't notify this isolate's Drift
+        // `.watch()` streams, so refresh the reading-derived providers.
+        _refreshReadingStreams();
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
         break;
@@ -102,9 +106,14 @@ class _AppShellState extends ConsumerState<AppShell>
       final broker = await ref.read(brokerRepositoryProvider).getById(brokerId);
       await ref.read(connectionProvider.notifier).connect(broker);
     } catch (_) {/* broker deleted — nothing to reconnect */}
+  }
 
+  /// Refresh every reading-derived provider so rows written by another isolate
+  /// (the MQTT service or the SMS background handler) surface after resume.
+  void _refreshReadingStreams() {
     ref.invalidate(aggregatedProvider);
     ref.invalidate(latestReadingProvider);
+    ref.invalidate(alertDurationProvider);
   }
 
   @override

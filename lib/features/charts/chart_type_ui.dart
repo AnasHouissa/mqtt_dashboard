@@ -23,6 +23,7 @@ extension ChartTypeUi on ChartType {
         ChartType.line => l.line,
         ChartType.sensorGrid => l.leakGrid,
         ChartType.statTile => l.statTile,
+        ChartType.alertDuration => l.alertDuration,
       };
 
   IconData get icon => switch (this) {
@@ -42,12 +43,15 @@ extension ChartTypeUi on ChartType {
         ChartType.line => Icons.timeline,
         ChartType.sensorGrid => Icons.grid_view,
         ChartType.statTile => Icons.text_fields,
+        ChartType.alertDuration => Icons.timelapse,
       };
 
   /// Whether this is a custom "current-state" component (single metric, latest
   /// reading) rather than a Syncfusion time-series chart.
   bool get isCustomComponent =>
-      this == ChartType.sensorGrid || this == ChartType.statTile;
+      this == ChartType.sensorGrid ||
+      this == ChartType.statTile ||
+      this == ChartType.alertDuration;
 
   /// Whether this type renders in a circular chart (pie/doughnut/radial bar)
   /// rather than the cartesian chart.

@@ -1,8 +1,13 @@
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:ui' show DartPluginRegistrant;
 
 import 'package:another_telephony/telephony.dart';
+import 'package:flutter/widgets.dart' show WidgetsFlutterBinding;
 import 'package:permission_handler/permission_handler.dart';
+
+import '../data/db/database.dart' show AppDatabase;
+import 'sms_ingest.dart';
 
 /// A single incoming SMS, normalised for the ingestion pipeline.
 class IncomingSms {
@@ -54,15 +59,25 @@ class SmsService {
     return granted ?? false;
   }
 
-  /// Begins foreground listening for incoming SMS. Idempotent; no-op on
-  /// unsupported platforms. Background reception is intentionally not enabled.
+  /// Begins listening for incoming SMS. Idempotent; no-op on unsupported
+  /// platforms.
+  ///
+  /// Uses `listenInBackground: true` so messages are delivered to
+  /// [smsBackgroundHandler] in a dedicated isolate when the app is backgrounded
+  /// or closed. This also sidesteps a plugin conflict: the MQTT
+  /// foreground-service spins up a second Flutter engine whose plugin
+  /// registration hijacks `another_telephony`'s process-global foreground SMS
+  /// channel; routing background delivery through the plugin's own isolate keeps
+  /// SMS ingestion working regardless of that engine. Foreground messages still
+  /// arrive on [_handle] (the UI isolate) when it owns the channel.
   void startListening() {
     final t = _telephony;
     if (t == null || _listening) return;
     _listening = true;
     t.listenIncomingSms(
       onNewMessage: _handle,
-      listenInBackground: false,
+      onBackgroundMessage: smsBackgroundHandler,
+      listenInBackground: true,
     );
   }
 
@@ -80,4 +95,34 @@ class SmsService {
   }
 
   void dispose() => _controller.close();
+}
+
+/// Background-isolate entry point for incoming SMS. Runs in `another_telephony`'s
+/// own isolate (independent of the UI isolate and the MQTT foreground-service
+/// engine), so SMS are parsed and persisted reliably even when the app is
+/// backgrounded or closed. Opens its own [AppDatabase] connection to the shared
+/// `mqtt_dash` file, mirroring the MQTT background runner.
+///
+/// Must stay a top-level, annotated function so it survives tree-shaking and can
+/// be resolved from the raw callback handle the plugin stores.
+@pragma('vm:entry-point')
+Future<void> smsBackgroundHandler(SmsMessage message) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+  final body = message.body ?? '';
+  if (body.isEmpty) return;
+  final ts = message.date != null
+      ? DateTime.fromMillisecondsSinceEpoch(message.date!)
+      : DateTime.now();
+  final db = AppDatabase();
+  try {
+    await ingestSms(
+      db,
+      sender: message.address ?? '',
+      body: body,
+      timestamp: ts,
+    );
+  } finally {
+    await db.close();
+  }
 }
