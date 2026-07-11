@@ -103,6 +103,10 @@ class MqttService {
       broker.port,
     );
     client.logging(on: true);
+    // Speak MQTT 3.1.1 (protocol name "MQTT", version 4). The library defaults
+    // to the legacy MQTT 3.1 "MQIsdp" header, which modern brokers such as
+    // test.mosquitto.org reject by resetting the connection.
+    client.setProtocolV311();
     client.secure = broker.secure;
     client.keepAlivePeriod = broker.keepAlive;
     client.connectTimeoutPeriod = broker.connectTimeout * 1000;
@@ -277,6 +281,7 @@ Future<MqttFailureReason?> testBrokerConnection({
 }) async {
   final clientId = 'mqtt_dash_test_${address.hashCode.toUnsigned(16)}';
   final client = MqttServerClient.withPort(address, clientId, port)
+    ..setProtocolV311() // MQTT 3.1.1, not the legacy MQIsdp header
     ..secure = secure
     ..keepAlivePeriod = keepAlive
     ..connectTimeoutPeriod = connectTimeout * 1000
