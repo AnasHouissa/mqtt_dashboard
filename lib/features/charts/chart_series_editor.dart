@@ -4,7 +4,7 @@ import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
-import '../../widgets/color_swatch_picker.dart';
+import '../../widgets/color_picker_field.dart';
 import '../../widgets/marquee_text.dart';
 import 'chart_type_ui.dart';
 
@@ -214,18 +214,10 @@ class ChartSeriesEditor extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          l.color,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
-        ),
         const SizedBox(height: AppSpacing.sm),
-        ColorSwatchPicker(
-          selected: draft.color,
+        ColorPickerField(
+          label: l.color,
+          color: draft.color,
           onChanged: (c) {
             draft.color = c;
             onChanged();

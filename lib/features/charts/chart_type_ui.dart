@@ -61,15 +61,17 @@ extension ChartTypeUi on ChartType {
       this == ChartType.radialBar;
 
   /// Order the type chips are offered in the selector. Line and spline lead
-  /// (the most common choices); the rest follow in their enum order. Kept
-  /// separate from [ChartType.values] so display order stays independent of the
-  /// enum's storage order.
+  /// (the most common choices), then histogram; the rest follow in their enum
+  /// order. Kept separate from [ChartType.values] so display order stays
+  /// independent of the enum's storage order.
   static List<ChartType> get displayOrder => [
         ChartType.line,
         ChartType.spline,
+        ChartType.histogram,
         for (final t in ChartType.values)
           if (t != ChartType.line &&
               t != ChartType.spline &&
+              t != ChartType.histogram &&
               !t.isCustomComponent)
             t,
       ];
