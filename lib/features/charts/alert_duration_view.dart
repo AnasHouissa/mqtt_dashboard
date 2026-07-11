@@ -72,6 +72,8 @@ class _AlertDurationViewState extends ConsumerState<AlertDurationView> {
       metricId: widget.item.metric.id,
       bucket: widget.bucket,
       anchor: widget.anchor,
+      startMinutes: null,
+      endMinutes: null,
     );
     final async = ref.watch(alertDurationProvider(key));
     final stats = async.valueOrNull ?? AlertDurationStats.empty;

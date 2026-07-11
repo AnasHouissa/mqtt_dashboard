@@ -295,6 +295,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get exportPdf => 'Exporter PDF';
 
   @override
+  String get exportRange => 'Plage d\'export';
+
+  @override
+  String get export => 'Exporter';
+
+  @override
+  String get from => 'Du';
+
+  @override
+  String get to => 'Au';
+
+  @override
+  String get invalidRange => 'Le début doit précéder la fin.';
+
+  @override
+  String get timeRange => 'Plage horaire';
+
+  @override
   String get fullscreen => 'Plein écran';
 
   @override
@@ -460,6 +478,21 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String deleteNamedBody(String name) {
     return 'Supprimer « $name » ? Cette action est irréversible.';
+  }
+
+  @override
+  String get deleteHistory => 'Supprimer l\'historique';
+
+  @override
+  String historyDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count relevés supprimés',
+      one: '1 relevé supprimé',
+      zero: 'Aucun relevé supprimé',
+    );
+    return '$_temp0';
   }
 
   @override

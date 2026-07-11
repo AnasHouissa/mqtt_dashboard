@@ -60,12 +60,44 @@ class ReadingRepository {
     return query.watch().map((rows) => rows.first.read<double?>('avg'));
   }
 
-  /// All raw readings for a metric (newest first), used for CSV/PDF export.
-  Future<List<Reading>> rawForMetric(int metricId) =>
-      (_db.select(_db.readings)
-            ..where((r) => r.metricId.equals(metricId))
-            ..orderBy([(r) => OrderingTerm(expression: r.timestamp)]))
-          .get();
+  /// All raw readings for a metric (oldest first), used for CSV/PDF export.
+  /// [start]/[end] optionally bound the export window (`[start, end]`,
+  /// inclusive); a null bound means "unbounded on that side".
+  Future<List<Reading>> rawForMetric(
+    int metricId, {
+    DateTime? start,
+    DateTime? end,
+  }) {
+    final query = _db.select(_db.readings)
+      ..where((r) => r.metricId.equals(metricId))
+      ..orderBy([(r) => OrderingTerm(expression: r.timestamp)]);
+    if (start != null) {
+      query.where((r) => r.timestamp.isBiggerOrEqualValue(start));
+    }
+    if (end != null) {
+      query.where((r) => r.timestamp.isSmallerOrEqualValue(end));
+    }
+    return query.get();
+  }
+
+  /// Deletes a metric's readings within `[start, end]` (inclusive; null bound =
+  /// unbounded). Returns the number of rows removed. Charts watching the metric
+  /// refresh automatically.
+  Future<int> deleteInRange(
+    int metricId, {
+    DateTime? start,
+    DateTime? end,
+  }) {
+    final query = _db.delete(_db.readings)
+      ..where((r) => r.metricId.equals(metricId));
+    if (start != null) {
+      query.where((r) => r.timestamp.isBiggerOrEqualValue(start));
+    }
+    if (end != null) {
+      query.where((r) => r.timestamp.isSmallerOrEqualValue(end));
+    }
+    return query.go();
+  }
 
   /// The `[start, end)` unix-second range covered by [bucket] anchored at
   /// [anchor]. Bounds are built from *local* calendar boundaries (Dart's
@@ -102,9 +134,27 @@ class ReadingRepository {
   Stream<List<AggregatedPoint>> watchAggregated(
     int metricId,
     TimeBucket bucket,
-    DateTime anchor,
-  ) {
-    return _watchRaw(metricId, _range(bucket, anchor));
+    DateTime anchor, {
+    int? startMinutes,
+    int? endMinutes,
+  }) {
+    var range = _range(bucket, anchor);
+    // For a day bucket, an optional time window narrows the range to
+    // [dayStart + startMinutes, dayStart + endMinutes] (end inclusive of the
+    // selected minute). Month/year buckets ignore the window.
+    if (bucket == TimeBucket.day &&
+        (startMinutes != null || endMinutes != null)) {
+      final dayStart = DateTime(anchor.year, anchor.month, anchor.day);
+      int sec(int minutes) =>
+          dayStart.add(Duration(minutes: minutes)).millisecondsSinceEpoch ~/
+          1000;
+      range = (
+        start: startMinutes != null ? sec(startMinutes) : range.start,
+        // +1 so a reading exactly at the end minute is included.
+        end: endMinutes != null ? sec(endMinutes + 1) : range.end,
+      );
+    }
+    return _watchRaw(metricId, range);
   }
 
   /// Reactive alert-duration stats for a metric over the period identified by

@@ -107,6 +107,12 @@
   "selectYear": "Select year",
   "exportCsv": "Export CSV",
   "exportPdf": "Export PDF",
+  "exportRange": "Export range",
+  "export": "Export",
+  "from": "From",
+  "to": "To",
+  "invalidRange": "The start must be before the end.",
+  "timeRange": "Time range",
   "fullscreen": "Fullscreen",
   "moveUp": "Move up",
   "moveDown": "Move down",
@@ -172,6 +178,13 @@
   "@deleteNamedBody": {
     "placeholders": {
       "name": { "type": "String" }
+    }
+  },
+  "deleteHistory": "Delete history",
+  "historyDeleted": "{count, plural, =0{No readings deleted} =1{1 reading deleted} other{{count} readings deleted}}",
+  "@historyDeleted": {
+    "placeholders": {
+      "count": { "type": "int" }
     }
   },
   "deleteBrokerBody": "Delete \"{name}\"? Its metrics, dashboards, charts and readings will also be permanently removed.",

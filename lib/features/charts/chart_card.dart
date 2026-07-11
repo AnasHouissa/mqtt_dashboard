@@ -16,6 +16,7 @@ import '../dashboards/stat_tile_form.dart';
 import 'alert_duration_view.dart';
 import 'chart_fullscreen.dart';
 import 'chart_type_ui.dart';
+import 'date_time_range_sheet.dart';
 import 'chart_view.dart';
 import 'sensor_grid_view.dart';
 import 'stat_tile_view.dart';
@@ -46,16 +47,50 @@ class _ChartCardState extends ConsumerState<ChartCard> {
   TimeBucket _bucket = TimeBucket.day;
   DateTime _anchor = defaultAnchor(TimeBucket.day);
 
+  /// Optional time-of-day window applied only to the day bucket; null = full day.
+  TimeOfDay? _dayStart;
+  TimeOfDay? _dayEnd;
+
   bool get _isDefault => _anchor == defaultAnchor(_bucket);
+
+  int? get _startMinutes =>
+      _dayStart == null ? null : _dayStart!.hour * 60 + _dayStart!.minute;
+  int? get _endMinutes =>
+      _dayEnd == null ? null : _dayEnd!.hour * 60 + _dayEnd!.minute;
 
   void _selectBucket(TimeBucket b) => setState(() {
     _bucket = b;
     _anchor = defaultAnchor(b); // start each tab at its current period
+    _dayStart = null; // the time window only applies to a day
+    _dayEnd = null;
   });
 
   Future<void> _pickPeriod() async {
     final picked = await pickPeriod(context, _bucket, _anchor);
     if (picked != null) setState(() => _anchor = picked);
+  }
+
+  /// Pick a start then an end time to narrow the day to a window. Swaps them if
+  /// the end precedes the start so the range is always valid.
+  Future<void> _pickDayTimeRange() async {
+    final start = await showTimePicker(
+      context: context,
+      initialTime: _dayStart ?? const TimeOfDay(hour: 0, minute: 0),
+      helpText: AppLocalizations.of(context).from,
+    );
+    if (start == null || !mounted) return;
+    final end = await showTimePicker(
+      context: context,
+      initialTime: _dayEnd ?? const TimeOfDay(hour: 23, minute: 59),
+      helpText: AppLocalizations.of(context).to,
+    );
+    if (end == null) return;
+    final startMin = start.hour * 60 + start.minute;
+    final endMin = end.hour * 60 + end.minute;
+    setState(() {
+      _dayStart = endMin < startMin ? end : start;
+      _dayEnd = endMin < startMin ? start : end;
+    });
   }
 
   ChartConfig get _chart => widget.item.chart;
@@ -107,11 +142,25 @@ class _ChartCardState extends ConsumerState<ChartCard> {
     }
   }
 
+  /// Asks the user for a date-time range, then fetches the metric's readings
+  /// within it. Returns null if the user cancelled the range picker.
+  Future<List<Reading>?> _pickRangeReadings(Metric metric) async {
+    final l = AppLocalizations.of(context);
+    final range = await showDateTimeRangeSheet(
+      context,
+      title: l.exportRange,
+      confirmLabel: l.export,
+    );
+    if (range == null) return null;
+    return ref
+        .read(readingRepositoryProvider)
+        .rawForMetric(metric.id, start: range.start, end: range.end);
+  }
+
   Future<void> _exportCsv(Metric metric) async {
     final l = AppLocalizations.of(context);
-    final readings = await ref
-        .read(readingRepositoryProvider)
-        .rawForMetric(metric.id);
+    final readings = await _pickRangeReadings(metric);
+    if (readings == null) return;
     await ref
         .read(exportServiceProvider)
         .exportCsv(
@@ -124,9 +173,8 @@ class _ChartCardState extends ConsumerState<ChartCard> {
 
   Future<void> _exportPdf(Metric metric) async {
     final l = AppLocalizations.of(context);
-    final readings = await ref
-        .read(readingRepositoryProvider)
-        .rawForMetric(metric.id);
+    final readings = await _pickRangeReadings(metric);
+    if (readings == null) return;
     await ref
         .read(exportServiceProvider)
         .exportPdf(
@@ -309,6 +357,29 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 ),
               ),
             ],
+            // Time-of-day window: only meaningful for a day-bucket time-series
+            // chart. A tap opens start/end time pickers; a set window shows a
+            // resettable chip.
+            if (!_isCustom && _bucket == TimeBucket.day) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: _dayStart == null || _dayEnd == null
+                    ? ActionChip(
+                        avatar: const Icon(Icons.schedule, size: 18),
+                        label: Text(l.timeRange),
+                        onPressed: _pickDayTimeRange,
+                      )
+                    : PeriodChip(
+                        label:
+                            '${_dayStart!.format(context)} – ${_dayEnd!.format(context)}',
+                        onReset: () => setState(() {
+                          _dayStart = null;
+                          _dayEnd = null;
+                        }),
+                      ),
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
           ],
           if (_isCustom)
@@ -320,6 +391,8 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 series: _series,
                 bucket: _bucket,
                 anchor: _anchor,
+                startMinutes: _startMinutes,
+                endMinutes: _endMinutes,
               ),
             ),
         ],

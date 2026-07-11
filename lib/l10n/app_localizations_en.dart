@@ -292,6 +292,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportPdf => 'Export PDF';
 
   @override
+  String get exportRange => 'Export range';
+
+  @override
+  String get export => 'Export';
+
+  @override
+  String get from => 'From';
+
+  @override
+  String get to => 'To';
+
+  @override
+  String get invalidRange => 'The start must be before the end.';
+
+  @override
+  String get timeRange => 'Time range';
+
+  @override
   String get fullscreen => 'Fullscreen';
 
   @override
@@ -455,6 +473,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String deleteNamedBody(String name) {
     return 'Delete \"$name\"? This action cannot be undone.';
+  }
+
+  @override
+  String get deleteHistory => 'Delete history';
+
+  @override
+  String historyDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count readings deleted',
+      one: '1 reading deleted',
+      zero: 'No readings deleted',
+    );
+    return '$_temp0';
   }
 
   @override

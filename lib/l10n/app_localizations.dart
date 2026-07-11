@@ -650,6 +650,42 @@ abstract class AppLocalizations {
   /// **'Export PDF'**
   String get exportPdf;
 
+  /// No description provided for @exportRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Export range'**
+  String get exportRange;
+
+  /// No description provided for @export.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get export;
+
+  /// No description provided for @from.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get from;
+
+  /// No description provided for @to.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get to;
+
+  /// No description provided for @invalidRange.
+  ///
+  /// In en, this message translates to:
+  /// **'The start must be before the end.'**
+  String get invalidRange;
+
+  /// No description provided for @timeRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Time range'**
+  String get timeRange;
+
   /// No description provided for @fullscreen.
   ///
   /// In en, this message translates to:
@@ -961,6 +997,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete \"{name}\"? This action cannot be undone.'**
   String deleteNamedBody(String name);
+
+  /// No description provided for @deleteHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete history'**
+  String get deleteHistory;
+
+  /// No description provided for @historyDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No readings deleted} =1{1 reading deleted} other{{count} readings deleted}}'**
+  String historyDeleted(int count);
 
   /// No description provided for @deleteBrokerBody.
   ///

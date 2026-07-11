@@ -103,12 +103,28 @@ final chartsProvider = StreamProvider.autoDispose
 /// Aggregated chart data, keyed by metric + time bucket + the selected period.
 /// [anchor] must be normalized to the period start by the caller so identical
 /// selections share a cache entry (records compare by value).
-typedef AggKey = ({int metricId, TimeBucket bucket, DateTime anchor});
+///
+/// [startMinutes]/[endMinutes] optionally narrow a **day** bucket to a time
+/// window within that day (minutes from midnight); null on both = the whole
+/// day. Ignored for month/year buckets.
+typedef AggKey = ({
+  int metricId,
+  TimeBucket bucket,
+  DateTime anchor,
+  int? startMinutes,
+  int? endMinutes,
+});
 
 final aggregatedProvider = StreamProvider.autoDispose
     .family<List<AggregatedPoint>, AggKey>((ref, key) => ref
         .watch(readingRepositoryProvider)
-        .watchAggregated(key.metricId, key.bucket, key.anchor));
+        .watchAggregated(
+          key.metricId,
+          key.bucket,
+          key.anchor,
+          startMinutes: key.startMinutes,
+          endMinutes: key.endMinutes,
+        ));
 
 /// The latest reading for a metric, used by "current-state" components (sensor
 /// grid / stat tile). Null until the first message for that metric arrives.

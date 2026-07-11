@@ -10,6 +10,7 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/entity_card.dart';
+import '../charts/date_time_range_sheet.dart';
 import 'metric_console_screen.dart';
 import 'metric_form.dart';
 
@@ -71,6 +72,8 @@ class MetricListView extends ConsumerWidget {
                               brokerId: broker.id,
                               template: metric.copyWith(
                                   name: l.copyOf(metric.name)));
+                        } else if (value == 'deleteHistory') {
+                          await _deleteHistory(context, ref, metric);
                         } else if (value == 'delete') {
                           if (await confirmDelete(context,
                               message: l.deleteNamedBody(metric.name))) {
@@ -88,6 +91,9 @@ class MetricListView extends ConsumerWidget {
                         PopupMenuItem(
                             value: 'duplicate', child: Text(l.duplicate)),
                         PopupMenuItem(
+                            value: 'deleteHistory',
+                            child: Text(l.deleteHistory)),
+                        PopupMenuItem(
                           value: 'delete',
                           child: Text(l.delete,
                               style: const TextStyle(color: AppColors.danger)),
@@ -102,6 +108,26 @@ class MetricListView extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  /// Asks for a date-time range and deletes the metric's readings within it,
+  /// reporting how many rows were removed.
+  Future<void> _deleteHistory(
+      BuildContext context, WidgetRef ref, Metric metric) async {
+    final l = AppLocalizations.of(context);
+    final range = await showDateTimeRangeSheet(
+      context,
+      title: l.deleteHistory,
+      confirmLabel: l.delete,
+      confirmDanger: true,
+    );
+    if (range == null) return;
+    final count = await ref
+        .read(readingRepositoryProvider)
+        .deleteInRange(metric.id, start: range.start, end: range.end);
+    if (context.mounted) {
+      showAppSnackBar(context, l.historyDeleted(count));
+    }
   }
 
   Future<void> _showPublishDialog(

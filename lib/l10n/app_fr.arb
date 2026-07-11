@@ -107,6 +107,12 @@
   "selectYear": "Choisir l'année",
   "exportCsv": "Exporter CSV",
   "exportPdf": "Exporter PDF",
+  "exportRange": "Plage d'export",
+  "export": "Exporter",
+  "from": "Du",
+  "to": "Au",
+  "invalidRange": "Le début doit précéder la fin.",
+  "timeRange": "Plage horaire",
   "fullscreen": "Plein écran",
   "moveUp": "Monter",
   "moveDown": "Descendre",
@@ -172,6 +178,13 @@
   "@deleteNamedBody": {
     "placeholders": {
       "name": { "type": "String" }
+    }
+  },
+  "deleteHistory": "Supprimer l'historique",
+  "historyDeleted": "{count, plural, =0{Aucun relevé supprimé} =1{1 relevé supprimé} other{{count} relevés supprimés}}",
+  "@historyDeleted": {
+    "placeholders": {
+      "count": { "type": "int" }
     }
   },
   "deleteBrokerBody": "Supprimer « {name} » ? Ses métriques, tableaux de bord, graphiques et relevés seront aussi supprimés définitivement.",

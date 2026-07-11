@@ -18,6 +18,8 @@ class MetricChart extends ConsumerWidget {
     required this.series,
     required this.bucket,
     required this.anchor,
+    this.startMinutes,
+    this.endMinutes,
   });
 
   final List<ChartSeriesWithMetric> series;
@@ -25,6 +27,11 @@ class MetricChart extends ConsumerWidget {
 
   /// Start of the selected period (day/month/year) the chart is scoped to.
   final DateTime anchor;
+
+  /// Optional time-of-day window (minutes from midnight) narrowing a day bucket;
+  /// null on both = the whole day. Ignored for month/year.
+  final int? startMinutes;
+  final int? endMinutes;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,7 +46,13 @@ class MetricChart extends ConsumerWidget {
           s,
           ref.watch(
             aggregatedProvider(
-              (metricId: s.metric.id, bucket: bucket, anchor: anchor),
+              (
+                metricId: s.metric.id,
+                bucket: bucket,
+                anchor: anchor,
+                startMinutes: startMinutes,
+                endMinutes: endMinutes,
+              ),
             ),
           ),
         ),
