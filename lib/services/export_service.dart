@@ -8,35 +8,42 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
 import '../data/db/database.dart';
+import '../utils/number_format.dart';
 
 /// Builds CSV / PDF files from readings and shares them.
 class ExportService {
   static final _dateFmt = DateFormat('yyyy-MM-dd HH:mm:ss');
 
-  /// Writes a CSV file and opens the share sheet.
+  /// Writes a CSV file and opens the share sheet. Values use [locale]'s decimal
+  /// separator; a semicolon separates fields so a French comma-decimal (`23,3`)
+  /// never collides with the field separator.
   Future<void> exportCsv({
     required String metricName,
     required List<Reading> readings,
     required String timestampHeader,
     required String valueHeader,
+    required String locale,
   }) async {
     final rows = <List<dynamic>>[
       [timestampHeader, valueHeader],
-      for (final r in readings) [_dateFmt.format(r.timestamp), r.value],
+      for (final r in readings)
+        [_dateFmt.format(r.timestamp), formatMetricValue(r.value, locale)],
     ];
-    final csv = const ListToCsvConverter().convert(rows);
+    final csv = const ListToCsvConverter(fieldDelimiter: ';').convert(rows);
 
     final file = await _writeFile('${_safe(metricName)}.csv', csv);
     await Share.shareXFiles([XFile(file.path)], subject: '$metricName CSV');
   }
 
-  /// Builds a PDF table and opens the share sheet.
+  /// Builds a PDF table and opens the share sheet. Values use [locale]'s
+  /// decimal separator.
   Future<void> exportPdf({
     required String metricName,
     required String title,
     required List<Reading> readings,
     required String timestampHeader,
     required String valueHeader,
+    required String locale,
   }) async {
     final doc = pw.Document();
     doc.addPage(
@@ -52,7 +59,7 @@ class ExportService {
             cellAlignment: pw.Alignment.centerLeft,
             data: [
               for (final r in readings)
-                [_dateFmt.format(r.timestamp), r.value.toString()],
+                [_dateFmt.format(r.timestamp), formatMetricValue(r.value, locale)],
             ],
           ),
         ],

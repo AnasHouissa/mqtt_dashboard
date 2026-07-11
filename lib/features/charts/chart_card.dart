@@ -159,6 +159,7 @@ class _ChartCardState extends ConsumerState<ChartCard> {
 
   Future<void> _exportCsv(Metric metric) async {
     final l = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final readings = await _pickRangeReadings(metric);
     if (readings == null) return;
     await ref
@@ -168,11 +169,13 @@ class _ChartCardState extends ConsumerState<ChartCard> {
           readings: readings,
           timestampHeader: l.timestamp,
           valueHeader: l.value,
+          locale: locale,
         );
   }
 
   Future<void> _exportPdf(Metric metric) async {
     final l = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final readings = await _pickRangeReadings(metric);
     if (readings == null) return;
     await ref
@@ -183,6 +186,7 @@ class _ChartCardState extends ConsumerState<ChartCard> {
           readings: readings,
           timestampHeader: l.timestamp,
           valueHeader: l.value,
+          locale: locale,
         );
   }
 

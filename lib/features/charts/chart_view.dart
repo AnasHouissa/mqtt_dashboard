@@ -117,6 +117,8 @@ class MetricChart extends ConsumerWidget {
       primaryYAxis: NumericAxis(
         minimum: axisMin,
         maximum: axisMax,
+        // Locale-aware axis labels (comma decimals for French, dot for English).
+        numberFormat: NumberFormat('0.##', Localizations.localeOf(context).toString()),
         plotBands: plotBands,
       ),
       legend: Legend(isVisible: cartesian.length > 1),

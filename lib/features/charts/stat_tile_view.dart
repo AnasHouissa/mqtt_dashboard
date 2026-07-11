@@ -5,6 +5,7 @@ import '../../data/repositories/dashboard_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/number_format.dart';
 
 /// Renders a [ChartType.statTile]: a styled value + unit box whose background
 /// is [bgColor] and whose text + border use [fgColor]. Below the value a thin
@@ -15,15 +16,11 @@ class StatTileView extends ConsumerWidget {
 
   final ChartSeriesWithMetric item;
 
-  static String _formatValue(double v) {
-    // Show integers without a trailing ".0"; otherwise up to 2 decimals.
-    if (v == v.roundToDouble()) return v.toInt().toString();
-    return v.toStringAsFixed(2);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    String fmt(double v) => formatMetricValue(v, locale);
     final config = item.series;
     final bg = Color(config.bgColor ?? AppColors.primarySoft.toARGB32());
     final fg = Color(config.fgColor ?? AppColors.primary.toARGB32());
@@ -31,7 +28,7 @@ class StatTileView extends ConsumerWidget {
 
     final reading = ref.watch(latestReadingProvider(item.metric.id));
     final text = reading.maybeWhen(
-      data: (latest) => latest == null ? '—' : _formatValue(latest.value),
+      data: (latest) => latest == null ? '—' : fmt(latest.value),
       orElse: () => '—',
     );
 
@@ -42,13 +39,11 @@ class StatTileView extends ConsumerWidget {
     // Reference stats shown under the value. Only set ones appear; the daily
     // average is always shown ("—" until today's first reading arrives).
     final stats = <(String, String)>[
-      if (config.statMin != null) (l.minValue, _formatValue(config.statMin!)),
-      if (config.statMax != null) (l.maxValue, _formatValue(config.statMax!)),
-      if (config.setpointOne != null)
-        (l.setpointOne, _formatValue(config.setpointOne!)),
-      if (config.setpointTwo != null)
-        (l.setpointTwo, _formatValue(config.setpointTwo!)),
-      (l.avgPerDay, dailyAvg == null ? '—' : _formatValue(dailyAvg)),
+      if (config.statMin != null) (l.minValue, fmt(config.statMin!)),
+      if (config.statMax != null) (l.maxValue, fmt(config.statMax!)),
+      if (config.setpointOne != null) (l.setpointOne, fmt(config.setpointOne!)),
+      if (config.setpointTwo != null) (l.setpointTwo, fmt(config.setpointTwo!)),
+      (l.avgPerDay, dailyAvg == null ? '—' : fmt(dailyAvg)),
     ];
 
     return Container(
