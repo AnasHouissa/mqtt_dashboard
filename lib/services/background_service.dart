@@ -94,11 +94,20 @@ class BackgroundMqttRunner {
   final Map<String, int> _topicToMetric = {};
 
   Future<void> start() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Show the persistent "app is running" notification immediately, before the
+    // (possibly slow or failing) broker connect, so the user always sees that
+    // background mode is active. It's refreshed with the broker name once
+    // connected.
     if (_service is AndroidServiceInstance) {
       await (_service).setAsForegroundService();
+      await (_service).setForegroundNotificationInfo(
+        title: prefs.getString(kBgNotifTitle) ?? 'TEKKIM Dash',
+        content: prefs.getString(kBgNotifBody) ?? '',
+      );
     }
 
-    final prefs = await SharedPreferences.getInstance();
     final brokerId = prefs.getInt(kBgActiveBrokerId);
     if (brokerId == null) {
       await _service.stopSelf();
