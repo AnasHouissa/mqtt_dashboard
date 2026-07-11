@@ -446,6 +446,12 @@ abstract class AppLocalizations {
   /// **'Add dashboard'**
   String get addDashboard;
 
+  /// No description provided for @renameDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename dashboard'**
+  String get renameDashboard;
+
   /// No description provided for @dashboardName.
   ///
   /// In en, this message translates to:

@@ -73,6 +73,7 @@
   "dashboards": "Tableaux de bord",
   "noDashboards": "Aucun tableau de bord. Appuyez sur + pour en ajouter un.",
   "addDashboard": "Ajouter un tableau de bord",
+  "renameDashboard": "Renommer le tableau de bord",
   "dashboardName": "Nom du tableau de bord",
   "addCurve": "Ajouter courbe",
   "editCurve": "Modifier",

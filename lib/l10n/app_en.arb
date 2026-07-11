@@ -73,6 +73,7 @@
   "dashboards": "Dashboards",
   "noDashboards": "No dashboards yet. Tap + to add one.",
   "addDashboard": "Add dashboard",
+  "renameDashboard": "Rename dashboard",
   "dashboardName": "Dashboard name",
   "addCurve": "Add curve",
   "editCurve": "Edit curve",

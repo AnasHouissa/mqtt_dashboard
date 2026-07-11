@@ -190,6 +190,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addDashboard => 'Add dashboard';
 
   @override
+  String get renameDashboard => 'Rename dashboard';
+
+  @override
   String get dashboardName => 'Dashboard name';
 
   @override

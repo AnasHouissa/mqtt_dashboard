@@ -61,21 +61,38 @@ class DashboardListScreen extends ConsumerWidget {
                         DashboardDetailScreen(dashboard: dashboard),
                   ),
                 ),
-                trailing: IconButton(
+                trailing: PopupMenuButton<String>(
                   icon: const Icon(
-                    Icons.delete_outline,
-                    color: AppColors.danger,
+                    Icons.more_vert,
+                    color: AppColors.textMuted,
                   ),
-                  onPressed: () async {
-                    if (await confirmDelete(
-                      context,
-                      message: l.deleteNamedBody(dashboard.name),
-                    )) {
-                      await ref
-                          .read(dashboardRepositoryProvider)
-                          .deleteDashboard(dashboard.id);
+                  onSelected: (value) async {
+                    if (value == 'rename') {
+                      await showRenameDashboardForm(context, ref, dashboard);
+                    } else if (value == 'delete') {
+                      if (await confirmDelete(
+                        context,
+                        message: l.deleteNamedBody(dashboard.name),
+                      )) {
+                        await ref
+                            .read(dashboardRepositoryProvider)
+                            .deleteDashboard(dashboard.id);
+                      }
                     }
                   },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'rename',
+                      child: Text(l.renameDashboard),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Text(
+                        l.delete,
+                        style: const TextStyle(color: AppColors.danger),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -93,8 +110,44 @@ Future<void> showAddDashboardForm(
   WidgetRef ref,
 ) async {
   final l = AppLocalizations.of(context);
-  final controller = TextEditingController();
-  final name = await showModalBottomSheet<String>(
+  final name = await _showDashboardNameSheet(context, title: l.addDashboard);
+  if (name != null && name.isNotEmpty) {
+    await ref
+        .read(dashboardRepositoryProvider)
+        .insertDashboard(DashboardsCompanion.insert(name: name));
+  }
+}
+
+/// Presents the "rename dashboard" sheet, pre-filled with the current name, and
+/// persists the new name.
+Future<void> showRenameDashboardForm(
+  BuildContext context,
+  WidgetRef ref,
+  Dashboard dashboard,
+) async {
+  final l = AppLocalizations.of(context);
+  final name = await _showDashboardNameSheet(
+    context,
+    title: l.renameDashboard,
+    initialName: dashboard.name,
+  );
+  if (name != null && name.isNotEmpty && name != dashboard.name) {
+    await ref
+        .read(dashboardRepositoryProvider)
+        .updateDashboardName(dashboard.id, name);
+  }
+}
+
+/// Shared bottom sheet that collects a dashboard name. Returns the trimmed
+/// input, or null if dismissed.
+Future<String?> _showDashboardNameSheet(
+  BuildContext context, {
+  required String title,
+  String? initialName,
+}) {
+  final l = AppLocalizations.of(context);
+  final controller = TextEditingController(text: initialName);
+  return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
     builder: (context) => Padding(
@@ -117,7 +170,7 @@ Future<void> showAddDashboardForm(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SheetHeader(title: l.addDashboard),
+                  SheetHeader(title: title),
                   const SizedBox(height: AppSpacing.lg),
                   TextField(
                     controller: controller,
@@ -156,10 +209,4 @@ Future<void> showAddDashboardForm(
       ),
     ),
   );
-
-  if (name != null && name.isNotEmpty) {
-    await ref
-        .read(dashboardRepositoryProvider)
-        .insertDashboard(DashboardsCompanion.insert(name: name));
-  }
 }

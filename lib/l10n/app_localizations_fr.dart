@@ -193,6 +193,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addDashboard => 'Ajouter un tableau de bord';
 
   @override
+  String get renameDashboard => 'Renommer le tableau de bord';
+
+  @override
   String get dashboardName => 'Nom du tableau de bord';
 
   @override

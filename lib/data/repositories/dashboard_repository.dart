@@ -19,6 +19,11 @@ class DashboardRepository {
   Future<int> insertDashboard(DashboardsCompanion dashboard) =>
       _db.into(_db.dashboards).insert(dashboard);
 
+  /// Rename a dashboard.
+  Future<void> updateDashboardName(int id, String name) =>
+      (_db.update(_db.dashboards)..where((d) => d.id.equals(id)))
+          .write(DashboardsCompanion(name: Value(name)));
+
   Future<int> deleteDashboard(int id) =>
       (_db.delete(_db.dashboards)..where((d) => d.id.equals(id))).go();
 
