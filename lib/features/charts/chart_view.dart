@@ -233,7 +233,8 @@ class MetricChart extends ConsumerWidget {
       ChartType.doughnut ||
       ChartType.pie ||
       ChartType.sensorGrid ||
-      ChartType.statTile =>
+      ChartType.statTile ||
+      ChartType.alertDuration =>
         ColumnSeries<AggregatedPoint, DateTime>(
           dataSource: points,
           xValueMapper: x,

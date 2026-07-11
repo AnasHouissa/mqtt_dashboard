@@ -46,6 +46,12 @@ Future<void> initializeBackgroundService() async {
     androidConfiguration: AndroidConfiguration(
       onStart: onStart,
       autoStart: false,
+      // Never let Android restart the service on boot. It spins up a second
+      // Flutter engine whose plugin registration hijacks `another_telephony`'s
+      // process-global foreground SMS channel, silently dropping incoming SMS.
+      // The service must start ONLY via the explicit background-mode handoff
+      // (see AppShell), never on its own.
+      autoStartOnBoot: false,
       isForegroundMode: true,
       notificationChannelId: _notificationChannelId,
       foregroundServiceNotificationId: _notificationId,

@@ -41,6 +41,7 @@ class DashboardRepository {
           ])
           ..where(_db.charts.dashboardId.equals(dashboardId))
           ..orderBy([
+            OrderingTerm(expression: _db.charts.position),
             OrderingTerm(expression: _db.charts.id),
             OrderingTerm(expression: _db.chartSeries.position),
           ]);
@@ -73,12 +74,19 @@ class DashboardRepository {
     required List<ChartSeriesDraft> series,
   }) {
     return _db.transaction(() async {
+      // Append the new component below existing ones in the dashboard.
+      final maxPosExpr = _db.charts.position.max();
+      final maxPosQuery = _db.selectOnly(_db.charts)
+        ..addColumns([maxPosExpr])
+        ..where(_db.charts.dashboardId.equals(dashboardId));
+      final maxPos = (await maxPosQuery.getSingle()).read(maxPosExpr);
       final chartId = await _db
           .into(_db.charts)
           .insert(
             ChartsCompanion.insert(
               dashboardId: dashboardId,
               title: Value(title),
+              position: Value((maxPos ?? -1) + 1),
             ),
           );
       for (var i = 0; i < series.length; i++) {
@@ -140,6 +148,19 @@ class DashboardRepository {
                 fgColor: Value(s.fgColor),
               ),
             );
+      }
+    });
+  }
+
+  /// Persist a new top-to-bottom order for a dashboard's components. [orderedIds]
+  /// lists the chart ids in the desired order; each row's `position` is rewritten
+  /// to its index so the reactive [watchCharts] stream re-emits in that order.
+  Future<void> reorderCharts(List<int> orderedIds) {
+    return _db.transaction(() async {
+      for (var i = 0; i < orderedIds.length; i++) {
+        await (_db.update(_db.charts)
+              ..where((c) => c.id.equals(orderedIds[i])))
+            .write(ChartsCompanion(position: Value(i)));
       }
     });
   }

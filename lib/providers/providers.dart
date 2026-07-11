@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,12 +15,12 @@ import '../data/repositories/reading_repository.dart';
 import '../data/repositories/sms_message_repository.dart';
 import '../data/repositories/sms_source_repository.dart';
 import '../data/repositories/sms_topic_preset_repository.dart';
+import '../services/alert_stats.dart';
 import '../services/background_service.dart';
 import '../services/export_service.dart';
 import '../services/mqtt_service.dart';
-import '../services/sms_parser.dart';
+import '../services/sms_ingest.dart';
 import '../services/sms_service.dart';
-import '../services/tn_phone.dart';
 
 // --- Infrastructure ---
 
@@ -116,6 +115,13 @@ final aggregatedProvider = StreamProvider.autoDispose
 final latestReadingProvider = StreamProvider.autoDispose
     .family<Reading?, int>((ref, metricId) =>
         ref.watch(readingRepositoryProvider).watchLatest(metricId));
+
+/// Alert-duration stats for a metric over the selected period, used by the
+/// alert-duration component. Keyed like [aggregatedProvider].
+final alertDurationProvider = StreamProvider.autoDispose
+    .family<AlertDurationStats, AggKey>((ref, key) => ref
+        .watch(readingRepositoryProvider)
+        .watchAlertDuration(key.metricId, key.bucket, key.anchor));
 
 // --- Device connectivity ---
 
@@ -248,90 +254,15 @@ class SmsIngestionController {
   final Ref _ref;
   StreamSubscription<IncomingSms>? _sub;
 
-  /// Matches a sender address to a source by its 8-digit subscriber number,
-  /// tolerating +216 / 00216 / bare-local / spaced sender formats.
-  SmsSource? _matchSource(List<SmsSource> sources, String sender) {
-    final key = TnPhone.matchKey(sender);
-    if (key == null) return null;
-    for (final src in sources) {
-      if (TnPhone.matchKey(src.phoneNumber) == key) return src;
-    }
-    return null;
-  }
-
-  Metric? _matchMetric(List<Metric> metrics, String name, String topic) {
-    final n = name.trim().toLowerCase();
-    final t = topic.trim().toLowerCase();
-    for (final m in metrics) {
-      if (m.name.trim().toLowerCase() == n &&
-          m.topic.trim().toLowerCase() == t) {
-        return m;
-      }
-    }
-    return null;
-  }
-
+  /// Foreground delivery: ingest against the UI's shared database so Drift's
+  /// reactive streams refresh live. Backgrounded/closed messages are handled by
+  /// `smsBackgroundHandler` in the plugin's own isolate (see [SmsService]).
   Future<void> _onSms(IncomingSms sms) async {
-    final sources = await _ref.read(smsSourceRepositoryProvider).getAll();
-    final source = _matchSource(sources, sms.sender);
-    if (source == null) return; // not from a tracked number — ignore entirely
-
-    final result = SmsParser.parse(sms.body);
-    final metricRepo = _ref.read(metricRepositoryProvider);
-    final readingRepo = _ref.read(readingRepositoryProvider);
-
-    var readingsCreated = 0;
-    SmsParseStatus status;
-    if (result.isEmpty) {
-      status = SmsParseStatus.error;
-    } else {
-      final metrics = await metricRepo.getForSmsSource(source.id);
-      for (final line in result.lines) {
-        final metric = _matchMetric(metrics, result.name, line.topic);
-        if (metric == null) continue;
-        // Value mode is always auto-detected from the message (the manual
-        // per-metric mode was removed from the UI).
-        final mode = SmsParser.detectMode(line.rawValue);
-        final value = SmsParser.toValue(line.rawValue, mode);
-        if (value == null) continue;
-        await readingRepo.insert(
-          metric.id,
-          value,
-          sms.timestamp,
-          raw: line.rawValue,
-        );
-        readingsCreated++;
-        await _maybeSeedRange(metricRepo, metric, line);
-      }
-      status = readingsCreated > 0
-          ? SmsParseStatus.matched
-          : SmsParseStatus.unmatched;
-    }
-
-    await _ref.read(smsMessageRepositoryProvider).insert(
-          smsSourceId: source.id,
-          sender: sms.sender,
-          body: sms.body,
-          receivedAt: sms.timestamp,
-          status: status,
-          readingsCreated: readingsCreated,
-        );
-  }
-
-  /// Auto-populate a metric's chart bounds from a `Min .. Max` prefix the first
-  /// time we see one (only when the user hasn't set bounds themselves).
-  Future<void> _maybeSeedRange(
-    MetricRepository repo,
-    Metric metric,
-    SmsTopicLine line,
-  ) async {
-    if (line.min == null || line.max == null) return;
-    if (metric.minValue != null || metric.maxValue != null) return;
-    await repo.update(
-      metric.copyWith(
-        minValue: Value(line.min),
-        maxValue: Value(line.max),
-      ),
+    await ingestSms(
+      _ref.read(databaseProvider),
+      sender: sms.sender,
+      body: sms.body,
+      timestamp: sms.timestamp,
     );
   }
 

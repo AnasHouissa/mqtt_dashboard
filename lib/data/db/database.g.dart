@@ -1944,8 +1944,20 @@ class $ChartsTable extends Charts with TableInfo<$ChartsTable, ChartConfig> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, dashboardId, title];
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, dashboardId, title, position];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1978,6 +1990,12 @@ class $ChartsTable extends Charts with TableInfo<$ChartsTable, ChartConfig> {
         title.isAcceptableOrUnknown(data['title']!, _titleMeta),
       );
     }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    }
     return context;
   }
 
@@ -1999,6 +2017,10 @@ class $ChartsTable extends Charts with TableInfo<$ChartsTable, ChartConfig> {
         DriftSqlType.string,
         data['${effectivePrefix}title'],
       ),
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
     );
   }
 
@@ -2012,7 +2034,16 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
   final int id;
   final int dashboardId;
   final String? title;
-  const ChartConfig({required this.id, required this.dashboardId, this.title});
+
+  /// Display order of this component within its dashboard (ascending). Lower
+  /// values render higher up. Reordered by drag / move up-down in the UI.
+  final int position;
+  const ChartConfig({
+    required this.id,
+    required this.dashboardId,
+    this.title,
+    required this.position,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2021,6 +2052,7 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
     }
+    map['position'] = Variable<int>(position);
     return map;
   }
 
@@ -2031,6 +2063,7 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
       title: title == null && nullToAbsent
           ? const Value.absent()
           : Value(title),
+      position: Value(position),
     );
   }
 
@@ -2043,6 +2076,7 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
       id: serializer.fromJson<int>(json['id']),
       dashboardId: serializer.fromJson<int>(json['dashboardId']),
       title: serializer.fromJson<String?>(json['title']),
+      position: serializer.fromJson<int>(json['position']),
     );
   }
   @override
@@ -2052,6 +2086,7 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
       'id': serializer.toJson<int>(id),
       'dashboardId': serializer.toJson<int>(dashboardId),
       'title': serializer.toJson<String?>(title),
+      'position': serializer.toJson<int>(position),
     };
   }
 
@@ -2059,10 +2094,12 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
     int? id,
     int? dashboardId,
     Value<String?> title = const Value.absent(),
+    int? position,
   }) => ChartConfig(
     id: id ?? this.id,
     dashboardId: dashboardId ?? this.dashboardId,
     title: title.present ? title.value : this.title,
+    position: position ?? this.position,
   );
   ChartConfig copyWithCompanion(ChartsCompanion data) {
     return ChartConfig(
@@ -2071,6 +2108,7 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
           ? data.dashboardId.value
           : this.dashboardId,
       title: data.title.present ? data.title.value : this.title,
+      position: data.position.present ? data.position.value : this.position,
     );
   }
 
@@ -2079,45 +2117,52 @@ class ChartConfig extends DataClass implements Insertable<ChartConfig> {
     return (StringBuffer('ChartConfig(')
           ..write('id: $id, ')
           ..write('dashboardId: $dashboardId, ')
-          ..write('title: $title')
+          ..write('title: $title, ')
+          ..write('position: $position')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, dashboardId, title);
+  int get hashCode => Object.hash(id, dashboardId, title, position);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ChartConfig &&
           other.id == this.id &&
           other.dashboardId == this.dashboardId &&
-          other.title == this.title);
+          other.title == this.title &&
+          other.position == this.position);
 }
 
 class ChartsCompanion extends UpdateCompanion<ChartConfig> {
   final Value<int> id;
   final Value<int> dashboardId;
   final Value<String?> title;
+  final Value<int> position;
   const ChartsCompanion({
     this.id = const Value.absent(),
     this.dashboardId = const Value.absent(),
     this.title = const Value.absent(),
+    this.position = const Value.absent(),
   });
   ChartsCompanion.insert({
     this.id = const Value.absent(),
     required int dashboardId,
     this.title = const Value.absent(),
+    this.position = const Value.absent(),
   }) : dashboardId = Value(dashboardId);
   static Insertable<ChartConfig> custom({
     Expression<int>? id,
     Expression<int>? dashboardId,
     Expression<String>? title,
+    Expression<int>? position,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (dashboardId != null) 'dashboard_id': dashboardId,
       if (title != null) 'title': title,
+      if (position != null) 'position': position,
     });
   }
 
@@ -2125,11 +2170,13 @@ class ChartsCompanion extends UpdateCompanion<ChartConfig> {
     Value<int>? id,
     Value<int>? dashboardId,
     Value<String?>? title,
+    Value<int>? position,
   }) {
     return ChartsCompanion(
       id: id ?? this.id,
       dashboardId: dashboardId ?? this.dashboardId,
       title: title ?? this.title,
+      position: position ?? this.position,
     );
   }
 
@@ -2145,6 +2192,9 @@ class ChartsCompanion extends UpdateCompanion<ChartConfig> {
     if (title.present) {
       map['title'] = Variable<String>(title.value);
     }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
     return map;
   }
 
@@ -2153,7 +2203,8 @@ class ChartsCompanion extends UpdateCompanion<ChartConfig> {
     return (StringBuffer('ChartsCompanion(')
           ..write('id: $id, ')
           ..write('dashboardId: $dashboardId, ')
-          ..write('title: $title')
+          ..write('title: $title, ')
+          ..write('position: $position')
           ..write(')'))
         .toString();
   }
@@ -5845,12 +5896,14 @@ typedef $$ChartsTableCreateCompanionBuilder =
       Value<int> id,
       required int dashboardId,
       Value<String?> title,
+      Value<int> position,
     });
 typedef $$ChartsTableUpdateCompanionBuilder =
     ChartsCompanion Function({
       Value<int> id,
       Value<int> dashboardId,
       Value<String?> title,
+      Value<int> position,
     });
 
 final class $$ChartsTableReferences
@@ -5911,6 +5964,11 @@ class $$ChartsTableFilterComposer
 
   ColumnFilters<String> get title => $composableBuilder(
     column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5982,6 +6040,11 @@ class $$ChartsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DashboardsTableOrderingComposer get dashboardId {
     final $$DashboardsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6020,6 +6083,9 @@ class $$ChartsTableAnnotationComposer
 
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
 
   $$DashboardsTableAnnotationComposer get dashboardId {
     final $$DashboardsTableAnnotationComposer composer = $composerBuilder(
@@ -6101,20 +6167,24 @@ class $$ChartsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> dashboardId = const Value.absent(),
                 Value<String?> title = const Value.absent(),
+                Value<int> position = const Value.absent(),
               }) => ChartsCompanion(
                 id: id,
                 dashboardId: dashboardId,
                 title: title,
+                position: position,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required int dashboardId,
                 Value<String?> title = const Value.absent(),
+                Value<int> position = const Value.absent(),
               }) => ChartsCompanion.insert(
                 id: id,
                 dashboardId: dashboardId,
                 title: title,
+                position: position,
               ),
           withReferenceMapper: (p0) => p0
               .map(

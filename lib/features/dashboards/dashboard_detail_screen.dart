@@ -9,6 +9,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/labeled_add_button.dart';
 import '../charts/chart_card.dart';
 import 'add_curve_dialog.dart';
+import 'alert_duration_form.dart';
 import 'leak_grid_form.dart';
 import 'stat_tile_form.dart';
 
@@ -42,6 +43,11 @@ Future<void> showAddComponentMenu(
             title: Text(l.addStatTile),
             onTap: () => Navigator.pop(context, 2),
           ),
+          ListTile(
+            leading: const Icon(Icons.timelapse, color: AppColors.primary),
+            title: Text(l.addAlertDuration),
+            onTap: () => Navigator.pop(context, 3),
+          ),
         ],
       ),
     ),
@@ -54,6 +60,8 @@ Future<void> showAddComponentMenu(
       await showLeakGridForm(context, dashboardId: dashboardId);
     case 2:
       await showStatTileForm(context, dashboardId: dashboardId);
+    case 3:
+      await showAlertDurationForm(context, dashboardId: dashboardId);
   }
 }
 
@@ -96,10 +104,40 @@ class DashboardDetailScreen extends ConsumerWidget {
                   showAddComponentMenu(context, dashboardId: dashboard.id),
             );
           }
-          return ListView.builder(
+          Future<void> reorder(List<int> orderedIds) => ref
+              .read(dashboardRepositoryProvider)
+              .reorderCharts(orderedIds);
+
+          // Move the component at [i] up or down by swapping it with its
+          // neighbour, then persist the whole order.
+          void move(int i, int delta) {
+            final ids = list.map((c) => c.chart.id).toList();
+            final j = i + delta;
+            if (j < 0 || j >= ids.length) return;
+            final tmp = ids[i];
+            ids[i] = ids[j];
+            ids[j] = tmp;
+            reorder(ids);
+          }
+
+          return ReorderableListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: list.length,
-            itemBuilder: (context, i) => ChartCard(item: list[i]),
+            onReorder: (oldIndex, newIndex) {
+              // ReorderableListView reports the insertion index *before* the
+              // moved item is removed, so decrement when moving downwards.
+              if (newIndex > oldIndex) newIndex -= 1;
+              final ids = list.map((c) => c.chart.id).toList();
+              final moved = ids.removeAt(oldIndex);
+              ids.insert(newIndex, moved);
+              reorder(ids);
+            },
+            itemBuilder: (context, i) => ChartCard(
+              key: ValueKey(list[i].chart.id),
+              item: list[i],
+              onMoveUp: i > 0 ? () => move(i, -1) : null,
+              onMoveDown: i < list.length - 1 ? () => move(i, 1) : null,
+            ),
           );
         },
       ),
