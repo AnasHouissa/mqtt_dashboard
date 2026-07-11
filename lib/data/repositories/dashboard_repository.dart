@@ -112,6 +112,10 @@ class DashboardRepository {
                 unit: Value(s.unit),
                 bgColor: Value(s.bgColor),
                 fgColor: Value(s.fgColor),
+                statMin: Value(s.statMin),
+                statMax: Value(s.statMax),
+                setpointOne: Value(s.setpointOne),
+                setpointTwo: Value(s.setpointTwo),
               ),
             );
       }
@@ -151,6 +155,10 @@ class DashboardRepository {
                 unit: Value(s.unit),
                 bgColor: Value(s.bgColor),
                 fgColor: Value(s.fgColor),
+                statMin: Value(s.statMin),
+                statMax: Value(s.statMax),
+                setpointOne: Value(s.setpointOne),
+                setpointTwo: Value(s.setpointTwo),
               ),
             );
       }
@@ -203,6 +211,10 @@ class ChartSeriesDraft {
   final String? unit;
   final int? bgColor;
   final int? fgColor;
+  final double? statMin;
+  final double? statMax;
+  final double? setpointOne;
+  final double? setpointTwo;
   const ChartSeriesDraft({
     required this.metricId,
     required this.type,
@@ -214,5 +226,9 @@ class ChartSeriesDraft {
     this.unit,
     this.bgColor,
     this.fgColor,
+    this.statMin,
+    this.statMax,
+    this.setpointOne,
+    this.setpointTwo,
   });
 }

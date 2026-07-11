@@ -154,10 +154,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enablePublishing => 'Enable publishing';
 
   @override
-  String get minValue => 'Min value';
+  String get minValue => 'Min';
 
   @override
-  String get maxValue => 'Max value';
+  String get maxValue => 'Max';
 
   @override
   String get fixedChartRange => 'Fixed chart range';
@@ -560,6 +560,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get foregroundColor => 'Text color';
+
+  @override
+  String get setpointOne => 'Setpoint 1';
+
+  @override
+  String get setpointTwo => 'Setpoint 2';
+
+  @override
+  String get avgPerDay => 'Daily avg';
 
   @override
   String get noInternet => 'No internet connection';

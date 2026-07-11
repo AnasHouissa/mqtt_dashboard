@@ -377,13 +377,13 @@ abstract class AppLocalizations {
   /// No description provided for @minValue.
   ///
   /// In en, this message translates to:
-  /// **'Min value'**
+  /// **'Min'**
   String get minValue;
 
   /// No description provided for @maxValue.
   ///
   /// In en, this message translates to:
-  /// **'Max value'**
+  /// **'Max'**
   String get maxValue;
 
   /// No description provided for @fixedChartRange.
@@ -1141,6 +1141,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Text color'**
   String get foregroundColor;
+
+  /// No description provided for @setpointOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint 1'**
+  String get setpointOne;
+
+  /// No description provided for @setpointTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint 2'**
+  String get setpointTwo;
+
+  /// No description provided for @avgPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily avg'**
+  String get avgPerDay;
 
   /// No description provided for @noInternet.
   ///

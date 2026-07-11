@@ -2366,6 +2366,50 @@ class $ChartSeriesTable extends ChartSeries
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _statMinMeta = const VerificationMeta(
+    'statMin',
+  );
+  @override
+  late final GeneratedColumn<double> statMin = GeneratedColumn<double>(
+    'stat_min',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statMaxMeta = const VerificationMeta(
+    'statMax',
+  );
+  @override
+  late final GeneratedColumn<double> statMax = GeneratedColumn<double>(
+    'stat_max',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _setpointOneMeta = const VerificationMeta(
+    'setpointOne',
+  );
+  @override
+  late final GeneratedColumn<double> setpointOne = GeneratedColumn<double>(
+    'setpoint_one',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _setpointTwoMeta = const VerificationMeta(
+    'setpointTwo',
+  );
+  @override
+  late final GeneratedColumn<double> setpointTwo = GeneratedColumn<double>(
+    'setpoint_two',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2381,6 +2425,10 @@ class $ChartSeriesTable extends ChartSeries
     unit,
     bgColor,
     fgColor,
+    statMin,
+    statMax,
+    setpointOne,
+    setpointTwo,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2472,6 +2520,36 @@ class $ChartSeriesTable extends ChartSeries
         fgColor.isAcceptableOrUnknown(data['fg_color']!, _fgColorMeta),
       );
     }
+    if (data.containsKey('stat_min')) {
+      context.handle(
+        _statMinMeta,
+        statMin.isAcceptableOrUnknown(data['stat_min']!, _statMinMeta),
+      );
+    }
+    if (data.containsKey('stat_max')) {
+      context.handle(
+        _statMaxMeta,
+        statMax.isAcceptableOrUnknown(data['stat_max']!, _statMaxMeta),
+      );
+    }
+    if (data.containsKey('setpoint_one')) {
+      context.handle(
+        _setpointOneMeta,
+        setpointOne.isAcceptableOrUnknown(
+          data['setpoint_one']!,
+          _setpointOneMeta,
+        ),
+      );
+    }
+    if (data.containsKey('setpoint_two')) {
+      context.handle(
+        _setpointTwoMeta,
+        setpointTwo.isAcceptableOrUnknown(
+          data['setpoint_two']!,
+          _setpointTwoMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2535,6 +2613,22 @@ class $ChartSeriesTable extends ChartSeries
         DriftSqlType.int,
         data['${effectivePrefix}fg_color'],
       ),
+      statMin: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}stat_min'],
+      ),
+      statMax: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}stat_max'],
+      ),
+      setpointOne: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}setpoint_one'],
+      ),
+      setpointTwo: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}setpoint_two'],
+      ),
     );
   }
 
@@ -2577,6 +2671,13 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
 
   /// ARGB foreground (text + border) color of a stat tile.
   final int? fgColor;
+
+  /// Optional reference values shown small under a [ChartType.statTile]'s value:
+  /// low/high bounds and up to two setpoints (consignes). All null when unset.
+  final double? statMin;
+  final double? statMax;
+  final double? setpointOne;
+  final double? setpointTwo;
   const ChartSeriesRow({
     required this.id,
     required this.chartId,
@@ -2591,6 +2692,10 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     this.unit,
     this.bgColor,
     this.fgColor,
+    this.statMin,
+    this.statMax,
+    this.setpointOne,
+    this.setpointTwo,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2622,6 +2727,18 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     if (!nullToAbsent || fgColor != null) {
       map['fg_color'] = Variable<int>(fgColor);
     }
+    if (!nullToAbsent || statMin != null) {
+      map['stat_min'] = Variable<double>(statMin);
+    }
+    if (!nullToAbsent || statMax != null) {
+      map['stat_max'] = Variable<double>(statMax);
+    }
+    if (!nullToAbsent || setpointOne != null) {
+      map['setpoint_one'] = Variable<double>(setpointOne);
+    }
+    if (!nullToAbsent || setpointTwo != null) {
+      map['setpoint_two'] = Variable<double>(setpointTwo);
+    }
     return map;
   }
 
@@ -2650,6 +2767,18 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       fgColor: fgColor == null && nullToAbsent
           ? const Value.absent()
           : Value(fgColor),
+      statMin: statMin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(statMin),
+      statMax: statMax == null && nullToAbsent
+          ? const Value.absent()
+          : Value(statMax),
+      setpointOne: setpointOne == null && nullToAbsent
+          ? const Value.absent()
+          : Value(setpointOne),
+      setpointTwo: setpointTwo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(setpointTwo),
     );
   }
 
@@ -2674,6 +2803,10 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       unit: serializer.fromJson<String?>(json['unit']),
       bgColor: serializer.fromJson<int?>(json['bgColor']),
       fgColor: serializer.fromJson<int?>(json['fgColor']),
+      statMin: serializer.fromJson<double?>(json['statMin']),
+      statMax: serializer.fromJson<double?>(json['statMax']),
+      setpointOne: serializer.fromJson<double?>(json['setpointOne']),
+      setpointTwo: serializer.fromJson<double?>(json['setpointTwo']),
     );
   }
   @override
@@ -2695,6 +2828,10 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       'unit': serializer.toJson<String?>(unit),
       'bgColor': serializer.toJson<int?>(bgColor),
       'fgColor': serializer.toJson<int?>(fgColor),
+      'statMin': serializer.toJson<double?>(statMin),
+      'statMax': serializer.toJson<double?>(statMax),
+      'setpointOne': serializer.toJson<double?>(setpointOne),
+      'setpointTwo': serializer.toJson<double?>(setpointTwo),
     };
   }
 
@@ -2712,6 +2849,10 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     Value<String?> unit = const Value.absent(),
     Value<int?> bgColor = const Value.absent(),
     Value<int?> fgColor = const Value.absent(),
+    Value<double?> statMin = const Value.absent(),
+    Value<double?> statMax = const Value.absent(),
+    Value<double?> setpointOne = const Value.absent(),
+    Value<double?> setpointTwo = const Value.absent(),
   }) => ChartSeriesRow(
     id: id ?? this.id,
     chartId: chartId ?? this.chartId,
@@ -2726,6 +2867,10 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     unit: unit.present ? unit.value : this.unit,
     bgColor: bgColor.present ? bgColor.value : this.bgColor,
     fgColor: fgColor.present ? fgColor.value : this.fgColor,
+    statMin: statMin.present ? statMin.value : this.statMin,
+    statMax: statMax.present ? statMax.value : this.statMax,
+    setpointOne: setpointOne.present ? setpointOne.value : this.setpointOne,
+    setpointTwo: setpointTwo.present ? setpointTwo.value : this.setpointTwo,
   );
   ChartSeriesRow copyWithCompanion(ChartSeriesCompanion data) {
     return ChartSeriesRow(
@@ -2746,6 +2891,14 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       unit: data.unit.present ? data.unit.value : this.unit,
       bgColor: data.bgColor.present ? data.bgColor.value : this.bgColor,
       fgColor: data.fgColor.present ? data.fgColor.value : this.fgColor,
+      statMin: data.statMin.present ? data.statMin.value : this.statMin,
+      statMax: data.statMax.present ? data.statMax.value : this.statMax,
+      setpointOne: data.setpointOne.present
+          ? data.setpointOne.value
+          : this.setpointOne,
+      setpointTwo: data.setpointTwo.present
+          ? data.setpointTwo.value
+          : this.setpointTwo,
     );
   }
 
@@ -2764,7 +2917,11 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
           ..write('emptyColor: $emptyColor, ')
           ..write('unit: $unit, ')
           ..write('bgColor: $bgColor, ')
-          ..write('fgColor: $fgColor')
+          ..write('fgColor: $fgColor, ')
+          ..write('statMin: $statMin, ')
+          ..write('statMax: $statMax, ')
+          ..write('setpointOne: $setpointOne, ')
+          ..write('setpointTwo: $setpointTwo')
           ..write(')'))
         .toString();
   }
@@ -2784,6 +2941,10 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     unit,
     bgColor,
     fgColor,
+    statMin,
+    statMax,
+    setpointOne,
+    setpointTwo,
   );
   @override
   bool operator ==(Object other) =>
@@ -2801,7 +2962,11 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
           other.emptyColor == this.emptyColor &&
           other.unit == this.unit &&
           other.bgColor == this.bgColor &&
-          other.fgColor == this.fgColor);
+          other.fgColor == this.fgColor &&
+          other.statMin == this.statMin &&
+          other.statMax == this.statMax &&
+          other.setpointOne == this.setpointOne &&
+          other.setpointTwo == this.setpointTwo);
 }
 
 class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
@@ -2818,6 +2983,10 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
   final Value<String?> unit;
   final Value<int?> bgColor;
   final Value<int?> fgColor;
+  final Value<double?> statMin;
+  final Value<double?> statMax;
+  final Value<double?> setpointOne;
+  final Value<double?> setpointTwo;
   const ChartSeriesCompanion({
     this.id = const Value.absent(),
     this.chartId = const Value.absent(),
@@ -2832,6 +3001,10 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     this.unit = const Value.absent(),
     this.bgColor = const Value.absent(),
     this.fgColor = const Value.absent(),
+    this.statMin = const Value.absent(),
+    this.statMax = const Value.absent(),
+    this.setpointOne = const Value.absent(),
+    this.setpointTwo = const Value.absent(),
   });
   ChartSeriesCompanion.insert({
     this.id = const Value.absent(),
@@ -2847,6 +3020,10 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     this.unit = const Value.absent(),
     this.bgColor = const Value.absent(),
     this.fgColor = const Value.absent(),
+    this.statMin = const Value.absent(),
+    this.statMax = const Value.absent(),
+    this.setpointOne = const Value.absent(),
+    this.setpointTwo = const Value.absent(),
   }) : chartId = Value(chartId),
        metricId = Value(metricId),
        type = Value(type),
@@ -2865,6 +3042,10 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     Expression<String>? unit,
     Expression<int>? bgColor,
     Expression<int>? fgColor,
+    Expression<double>? statMin,
+    Expression<double>? statMax,
+    Expression<double>? setpointOne,
+    Expression<double>? setpointTwo,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2880,6 +3061,10 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
       if (unit != null) 'unit': unit,
       if (bgColor != null) 'bg_color': bgColor,
       if (fgColor != null) 'fg_color': fgColor,
+      if (statMin != null) 'stat_min': statMin,
+      if (statMax != null) 'stat_max': statMax,
+      if (setpointOne != null) 'setpoint_one': setpointOne,
+      if (setpointTwo != null) 'setpoint_two': setpointTwo,
     });
   }
 
@@ -2897,6 +3082,10 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     Value<String?>? unit,
     Value<int?>? bgColor,
     Value<int?>? fgColor,
+    Value<double?>? statMin,
+    Value<double?>? statMax,
+    Value<double?>? setpointOne,
+    Value<double?>? setpointTwo,
   }) {
     return ChartSeriesCompanion(
       id: id ?? this.id,
@@ -2912,6 +3101,10 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
       unit: unit ?? this.unit,
       bgColor: bgColor ?? this.bgColor,
       fgColor: fgColor ?? this.fgColor,
+      statMin: statMin ?? this.statMin,
+      statMax: statMax ?? this.statMax,
+      setpointOne: setpointOne ?? this.setpointOne,
+      setpointTwo: setpointTwo ?? this.setpointTwo,
     );
   }
 
@@ -2959,6 +3152,18 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     if (fgColor.present) {
       map['fg_color'] = Variable<int>(fgColor.value);
     }
+    if (statMin.present) {
+      map['stat_min'] = Variable<double>(statMin.value);
+    }
+    if (statMax.present) {
+      map['stat_max'] = Variable<double>(statMax.value);
+    }
+    if (setpointOne.present) {
+      map['setpoint_one'] = Variable<double>(setpointOne.value);
+    }
+    if (setpointTwo.present) {
+      map['setpoint_two'] = Variable<double>(setpointTwo.value);
+    }
     return map;
   }
 
@@ -2977,7 +3182,11 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
           ..write('emptyColor: $emptyColor, ')
           ..write('unit: $unit, ')
           ..write('bgColor: $bgColor, ')
-          ..write('fgColor: $fgColor')
+          ..write('fgColor: $fgColor, ')
+          ..write('statMin: $statMin, ')
+          ..write('statMax: $statMax, ')
+          ..write('setpointOne: $setpointOne, ')
+          ..write('setpointTwo: $setpointTwo')
           ..write(')'))
         .toString();
   }
@@ -6291,6 +6500,10 @@ typedef $$ChartSeriesTableCreateCompanionBuilder =
       Value<String?> unit,
       Value<int?> bgColor,
       Value<int?> fgColor,
+      Value<double?> statMin,
+      Value<double?> statMax,
+      Value<double?> setpointOne,
+      Value<double?> setpointTwo,
     });
 typedef $$ChartSeriesTableUpdateCompanionBuilder =
     ChartSeriesCompanion Function({
@@ -6307,6 +6520,10 @@ typedef $$ChartSeriesTableUpdateCompanionBuilder =
       Value<String?> unit,
       Value<int?> bgColor,
       Value<int?> fgColor,
+      Value<double?> statMin,
+      Value<double?> statMax,
+      Value<double?> setpointOne,
+      Value<double?> setpointTwo,
     });
 
 final class $$ChartSeriesTableReferences
@@ -6413,6 +6630,26 @@ class $$ChartSeriesTableFilterComposer
 
   ColumnFilters<int> get fgColor => $composableBuilder(
     column: $table.fgColor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get statMin => $composableBuilder(
+    column: $table.statMin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get statMax => $composableBuilder(
+    column: $table.statMax,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get setpointOne => $composableBuilder(
+    column: $table.setpointOne,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get setpointTwo => $composableBuilder(
+    column: $table.setpointTwo,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6527,6 +6764,26 @@ class $$ChartSeriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get statMin => $composableBuilder(
+    column: $table.statMin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get statMax => $composableBuilder(
+    column: $table.statMax,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get setpointOne => $composableBuilder(
+    column: $table.setpointOne,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get setpointTwo => $composableBuilder(
+    column: $table.setpointTwo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ChartsTableOrderingComposer get chartId {
     final $$ChartsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6620,6 +6877,22 @@ class $$ChartSeriesTableAnnotationComposer
   GeneratedColumn<int> get fgColor =>
       $composableBuilder(column: $table.fgColor, builder: (column) => column);
 
+  GeneratedColumn<double> get statMin =>
+      $composableBuilder(column: $table.statMin, builder: (column) => column);
+
+  GeneratedColumn<double> get statMax =>
+      $composableBuilder(column: $table.statMax, builder: (column) => column);
+
+  GeneratedColumn<double> get setpointOne => $composableBuilder(
+    column: $table.setpointOne,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get setpointTwo => $composableBuilder(
+    column: $table.setpointTwo,
+    builder: (column) => column,
+  );
+
   $$ChartsTableAnnotationComposer get chartId {
     final $$ChartsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -6708,6 +6981,10 @@ class $$ChartSeriesTableTableManager
                 Value<String?> unit = const Value.absent(),
                 Value<int?> bgColor = const Value.absent(),
                 Value<int?> fgColor = const Value.absent(),
+                Value<double?> statMin = const Value.absent(),
+                Value<double?> statMax = const Value.absent(),
+                Value<double?> setpointOne = const Value.absent(),
+                Value<double?> setpointTwo = const Value.absent(),
               }) => ChartSeriesCompanion(
                 id: id,
                 chartId: chartId,
@@ -6722,6 +6999,10 @@ class $$ChartSeriesTableTableManager
                 unit: unit,
                 bgColor: bgColor,
                 fgColor: fgColor,
+                statMin: statMin,
+                statMax: statMax,
+                setpointOne: setpointOne,
+                setpointTwo: setpointTwo,
               ),
           createCompanionCallback:
               ({
@@ -6738,6 +7019,10 @@ class $$ChartSeriesTableTableManager
                 Value<String?> unit = const Value.absent(),
                 Value<int?> bgColor = const Value.absent(),
                 Value<int?> fgColor = const Value.absent(),
+                Value<double?> statMin = const Value.absent(),
+                Value<double?> statMax = const Value.absent(),
+                Value<double?> setpointOne = const Value.absent(),
+                Value<double?> setpointTwo = const Value.absent(),
               }) => ChartSeriesCompanion.insert(
                 id: id,
                 chartId: chartId,
@@ -6752,6 +7037,10 @@ class $$ChartSeriesTableTableManager
                 unit: unit,
                 bgColor: bgColor,
                 fgColor: fgColor,
+                statMin: statMin,
+                statMax: statMax,
+                setpointOne: setpointOne,
+                setpointTwo: setpointTwo,
               ),
           withReferenceMapper: (p0) => p0
               .map(

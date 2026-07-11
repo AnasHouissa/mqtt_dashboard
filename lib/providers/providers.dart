@@ -116,6 +116,12 @@ final latestReadingProvider = StreamProvider.autoDispose
     .family<Reading?, int>((ref, metricId) =>
         ref.watch(readingRepositoryProvider).watchLatest(metricId));
 
+/// Average of today's readings for a metric, shown on the stat tile. Null until
+/// the first reading of the day arrives.
+final dailyAverageProvider = StreamProvider.autoDispose
+    .family<double?, int>((ref, metricId) =>
+        ref.watch(readingRepositoryProvider).watchDailyAverage(metricId));
+
 /// Alert-duration stats for a metric over the selected period, used by the
 /// alert-duration component. Keyed like [aggregatedProvider].
 final alertDurationProvider = StreamProvider.autoDispose

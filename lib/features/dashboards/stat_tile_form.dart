@@ -26,9 +26,21 @@ class StatTileForm extends ConsumerStatefulWidget {
 class _StatTileFormState extends ConsumerState<StatTileForm> {
   final _title = TextEditingController();
   final _unit = TextEditingController();
+  final _min = TextEditingController();
+  final _max = TextEditingController();
+  final _setpoint1 = TextEditingController();
+  final _setpoint2 = TextEditingController();
   int? _metricId;
   Color _bgColor = AppColors.primarySoft;
   Color _fgColor = AppColors.primary;
+
+  /// Formats an optional stored value back into an editable string (empty when
+  /// unset, no trailing ".0" for whole numbers).
+  static String _fmt(double? v) {
+    if (v == null) return '';
+    if (v == v.roundToDouble()) return v.toInt().toString();
+    return v.toString();
+  }
 
   bool get _isEditing => widget.existing != null;
 
@@ -43,6 +55,10 @@ class _StatTileFormState extends ConsumerState<StatTileForm> {
       _metricId = s.metricId;
       _bgColor = Color(s.bgColor ?? AppColors.primarySoft.toARGB32());
       _fgColor = Color(s.fgColor ?? AppColors.primary.toARGB32());
+      _min.text = _fmt(s.statMin);
+      _max.text = _fmt(s.statMax);
+      _setpoint1.text = _fmt(s.setpointOne);
+      _setpoint2.text = _fmt(s.setpointTwo);
     }
   }
 
@@ -50,8 +66,26 @@ class _StatTileFormState extends ConsumerState<StatTileForm> {
   void dispose() {
     _title.dispose();
     _unit.dispose();
+    _min.dispose();
+    _max.dispose();
+    _setpoint1.dispose();
+    _setpoint2.dispose();
     super.dispose();
   }
+
+  /// Parses a number field, tolerating a comma decimal separator; null if blank
+  /// or unparseable.
+  static double? _parse(TextEditingController c) =>
+      double.tryParse(c.text.trim().replaceAll(',', '.'));
+
+  Widget _numberField(TextEditingController c, String label) => TextField(
+        controller: c,
+        keyboardType: const TextInputType.numberWithOptions(
+          decimal: true,
+          signed: true,
+        ),
+        decoration: InputDecoration(labelText: label),
+      );
 
   bool get _canSave => _metricId != null;
 
@@ -67,6 +101,10 @@ class _StatTileFormState extends ConsumerState<StatTileForm> {
       unit: unit.isEmpty ? null : unit,
       bgColor: _bgColor.toARGB32(),
       fgColor: _fgColor.toARGB32(),
+      statMin: _parse(_min),
+      statMax: _parse(_max),
+      setpointOne: _parse(_setpoint1),
+      setpointTwo: _parse(_setpoint2),
     );
     final repo = ref.read(dashboardRepositoryProvider);
     final title = _title.text.trim().isEmpty ? null : _title.text.trim();
@@ -118,6 +156,23 @@ class _StatTileFormState extends ConsumerState<StatTileForm> {
               TextField(
                 controller: _unit,
                 decoration: InputDecoration(labelText: l.unit),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              // Optional reference values, shown small on the tile.
+              Row(
+                children: [
+                  Expanded(child: _numberField(_min, l.minValue)),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: _numberField(_max, l.maxValue)),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(child: _numberField(_setpoint1, l.setpointOne)),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: _numberField(_setpoint2, l.setpointTwo)),
+                ],
               ),
               const SizedBox(height: AppSpacing.md),
               ColorPickerField(

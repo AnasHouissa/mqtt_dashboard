@@ -42,6 +42,24 @@ class ReadingRepository {
         .watchSingleOrNull();
   }
 
+  /// Reactive average of today's readings for a metric (local calendar day), or
+  /// null when there are none yet. Used by the stat tile's "average per day".
+  Stream<double?> watchDailyAverage(int metricId) {
+    final now = DateTime.now();
+    final range = _range(TimeBucket.day, now);
+    final query = _db.customSelect(
+      "SELECT AVG(value) AS avg FROM readings "
+      "WHERE metric_id = ?1 AND timestamp >= ?2 AND timestamp < ?3",
+      variables: [
+        Variable.withInt(metricId),
+        Variable.withInt(range.start),
+        Variable.withInt(range.end),
+      ],
+      readsFrom: {_db.readings},
+    );
+    return query.watch().map((rows) => rows.first.read<double?>('avg'));
+  }
+
   /// All raw readings for a metric (newest first), used for CSV/PDF export.
   Future<List<Reading>> rawForMetric(int metricId) =>
       (_db.select(_db.readings)

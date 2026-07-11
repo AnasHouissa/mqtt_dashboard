@@ -174,6 +174,13 @@ class ChartSeries extends Table {
 
   /// ARGB foreground (text + border) color of a stat tile.
   IntColumn get fgColor => integer().nullable()();
+
+  /// Optional reference values shown small under a [ChartType.statTile]'s value:
+  /// low/high bounds and up to two setpoints (consignes). All null when unset.
+  RealColumn get statMin => real().nullable()();
+  RealColumn get statMax => real().nullable()();
+  RealColumn get setpointOne => real().nullable()();
+  RealColumn get setpointTwo => real().nullable()();
 }
 
 @DataClassName('Reading')
@@ -263,7 +270,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mqtt_dash'));
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -363,6 +370,14 @@ class AppDatabase extends _$AppDatabase {
             // their current top-to-bottom order until the user reorders them.
             await m.addColumn(charts, charts.position);
             await customStatement('UPDATE charts SET position = id');
+          }
+          if (from < 10) {
+            // Optional stat-tile reference values (min/max + two setpoints). All
+            // nullable, so existing tiles are untouched.
+            await m.addColumn(chartSeries, chartSeries.statMin);
+            await m.addColumn(chartSeries, chartSeries.statMax);
+            await m.addColumn(chartSeries, chartSeries.setpointOne);
+            await m.addColumn(chartSeries, chartSeries.setpointTwo);
           }
         },
       );
