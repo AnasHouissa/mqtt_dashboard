@@ -60,6 +60,8 @@ dependencies:
   pdf: ^3.11.0
   printing: ^5.13.0
   share_plus: ^10.0.0
+  # System "Save to…" (SAF) dialog so users can download exports to Downloads.
+  flutter_file_dialog: ^3.0.2
 
   # App metadata (version display in Settings)
   package_info_plus: ^8.0.0

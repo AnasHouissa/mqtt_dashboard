@@ -31,6 +31,9 @@ class LeakGridForm extends ConsumerStatefulWidget {
 
 class _LeakGridFormState extends ConsumerState<LeakGridForm> {
   final _title = TextEditingController();
+  // Cell label prefix (e.g. "IN" → IN1, IN2…). Stored in the series' `unit`
+  // column, which the sensor grid doesn't otherwise use.
+  final _prefix = TextEditingController(text: 'IN');
   int? _metricId;
   int _sensorCount = 4;
   Color _fillColor = AppColors.danger;
@@ -45,6 +48,7 @@ class _LeakGridFormState extends ConsumerState<LeakGridForm> {
     if (existing != null) {
       final s = existing.series.first.series;
       _title.text = existing.chart.title ?? '';
+      _prefix.text = s.unit ?? 'IN';
       _metricId = s.metricId;
       _sensorCount = s.sensorCount ?? 4;
       _fillColor = Color(s.fillColor ?? AppColors.danger.toARGB32());
@@ -55,6 +59,7 @@ class _LeakGridFormState extends ConsumerState<LeakGridForm> {
   @override
   void dispose() {
     _title.dispose();
+    _prefix.dispose();
     super.dispose();
   }
 
@@ -63,6 +68,7 @@ class _LeakGridFormState extends ConsumerState<LeakGridForm> {
   Future<void> _save() async {
     final metricId = _metricId;
     if (metricId == null) return;
+    final prefix = _prefix.text.trim();
     final draft = ChartSeriesDraft(
       metricId: metricId,
       type: ChartType.sensorGrid,
@@ -71,6 +77,7 @@ class _LeakGridFormState extends ConsumerState<LeakGridForm> {
       sensorCount: _sensorCount,
       fillColor: _fillColor.toARGB32(),
       emptyColor: _emptyColor.toARGB32(),
+      unit: prefix.isEmpty ? null : prefix,
     );
     final repo = ref.read(dashboardRepositoryProvider);
     final title = _title.text.trim().isEmpty ? null : _title.text.trim();
@@ -117,6 +124,14 @@ class _LeakGridFormState extends ConsumerState<LeakGridForm> {
               MetricDropdown(
                 selected: _metricId,
                 onChanged: (v) => setState(() => _metricId = v),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              TextField(
+                controller: _prefix,
+                decoration: InputDecoration(
+                  labelText: l.cellPrefix,
+                  helperText: l.cellPrefixHelper,
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(

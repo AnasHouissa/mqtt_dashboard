@@ -21,6 +21,7 @@ import '../services/export_service.dart';
 import '../services/mqtt_service.dart';
 import '../services/sms_ingest.dart';
 import '../services/sms_service.dart';
+import '../services/sql_export_service.dart';
 
 // --- Infrastructure ---
 
@@ -46,6 +47,9 @@ final smsTopicPresetRepositoryProvider = Provider(
     (ref) => SmsTopicPresetRepository(ref.watch(databaseProvider)));
 
 final exportServiceProvider = Provider((ref) => ExportService());
+
+final sqlExportServiceProvider =
+    Provider((ref) => SqlExportService(ref.watch(databaseProvider)));
 
 final mqttServiceProvider = Provider<MqttService>((ref) {
   final service = MqttService();

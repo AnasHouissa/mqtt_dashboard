@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:csv/csv.dart';
+import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:share_plus/share_plus.dart';
 
 import '../data/db/database.dart';
 import '../utils/number_format.dart';
@@ -32,7 +32,7 @@ class ExportService {
     final csv = const ListToCsvConverter(fieldDelimiter: ';').convert(rows);
 
     final file = await _writeFile('${_safe(metricName)}.csv', csv);
-    await Share.shareXFiles([XFile(file.path)], subject: '$metricName CSV');
+    await _saveToDevice(file, '${_safe(metricName)}.csv');
   }
 
   /// Builds a PDF table and opens the share sheet. Values use [locale]'s
@@ -68,7 +68,7 @@ class ExportService {
 
     final bytes = await doc.save();
     final file = await _writeBytes('${_safe(metricName)}.pdf', bytes);
-    await Share.shareXFiles([XFile(file.path)], subject: '$metricName PDF');
+    await _saveToDevice(file, '${_safe(metricName)}.pdf');
   }
 
   Future<File> _writeFile(String name, String contents) async {
@@ -81,6 +81,17 @@ class ExportService {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/$name');
     return file.writeAsBytes(bytes);
+  }
+
+  /// Opens the system "Save to…" dialog so the user can download [file] to a
+  /// location they pick (e.g. Downloads). Returns null if they cancel.
+  static Future<String?> _saveToDevice(File file, String fileName) {
+    return FlutterFileDialog.saveFile(
+      params: SaveFileDialogParams(
+        sourceFilePath: file.path,
+        fileName: fileName,
+      ),
+    );
   }
 
   static String _safe(String name) =>

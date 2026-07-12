@@ -465,6 +465,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appVersion => 'App version';
 
   @override
+  String get data => 'Data';
+
+  @override
+  String get downloadSqlBackup => 'Download SQL backup';
+
+  @override
+  String get downloadSqlBackupSubtitle =>
+      'Export the entire database as a .sql file';
+
+  @override
+  String get exportFailed => 'Export failed';
+
+  @override
   String get deleteConfirmTitle => 'Delete?';
 
   @override
@@ -578,6 +591,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sensorCount => 'Number of sensors';
+
+  @override
+  String get cellPrefix => 'Cell label prefix';
+
+  @override
+  String get cellPrefixHelper => 'e.g. IN → IN1, IN2, IN3';
 
   @override
   String get fillColor => 'Alert (fill) color';

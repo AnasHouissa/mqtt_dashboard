@@ -470,6 +470,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get appVersion => 'Version de l’application';
 
   @override
+  String get data => 'Données';
+
+  @override
+  String get downloadSqlBackup => 'Télécharger la sauvegarde SQL';
+
+  @override
+  String get downloadSqlBackupSubtitle =>
+      'Exporter toute la base de données en fichier .sql';
+
+  @override
+  String get exportFailed => 'Échec de l’export';
+
+  @override
   String get deleteConfirmTitle => 'Supprimer ?';
 
   @override
@@ -584,6 +597,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sensorCount => 'Nombre de capteurs';
+
+  @override
+  String get cellPrefix => 'Préfixe des cellules';
+
+  @override
+  String get cellPrefixHelper => 'ex. IN → IN1, IN2, IN3';
 
   @override
   String get fillColor => 'Couleur d\'alerte';

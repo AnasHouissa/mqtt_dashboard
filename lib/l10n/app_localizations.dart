@@ -980,6 +980,30 @@ abstract class AppLocalizations {
   /// **'App version'**
   String get appVersion;
 
+  /// No description provided for @data.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get data;
+
+  /// No description provided for @downloadSqlBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Download SQL backup'**
+  String get downloadSqlBackup;
+
+  /// No description provided for @downloadSqlBackupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export the entire database as a .sql file'**
+  String get downloadSqlBackupSubtitle;
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed'**
+  String get exportFailed;
+
   /// No description provided for @deleteConfirmTitle.
   ///
   /// In en, this message translates to:
@@ -1159,6 +1183,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Number of sensors'**
   String get sensorCount;
+
+  /// No description provided for @cellPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Cell label prefix'**
+  String get cellPrefix;
+
+  /// No description provided for @cellPrefixHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. IN → IN1, IN2, IN3'**
+  String get cellPrefixHelper;
 
   /// No description provided for @fillColor.
   ///

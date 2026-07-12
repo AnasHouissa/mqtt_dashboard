@@ -24,6 +24,10 @@ class SensorGridView extends ConsumerWidget {
     final count = config.sensorCount ?? _cellsPerRow;
     final fill = Color(config.fillColor ?? AppColors.danger.toARGB32());
     final empty = Color(config.emptyColor ?? 0xFFCBD2DC);
+    // Cell label prefix chosen in the form (stored in `unit`); defaults to "IN".
+    final prefix = (config.unit?.trim().isNotEmpty ?? false)
+        ? config.unit!.trim()
+        : 'IN';
 
     final reading = ref.watch(latestReadingProvider(item.metric.id));
 
@@ -48,7 +52,7 @@ class SensorGridView extends ConsumerWidget {
               children: [
                 for (var i = 1; i <= count; i++)
                   _SensorCell(
-                    index: i,
+                    label: '$prefix$i',
                     size: cellSize.clamp(28.0, 96.0),
                     // No message yet -> empty outline. Active -> alert fill.
                     // Otherwise cleared/OK -> the empty (default) color.
@@ -67,12 +71,13 @@ class SensorGridView extends ConsumerWidget {
 
 class _SensorCell extends StatelessWidget {
   const _SensorCell({
-    required this.index,
+    required this.label,
     required this.size,
     required this.color,
   });
 
-  final int index;
+  /// The cell's text, e.g. "IN1" (prefix + index).
+  final String label;
 
   /// The fill color, or null when nothing has been received for this cell yet
   /// (rendered as an empty dashed-looking outline).
@@ -101,7 +106,7 @@ class _SensorCell extends StatelessWidget {
         ),
       ),
       child: Text(
-        'IN$index',
+        label,
         style: TextStyle(
           color: labelColor,
           fontSize: 12,

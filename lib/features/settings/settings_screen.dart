@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
+import '../../widgets/app_snackbar.dart';
 import 'sms_topics_screen.dart';
 
 /// App settings: language selection and the current app version.
@@ -93,6 +94,20 @@ class SettingsScreen extends ConsumerWidget {
           ],
           const Divider(),
           ListTile(
+            title: Text(
+              l.data,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.download_outlined),
+            title: Text(l.downloadSqlBackup),
+            subtitle: Text(l.downloadSqlBackupSubtitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _downloadSqlBackup(context, ref),
+          ),
+          const Divider(),
+          ListTile(
             leading: const Icon(Icons.info_outline),
             title: Text(l.appVersion),
             subtitle: Text(version.valueOrNull ?? '—'),
@@ -100,5 +115,18 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Builds the full-database `.sql` dump and opens the share sheet, showing a
+  /// brief error if it fails.
+  Future<void> _downloadSqlBackup(BuildContext context, WidgetRef ref) async {
+    final l = AppLocalizations.of(context);
+    try {
+      await ref.read(sqlExportServiceProvider).exportSqlDump();
+    } catch (e) {
+      if (context.mounted) {
+        showAppSnackBar(context, l.exportFailed, isError: true);
+      }
+    }
   }
 }
