@@ -60,6 +60,32 @@ class ReadingRepository {
     return query.watch().map((rows) => rows.first.read<double?>('avg'));
   }
 
+  /// Reactive minimum of today's readings for a metric (local calendar day), or
+  /// null when there are none yet. Used by the stat tile's "daily min".
+  Stream<double?> watchDailyMin(int metricId) =>
+      _watchDailyAgg(metricId, 'MIN');
+
+  /// Reactive maximum of today's readings for a metric (local calendar day), or
+  /// null when there are none yet. Used by the stat tile's "daily max".
+  Stream<double?> watchDailyMax(int metricId) =>
+      _watchDailyAgg(metricId, 'MAX');
+
+  Stream<double?> _watchDailyAgg(int metricId, String fn) {
+    final now = DateTime.now();
+    final range = _range(TimeBucket.day, now);
+    final query = _db.customSelect(
+      "SELECT $fn(value) AS v FROM readings "
+      "WHERE metric_id = ?1 AND timestamp >= ?2 AND timestamp < ?3",
+      variables: [
+        Variable.withInt(metricId),
+        Variable.withInt(range.start),
+        Variable.withInt(range.end),
+      ],
+      readsFrom: {_db.readings},
+    );
+    return query.watch().map((rows) => rows.first.read<double?>('v'));
+  }
+
   /// All raw readings for a metric (oldest first), used for CSV/PDF export.
   /// [start]/[end] optionally bound the export window (`[start, end]`,
   /// inclusive); a null bound means "unbounded on that side".

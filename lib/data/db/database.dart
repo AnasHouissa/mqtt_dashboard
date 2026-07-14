@@ -177,10 +177,17 @@ class ChartSeries extends Table {
 
   /// Optional reference values shown small under a [ChartType.statTile]'s value:
   /// low/high bounds and up to two setpoints (consignes). All null when unset.
+  /// [statMin]/[statMax] are legacy (no longer edited); the tile now shows the
+  /// day's min/max instead, gated by [showDailyMin]/[showDailyMax].
   RealColumn get statMin => real().nullable()();
   RealColumn get statMax => real().nullable()();
   RealColumn get setpointOne => real().nullable()();
   RealColumn get setpointTwo => real().nullable()();
+
+  /// When true, the stat tile shows the day's minimum / maximum received value
+  /// (computed live, like the daily average).
+  BoolColumn get showDailyMin => boolean().withDefault(const Constant(false))();
+  BoolColumn get showDailyMax => boolean().withDefault(const Constant(false))();
 }
 
 @DataClassName('Reading')
@@ -270,7 +277,7 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mqtt_dash'));
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -378,6 +385,11 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(chartSeries, chartSeries.statMax);
             await m.addColumn(chartSeries, chartSeries.setpointOne);
             await m.addColumn(chartSeries, chartSeries.setpointTwo);
+          }
+          if (from < 11) {
+            // Stat tile: show the day's min/max received value, toggled on.
+            await m.addColumn(chartSeries, chartSeries.showDailyMin);
+            await m.addColumn(chartSeries, chartSeries.showDailyMax);
           }
         },
       );

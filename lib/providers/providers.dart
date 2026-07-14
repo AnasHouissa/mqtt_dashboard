@@ -142,6 +142,18 @@ final dailyAverageProvider = StreamProvider.autoDispose
     .family<double?, int>((ref, metricId) =>
         ref.watch(readingRepositoryProvider).watchDailyAverage(metricId));
 
+/// Minimum of today's readings for a metric, shown on the stat tile when
+/// enabled. Null until the first reading of the day arrives.
+final dailyMinProvider = StreamProvider.autoDispose
+    .family<double?, int>((ref, metricId) =>
+        ref.watch(readingRepositoryProvider).watchDailyMin(metricId));
+
+/// Maximum of today's readings for a metric, shown on the stat tile when
+/// enabled. Null until the first reading of the day arrives.
+final dailyMaxProvider = StreamProvider.autoDispose
+    .family<double?, int>((ref, metricId) =>
+        ref.watch(readingRepositoryProvider).watchDailyMax(metricId));
+
 /// Alert-duration stats for a metric over the selected period, used by the
 /// alert-duration component. Keyed like [aggregatedProvider].
 final alertDurationProvider = StreamProvider.autoDispose

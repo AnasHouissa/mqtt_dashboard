@@ -2410,6 +2410,36 @@ class $ChartSeriesTable extends ChartSeries
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _showDailyMinMeta = const VerificationMeta(
+    'showDailyMin',
+  );
+  @override
+  late final GeneratedColumn<bool> showDailyMin = GeneratedColumn<bool>(
+    'show_daily_min',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("show_daily_min" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _showDailyMaxMeta = const VerificationMeta(
+    'showDailyMax',
+  );
+  @override
+  late final GeneratedColumn<bool> showDailyMax = GeneratedColumn<bool>(
+    'show_daily_max',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("show_daily_max" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2429,6 +2459,8 @@ class $ChartSeriesTable extends ChartSeries
     statMax,
     setpointOne,
     setpointTwo,
+    showDailyMin,
+    showDailyMax,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2550,6 +2582,24 @@ class $ChartSeriesTable extends ChartSeries
         ),
       );
     }
+    if (data.containsKey('show_daily_min')) {
+      context.handle(
+        _showDailyMinMeta,
+        showDailyMin.isAcceptableOrUnknown(
+          data['show_daily_min']!,
+          _showDailyMinMeta,
+        ),
+      );
+    }
+    if (data.containsKey('show_daily_max')) {
+      context.handle(
+        _showDailyMaxMeta,
+        showDailyMax.isAcceptableOrUnknown(
+          data['show_daily_max']!,
+          _showDailyMaxMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2629,6 +2679,14 @@ class $ChartSeriesTable extends ChartSeries
         DriftSqlType.double,
         data['${effectivePrefix}setpoint_two'],
       ),
+      showDailyMin: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}show_daily_min'],
+      )!,
+      showDailyMax: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}show_daily_max'],
+      )!,
     );
   }
 
@@ -2674,10 +2732,17 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
 
   /// Optional reference values shown small under a [ChartType.statTile]'s value:
   /// low/high bounds and up to two setpoints (consignes). All null when unset.
+  /// [statMin]/[statMax] are legacy (no longer edited); the tile now shows the
+  /// day's min/max instead, gated by [showDailyMin]/[showDailyMax].
   final double? statMin;
   final double? statMax;
   final double? setpointOne;
   final double? setpointTwo;
+
+  /// When true, the stat tile shows the day's minimum / maximum received value
+  /// (computed live, like the daily average).
+  final bool showDailyMin;
+  final bool showDailyMax;
   const ChartSeriesRow({
     required this.id,
     required this.chartId,
@@ -2696,6 +2761,8 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     this.statMax,
     this.setpointOne,
     this.setpointTwo,
+    required this.showDailyMin,
+    required this.showDailyMax,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2739,6 +2806,8 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     if (!nullToAbsent || setpointTwo != null) {
       map['setpoint_two'] = Variable<double>(setpointTwo);
     }
+    map['show_daily_min'] = Variable<bool>(showDailyMin);
+    map['show_daily_max'] = Variable<bool>(showDailyMax);
     return map;
   }
 
@@ -2779,6 +2848,8 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       setpointTwo: setpointTwo == null && nullToAbsent
           ? const Value.absent()
           : Value(setpointTwo),
+      showDailyMin: Value(showDailyMin),
+      showDailyMax: Value(showDailyMax),
     );
   }
 
@@ -2807,6 +2878,8 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       statMax: serializer.fromJson<double?>(json['statMax']),
       setpointOne: serializer.fromJson<double?>(json['setpointOne']),
       setpointTwo: serializer.fromJson<double?>(json['setpointTwo']),
+      showDailyMin: serializer.fromJson<bool>(json['showDailyMin']),
+      showDailyMax: serializer.fromJson<bool>(json['showDailyMax']),
     );
   }
   @override
@@ -2832,6 +2905,8 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       'statMax': serializer.toJson<double?>(statMax),
       'setpointOne': serializer.toJson<double?>(setpointOne),
       'setpointTwo': serializer.toJson<double?>(setpointTwo),
+      'showDailyMin': serializer.toJson<bool>(showDailyMin),
+      'showDailyMax': serializer.toJson<bool>(showDailyMax),
     };
   }
 
@@ -2853,6 +2928,8 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     Value<double?> statMax = const Value.absent(),
     Value<double?> setpointOne = const Value.absent(),
     Value<double?> setpointTwo = const Value.absent(),
+    bool? showDailyMin,
+    bool? showDailyMax,
   }) => ChartSeriesRow(
     id: id ?? this.id,
     chartId: chartId ?? this.chartId,
@@ -2871,6 +2948,8 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     statMax: statMax.present ? statMax.value : this.statMax,
     setpointOne: setpointOne.present ? setpointOne.value : this.setpointOne,
     setpointTwo: setpointTwo.present ? setpointTwo.value : this.setpointTwo,
+    showDailyMin: showDailyMin ?? this.showDailyMin,
+    showDailyMax: showDailyMax ?? this.showDailyMax,
   );
   ChartSeriesRow copyWithCompanion(ChartSeriesCompanion data) {
     return ChartSeriesRow(
@@ -2899,6 +2978,12 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
       setpointTwo: data.setpointTwo.present
           ? data.setpointTwo.value
           : this.setpointTwo,
+      showDailyMin: data.showDailyMin.present
+          ? data.showDailyMin.value
+          : this.showDailyMin,
+      showDailyMax: data.showDailyMax.present
+          ? data.showDailyMax.value
+          : this.showDailyMax,
     );
   }
 
@@ -2921,7 +3006,9 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
           ..write('statMin: $statMin, ')
           ..write('statMax: $statMax, ')
           ..write('setpointOne: $setpointOne, ')
-          ..write('setpointTwo: $setpointTwo')
+          ..write('setpointTwo: $setpointTwo, ')
+          ..write('showDailyMin: $showDailyMin, ')
+          ..write('showDailyMax: $showDailyMax')
           ..write(')'))
         .toString();
   }
@@ -2945,6 +3032,8 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
     statMax,
     setpointOne,
     setpointTwo,
+    showDailyMin,
+    showDailyMax,
   );
   @override
   bool operator ==(Object other) =>
@@ -2966,7 +3055,9 @@ class ChartSeriesRow extends DataClass implements Insertable<ChartSeriesRow> {
           other.statMin == this.statMin &&
           other.statMax == this.statMax &&
           other.setpointOne == this.setpointOne &&
-          other.setpointTwo == this.setpointTwo);
+          other.setpointTwo == this.setpointTwo &&
+          other.showDailyMin == this.showDailyMin &&
+          other.showDailyMax == this.showDailyMax);
 }
 
 class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
@@ -2987,6 +3078,8 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
   final Value<double?> statMax;
   final Value<double?> setpointOne;
   final Value<double?> setpointTwo;
+  final Value<bool> showDailyMin;
+  final Value<bool> showDailyMax;
   const ChartSeriesCompanion({
     this.id = const Value.absent(),
     this.chartId = const Value.absent(),
@@ -3005,6 +3098,8 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     this.statMax = const Value.absent(),
     this.setpointOne = const Value.absent(),
     this.setpointTwo = const Value.absent(),
+    this.showDailyMin = const Value.absent(),
+    this.showDailyMax = const Value.absent(),
   });
   ChartSeriesCompanion.insert({
     this.id = const Value.absent(),
@@ -3024,6 +3119,8 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     this.statMax = const Value.absent(),
     this.setpointOne = const Value.absent(),
     this.setpointTwo = const Value.absent(),
+    this.showDailyMin = const Value.absent(),
+    this.showDailyMax = const Value.absent(),
   }) : chartId = Value(chartId),
        metricId = Value(metricId),
        type = Value(type),
@@ -3046,6 +3143,8 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     Expression<double>? statMax,
     Expression<double>? setpointOne,
     Expression<double>? setpointTwo,
+    Expression<bool>? showDailyMin,
+    Expression<bool>? showDailyMax,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3065,6 +3164,8 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
       if (statMax != null) 'stat_max': statMax,
       if (setpointOne != null) 'setpoint_one': setpointOne,
       if (setpointTwo != null) 'setpoint_two': setpointTwo,
+      if (showDailyMin != null) 'show_daily_min': showDailyMin,
+      if (showDailyMax != null) 'show_daily_max': showDailyMax,
     });
   }
 
@@ -3086,6 +3187,8 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     Value<double?>? statMax,
     Value<double?>? setpointOne,
     Value<double?>? setpointTwo,
+    Value<bool>? showDailyMin,
+    Value<bool>? showDailyMax,
   }) {
     return ChartSeriesCompanion(
       id: id ?? this.id,
@@ -3105,6 +3208,8 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
       statMax: statMax ?? this.statMax,
       setpointOne: setpointOne ?? this.setpointOne,
       setpointTwo: setpointTwo ?? this.setpointTwo,
+      showDailyMin: showDailyMin ?? this.showDailyMin,
+      showDailyMax: showDailyMax ?? this.showDailyMax,
     );
   }
 
@@ -3164,6 +3269,12 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
     if (setpointTwo.present) {
       map['setpoint_two'] = Variable<double>(setpointTwo.value);
     }
+    if (showDailyMin.present) {
+      map['show_daily_min'] = Variable<bool>(showDailyMin.value);
+    }
+    if (showDailyMax.present) {
+      map['show_daily_max'] = Variable<bool>(showDailyMax.value);
+    }
     return map;
   }
 
@@ -3186,7 +3297,9 @@ class ChartSeriesCompanion extends UpdateCompanion<ChartSeriesRow> {
           ..write('statMin: $statMin, ')
           ..write('statMax: $statMax, ')
           ..write('setpointOne: $setpointOne, ')
-          ..write('setpointTwo: $setpointTwo')
+          ..write('setpointTwo: $setpointTwo, ')
+          ..write('showDailyMin: $showDailyMin, ')
+          ..write('showDailyMax: $showDailyMax')
           ..write(')'))
         .toString();
   }
@@ -6504,6 +6617,8 @@ typedef $$ChartSeriesTableCreateCompanionBuilder =
       Value<double?> statMax,
       Value<double?> setpointOne,
       Value<double?> setpointTwo,
+      Value<bool> showDailyMin,
+      Value<bool> showDailyMax,
     });
 typedef $$ChartSeriesTableUpdateCompanionBuilder =
     ChartSeriesCompanion Function({
@@ -6524,6 +6639,8 @@ typedef $$ChartSeriesTableUpdateCompanionBuilder =
       Value<double?> statMax,
       Value<double?> setpointOne,
       Value<double?> setpointTwo,
+      Value<bool> showDailyMin,
+      Value<bool> showDailyMax,
     });
 
 final class $$ChartSeriesTableReferences
@@ -6650,6 +6767,16 @@ class $$ChartSeriesTableFilterComposer
 
   ColumnFilters<double> get setpointTwo => $composableBuilder(
     column: $table.setpointTwo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get showDailyMin => $composableBuilder(
+    column: $table.showDailyMin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get showDailyMax => $composableBuilder(
+    column: $table.showDailyMax,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6784,6 +6911,16 @@ class $$ChartSeriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get showDailyMin => $composableBuilder(
+    column: $table.showDailyMin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get showDailyMax => $composableBuilder(
+    column: $table.showDailyMax,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ChartsTableOrderingComposer get chartId {
     final $$ChartsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6893,6 +7030,16 @@ class $$ChartSeriesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get showDailyMin => $composableBuilder(
+    column: $table.showDailyMin,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get showDailyMax => $composableBuilder(
+    column: $table.showDailyMax,
+    builder: (column) => column,
+  );
+
   $$ChartsTableAnnotationComposer get chartId {
     final $$ChartsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -6985,6 +7132,8 @@ class $$ChartSeriesTableTableManager
                 Value<double?> statMax = const Value.absent(),
                 Value<double?> setpointOne = const Value.absent(),
                 Value<double?> setpointTwo = const Value.absent(),
+                Value<bool> showDailyMin = const Value.absent(),
+                Value<bool> showDailyMax = const Value.absent(),
               }) => ChartSeriesCompanion(
                 id: id,
                 chartId: chartId,
@@ -7003,6 +7152,8 @@ class $$ChartSeriesTableTableManager
                 statMax: statMax,
                 setpointOne: setpointOne,
                 setpointTwo: setpointTwo,
+                showDailyMin: showDailyMin,
+                showDailyMax: showDailyMax,
               ),
           createCompanionCallback:
               ({
@@ -7023,6 +7174,8 @@ class $$ChartSeriesTableTableManager
                 Value<double?> statMax = const Value.absent(),
                 Value<double?> setpointOne = const Value.absent(),
                 Value<double?> setpointTwo = const Value.absent(),
+                Value<bool> showDailyMin = const Value.absent(),
+                Value<bool> showDailyMax = const Value.absent(),
               }) => ChartSeriesCompanion.insert(
                 id: id,
                 chartId: chartId,
@@ -7041,6 +7194,8 @@ class $$ChartSeriesTableTableManager
                 statMax: statMax,
                 setpointOne: setpointOne,
                 setpointTwo: setpointTwo,
+                showDailyMin: showDailyMin,
+                showDailyMax: showDailyMax,
               ),
           withReferenceMapper: (p0) => p0
               .map(

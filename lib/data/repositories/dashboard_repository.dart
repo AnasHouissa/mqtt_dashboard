@@ -116,6 +116,8 @@ class DashboardRepository {
                 statMax: Value(s.statMax),
                 setpointOne: Value(s.setpointOne),
                 setpointTwo: Value(s.setpointTwo),
+                showDailyMin: Value(s.showDailyMin),
+                showDailyMax: Value(s.showDailyMax),
               ),
             );
       }
@@ -159,6 +161,8 @@ class DashboardRepository {
                 statMax: Value(s.statMax),
                 setpointOne: Value(s.setpointOne),
                 setpointTwo: Value(s.setpointTwo),
+                showDailyMin: Value(s.showDailyMin),
+                showDailyMax: Value(s.showDailyMax),
               ),
             );
       }
@@ -215,6 +219,8 @@ class ChartSeriesDraft {
   final double? statMax;
   final double? setpointOne;
   final double? setpointTwo;
+  final bool showDailyMin;
+  final bool showDailyMax;
   const ChartSeriesDraft({
     required this.metricId,
     required this.type,
@@ -230,5 +236,7 @@ class ChartSeriesDraft {
     this.statMax,
     this.setpointOne,
     this.setpointTwo,
+    this.showDailyMin = false,
+    this.showDailyMax = false,
   });
 }

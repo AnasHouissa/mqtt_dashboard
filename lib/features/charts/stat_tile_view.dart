@@ -35,12 +35,23 @@ class StatTileView extends ConsumerWidget {
     final dailyAvg = ref
         .watch(dailyAverageProvider(item.metric.id))
         .maybeWhen(data: (v) => v, orElse: () => null);
+    final dailyMin = config.showDailyMin
+        ? ref
+            .watch(dailyMinProvider(item.metric.id))
+            .maybeWhen(data: (v) => v, orElse: () => null)
+        : null;
+    final dailyMax = config.showDailyMax
+        ? ref
+            .watch(dailyMaxProvider(item.metric.id))
+            .maybeWhen(data: (v) => v, orElse: () => null)
+        : null;
 
-    // Reference stats shown under the value. Only set ones appear; the daily
-    // average is always shown ("—" until today's first reading arrives).
+    // Stats shown under the value. The daily min/max appear only when toggled
+    // on; setpoints appear only when set. The daily average is always shown
+    // ("—" until today's first reading arrives).
     final stats = <(String, String)>[
-      if (config.statMin != null) (l.minValue, fmt(config.statMin!)),
-      if (config.statMax != null) (l.maxValue, fmt(config.statMax!)),
+      if (config.showDailyMin) (l.minPerDay, dailyMin == null ? '—' : fmt(dailyMin)),
+      if (config.showDailyMax) (l.maxPerDay, dailyMax == null ? '—' : fmt(dailyMax)),
       if (config.setpointOne != null) (l.setpointOne, fmt(config.setpointOne!)),
       if (config.setpointTwo != null) (l.setpointTwo, fmt(config.setpointTwo!)),
       (l.avgPerDay, dailyAvg == null ? '—' : fmt(dailyAvg)),

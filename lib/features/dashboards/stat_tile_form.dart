@@ -26,11 +26,11 @@ class StatTileForm extends ConsumerStatefulWidget {
 class _StatTileFormState extends ConsumerState<StatTileForm> {
   final _title = TextEditingController();
   final _unit = TextEditingController();
-  final _min = TextEditingController();
-  final _max = TextEditingController();
   final _setpoint1 = TextEditingController();
   final _setpoint2 = TextEditingController();
   int? _metricId;
+  bool _showDailyMin = false;
+  bool _showDailyMax = false;
   Color _bgColor = AppColors.primarySoft;
   Color _fgColor = AppColors.primary;
 
@@ -55,8 +55,8 @@ class _StatTileFormState extends ConsumerState<StatTileForm> {
       _metricId = s.metricId;
       _bgColor = Color(s.bgColor ?? AppColors.primarySoft.toARGB32());
       _fgColor = Color(s.fgColor ?? AppColors.primary.toARGB32());
-      _min.text = _fmt(s.statMin);
-      _max.text = _fmt(s.statMax);
+      _showDailyMin = s.showDailyMin;
+      _showDailyMax = s.showDailyMax;
       _setpoint1.text = _fmt(s.setpointOne);
       _setpoint2.text = _fmt(s.setpointTwo);
     }
@@ -66,8 +66,6 @@ class _StatTileFormState extends ConsumerState<StatTileForm> {
   void dispose() {
     _title.dispose();
     _unit.dispose();
-    _min.dispose();
-    _max.dispose();
     _setpoint1.dispose();
     _setpoint2.dispose();
     super.dispose();
@@ -101,10 +99,10 @@ class _StatTileFormState extends ConsumerState<StatTileForm> {
       unit: unit.isEmpty ? null : unit,
       bgColor: _bgColor.toARGB32(),
       fgColor: _fgColor.toARGB32(),
-      statMin: _parse(_min),
-      statMax: _parse(_max),
       setpointOne: _parse(_setpoint1),
       setpointTwo: _parse(_setpoint2),
+      showDailyMin: _showDailyMin,
+      showDailyMax: _showDailyMax,
     );
     final repo = ref.read(dashboardRepositoryProvider);
     final title = _title.text.trim().isEmpty ? null : _title.text.trim();
@@ -158,13 +156,18 @@ class _StatTileFormState extends ConsumerState<StatTileForm> {
                 decoration: InputDecoration(labelText: l.unit),
               ),
               const SizedBox(height: AppSpacing.lg),
-              // Optional reference values, shown small on the tile.
-              Row(
-                children: [
-                  Expanded(child: _numberField(_min, l.minValue)),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(child: _numberField(_max, l.maxValue)),
-                ],
+              // Toggle the live daily min / max shown small on the tile.
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l.showDailyMin),
+                value: _showDailyMin,
+                onChanged: (v) => setState(() => _showDailyMin = v),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l.showDailyMax),
+                value: _showDailyMax,
+                onChanged: (v) => setState(() => _showDailyMax = v),
               ),
               const SizedBox(height: AppSpacing.md),
               Row(
