@@ -25,4 +25,38 @@ class SmsSourceRepository {
 
   Future<int> delete(int id) =>
       (_db.delete(_db.smsSources)..where((s) => s.id.equals(id))).go();
+
+  /// Deep-duplicates a source: inserts a copy of the source row under [newName]
+  /// (same sender number) and clones every metric belonging to it. Readings are
+  /// not copied. Returns the new source id.
+  Future<int> duplicate(int sourceId, String newName) {
+    return _db.transaction(() async {
+      final src = await getById(sourceId);
+      final newId = await insert(
+        SmsSourcesCompanion.insert(
+          name: newName,
+          phoneNumber: src.phoneNumber,
+        ),
+      );
+      final metrics = await (_db.select(_db.metrics)
+            ..where((m) => m.smsSourceId.equals(sourceId)))
+          .get();
+      for (final m in metrics) {
+        await _db.into(_db.metrics).insert(
+              MetricsCompanion.insert(
+                sourceKind: Value(m.sourceKind),
+                smsSourceId: Value(newId),
+                name: m.name,
+                topic: m.topic,
+                publishEnabled: Value(m.publishEnabled),
+                minValue: Value(m.minValue),
+                maxValue: Value(m.maxValue),
+                useFixedRange: Value(m.useFixedRange),
+                smsValueMode: Value(m.smsValueMode),
+              ),
+            );
+      }
+      return newId;
+    });
+  }
 }

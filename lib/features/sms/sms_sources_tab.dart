@@ -54,6 +54,10 @@ class SmsSourcesTab extends ConsumerWidget {
                   onSelected: (value) async {
                     if (value == 'edit') {
                       await showSmsSourceForm(context, source: source);
+                    } else if (value == 'duplicate') {
+                      await ref
+                          .read(smsSourceRepositoryProvider)
+                          .duplicate(source.id, l.copyOf(source.name));
                     } else if (value == 'delete') {
                       if (await confirmDelete(
                         context,
@@ -67,6 +71,7 @@ class SmsSourcesTab extends ConsumerWidget {
                   },
                   itemBuilder: (context) => [
                     PopupMenuItem(value: 'edit', child: Text(l.editSmsSource)),
+                    PopupMenuItem(value: 'duplicate', child: Text(l.duplicate)),
                     PopupMenuItem(
                       value: 'delete',
                       child: Text(
