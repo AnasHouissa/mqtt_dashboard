@@ -377,13 +377,13 @@ abstract class AppLocalizations {
   /// No description provided for @minValue.
   ///
   /// In en, this message translates to:
-  /// **'Min'**
+  /// **'Min value'**
   String get minValue;
 
   /// No description provided for @maxValue.
   ///
   /// In en, this message translates to:
-  /// **'Max'**
+  /// **'Max value'**
   String get maxValue;
 
   /// No description provided for @fixedChartRange.
@@ -761,7 +761,7 @@ abstract class AppLocalizations {
   /// No description provided for @editSmsSource.
   ///
   /// In en, this message translates to:
-  /// **'Edit SMS source'**
+  /// **'Edit'**
   String get editSmsSource;
 
   /// No description provided for @smsSourceName.
@@ -1052,6 +1052,18 @@ abstract class AppLocalizations {
   /// **'Timestamp'**
   String get timestamp;
 
+  /// No description provided for @csvDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get csvDate;
+
+  /// No description provided for @csvTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get csvTime;
+
   /// No description provided for @value.
   ///
   /// In en, this message translates to:
@@ -1243,6 +1255,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Daily avg'**
   String get avgPerDay;
+
+  /// No description provided for @minPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily min'**
+  String get minPerDay;
+
+  /// No description provided for @maxPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily max'**
+  String get maxPerDay;
+
+  /// No description provided for @showDailyMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Display min value received'**
+  String get showDailyMin;
+
+  /// No description provided for @showDailyMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Display max value received'**
+  String get showDailyMax;
 
   /// No description provided for @noInternet.
   ///

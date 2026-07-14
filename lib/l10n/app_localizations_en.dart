@@ -154,10 +154,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enablePublishing => 'Enable publishing';
 
   @override
-  String get minValue => 'Min';
+  String get minValue => 'Min value';
 
   @override
-  String get maxValue => 'Max';
+  String get maxValue => 'Max value';
 
   @override
   String get fixedChartRange => 'Fixed chart range';
@@ -346,7 +346,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addSmsSource => 'Add SMS source';
 
   @override
-  String get editSmsSource => 'Edit SMS source';
+  String get editSmsSource => 'Edit';
 
   @override
   String get smsSourceName => 'Source name';
@@ -517,6 +517,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timestamp => 'Timestamp';
 
   @override
+  String get csvDate => 'Date';
+
+  @override
+  String get csvTime => 'Time';
+
+  @override
   String get value => 'Value';
 
   @override
@@ -621,6 +627,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get avgPerDay => 'Daily avg';
+
+  @override
+  String get minPerDay => 'Daily min';
+
+  @override
+  String get maxPerDay => 'Daily max';
+
+  @override
+  String get showDailyMin => 'Display min value received';
+
+  @override
+  String get showDailyMax => 'Display max value received';
 
   @override
   String get noInternet => 'No internet connection';
