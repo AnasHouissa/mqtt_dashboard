@@ -13,21 +13,29 @@ import '../utils/number_format.dart';
 /// Builds CSV / PDF files from readings and shares them.
 class ExportService {
   static final _dateFmt = DateFormat('yyyy-MM-dd HH:mm:ss');
+  static final _dateOnlyFmt = DateFormat('yyyy-MM-dd');
+  static final _timeOnlyFmt = DateFormat('HH:mm:ss');
 
-  /// Writes a CSV file and opens the share sheet. Values use [locale]'s decimal
-  /// separator; a semicolon separates fields so a French comma-decimal (`23,3`)
-  /// never collides with the field separator.
+  /// Writes a CSV file and opens the share sheet. Emits `Date;Time;Value`
+  /// columns. Values use [locale]'s decimal separator; a semicolon separates
+  /// fields so a French comma-decimal (`23,3`) never collides with the field
+  /// separator.
   Future<void> exportCsv({
     required String metricName,
     required List<Reading> readings,
-    required String timestampHeader,
+    required String dateHeader,
+    required String timeHeader,
     required String valueHeader,
     required String locale,
   }) async {
     final rows = <List<dynamic>>[
-      [timestampHeader, valueHeader],
+      [dateHeader, timeHeader, valueHeader],
       for (final r in readings)
-        [_dateFmt.format(r.timestamp), formatMetricValue(r.value, locale)],
+        [
+          _dateOnlyFmt.format(r.timestamp),
+          _timeOnlyFmt.format(r.timestamp),
+          formatMetricValue(r.value, locale),
+        ],
     ];
     final csv = const ListToCsvConverter(fieldDelimiter: ';').convert(rows);
 

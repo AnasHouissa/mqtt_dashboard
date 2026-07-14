@@ -167,7 +167,8 @@ class _ChartCardState extends ConsumerState<ChartCard> {
         .exportCsv(
           metricName: metric.name,
           readings: readings,
-          timestampHeader: l.timestamp,
+          dateHeader: l.csvDate,
+          timeHeader: l.csvTime,
           valueHeader: l.value,
           locale: locale,
         );
