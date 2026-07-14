@@ -69,6 +69,13 @@ class DashboardListScreen extends ConsumerWidget {
                   onSelected: (value) async {
                     if (value == 'rename') {
                       await showRenameDashboardForm(context, ref, dashboard);
+                    } else if (value == 'duplicate') {
+                      await ref
+                          .read(dashboardRepositoryProvider)
+                          .duplicateDashboard(
+                            dashboard.id,
+                            l.copyOf(dashboard.name),
+                          );
                     } else if (value == 'delete') {
                       if (await confirmDelete(
                         context,
@@ -84,6 +91,10 @@ class DashboardListScreen extends ConsumerWidget {
                     PopupMenuItem(
                       value: 'rename',
                       child: Text(l.renameDashboard),
+                    ),
+                    PopupMenuItem(
+                      value: 'duplicate',
+                      child: Text(l.duplicate),
                     ),
                     PopupMenuItem(
                       value: 'delete',

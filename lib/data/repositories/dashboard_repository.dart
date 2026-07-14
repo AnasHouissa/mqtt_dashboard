@@ -27,6 +27,67 @@ class DashboardRepository {
   Future<int> deleteDashboard(int id) =>
       (_db.delete(_db.dashboards)..where((d) => d.id.equals(id))).go();
 
+  /// Deep-duplicates a dashboard: inserts a copy under [newName] and clones all
+  /// of its charts (title + position) and every chart's series (all config).
+  /// Metrics are referenced by id — not copied — and readings are untouched.
+  /// Returns the new dashboard id.
+  Future<int> duplicateDashboard(int sourceId, String newName) {
+    return _db.transaction(() async {
+      final newDashId = await _db
+          .into(_db.dashboards)
+          .insert(DashboardsCompanion.insert(name: newName));
+
+      final charts = await (_db.select(_db.charts)
+            ..where((c) => c.dashboardId.equals(sourceId))
+            ..orderBy([
+              (c) => OrderingTerm(expression: c.position),
+              (c) => OrderingTerm(expression: c.id),
+            ]))
+          .get();
+
+      for (final chart in charts) {
+        final newChartId = await _db.into(_db.charts).insert(
+              ChartsCompanion.insert(
+                dashboardId: newDashId,
+                title: Value(chart.title),
+                position: Value(chart.position),
+              ),
+            );
+
+        final series = await (_db.select(_db.chartSeries)
+              ..where((s) => s.chartId.equals(chart.id))
+              ..orderBy([(s) => OrderingTerm(expression: s.position)]))
+            .get();
+
+        for (final s in series) {
+          await _db.into(_db.chartSeries).insert(
+                ChartSeriesCompanion.insert(
+                  chartId: newChartId,
+                  metricId: s.metricId,
+                  type: s.type,
+                  color: s.color,
+                  visible: Value(s.visible),
+                  position: Value(s.position),
+                  sensorCount: Value(s.sensorCount),
+                  fillColor: Value(s.fillColor),
+                  emptyColor: Value(s.emptyColor),
+                  unit: Value(s.unit),
+                  bgColor: Value(s.bgColor),
+                  fgColor: Value(s.fgColor),
+                  statMin: Value(s.statMin),
+                  statMax: Value(s.statMax),
+                  setpointOne: Value(s.setpointOne),
+                  setpointTwo: Value(s.setpointTwo),
+                  showDailyMin: Value(s.showDailyMin),
+                  showDailyMax: Value(s.showDailyMax),
+                ),
+              );
+        }
+      }
+      return newDashId;
+    });
+  }
+
   // --- Charts ---
 
   /// Watch every chart in a dashboard with its ordered series (each joined to
