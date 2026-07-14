@@ -10,6 +10,7 @@ import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/entity_card.dart';
 import '../../widgets/labeled_add_button.dart';
+import '../charts/date_time_range_sheet.dart';
 import 'sms_log_view.dart';
 import 'sms_metric_form.dart';
 
@@ -220,6 +221,14 @@ class _SmsMetricList extends ConsumerWidget {
                       smsSourceId: source.id,
                       metric: metric,
                     );
+                  } else if (value == 'duplicate') {
+                    await showSmsMetricForm(
+                      context,
+                      smsSourceId: source.id,
+                      template: metric.copyWith(name: l.copyOf(metric.name)),
+                    );
+                  } else if (value == 'deleteHistory') {
+                    await _deleteHistory(context, ref, metric);
                   } else if (value == 'delete') {
                     if (await confirmDelete(
                       context,
@@ -233,6 +242,9 @@ class _SmsMetricList extends ConsumerWidget {
                 },
                 itemBuilder: (context) => [
                   PopupMenuItem(value: 'edit', child: Text(l.editMetric)),
+                  PopupMenuItem(value: 'duplicate', child: Text(l.duplicate)),
+                  PopupMenuItem(
+                      value: 'deleteHistory', child: Text(l.deleteHistory)),
                   PopupMenuItem(
                     value: 'delete',
                     child: Text(
@@ -247,5 +259,25 @@ class _SmsMetricList extends ConsumerWidget {
         );
       },
     );
+  }
+
+  /// Asks for a date-time range and deletes the metric's readings within it,
+  /// reporting how many rows were removed. Mirrors the broker metric list.
+  Future<void> _deleteHistory(
+      BuildContext context, WidgetRef ref, Metric metric) async {
+    final l = AppLocalizations.of(context);
+    final range = await showDateTimeRangeSheet(
+      context,
+      title: l.deleteHistory,
+      confirmLabel: l.delete,
+      confirmDanger: true,
+    );
+    if (range == null) return;
+    final count = await ref
+        .read(readingRepositoryProvider)
+        .deleteInRange(metric.id, start: range.start, end: range.end);
+    if (context.mounted) {
+      showAppSnackBar(context, l.historyDeleted(count));
+    }
   }
 }
