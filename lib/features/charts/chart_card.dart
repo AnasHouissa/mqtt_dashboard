@@ -264,33 +264,31 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 value: _bucket,
                 onChanged: _selectBucket,
                 onPickPeriod: _pickPeriod,
+                // Time-of-day window only applies to a day-bucket time-series
+                // chart; the clock button sits next to the calendar button.
+                onPickTimeRange: !_isCustom && _bucket == TimeBucket.day
+                    ? _pickDayTimeRange
+                    : null,
+                timeRangeActive: _dayStart != null && _dayEnd != null,
               ),
             ),
-            if (!_isDefault) ...[
+            // Selected period and time-of-day window shown as resettable chips.
+            if (!_isDefault || (_dayStart != null && _dayEnd != null)) ...[
               const SizedBox(height: AppSpacing.sm),
               Align(
                 alignment: Alignment.centerLeft,
-                child: PeriodChip(
-                  label: formatPeriod(context, _bucket, _anchor),
-                  onReset: () =>
-                      setState(() => _anchor = defaultAnchor(_bucket)),
-                ),
-              ),
-            ],
-            // Time-of-day window: only meaningful for a day-bucket time-series
-            // chart. A tap opens start/end time pickers; a set window shows a
-            // resettable chip.
-            if (!_isCustom && _bucket == TimeBucket.day) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: _dayStart == null || _dayEnd == null
-                    ? ActionChip(
-                        avatar: const Icon(Icons.schedule, size: 18),
-                        label: Text(l.timeRange),
-                        onPressed: _pickDayTimeRange,
-                      )
-                    : PeriodChip(
+                child: Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    if (!_isDefault)
+                      PeriodChip(
+                        label: formatPeriod(context, _bucket, _anchor),
+                        onReset: () =>
+                            setState(() => _anchor = defaultAnchor(_bucket)),
+                      ),
+                    if (_dayStart != null && _dayEnd != null)
+                      PeriodChip(
                         label:
                             '${_dayStart!.format(context)} – ${_dayEnd!.format(context)}',
                         onReset: () => setState(() {
@@ -298,6 +296,8 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                           _dayEnd = null;
                         }),
                       ),
+                  ],
+                ),
               ),
             ],
             const SizedBox(height: AppSpacing.md),
