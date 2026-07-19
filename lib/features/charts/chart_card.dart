@@ -217,8 +217,9 @@ class _ChartCardState extends ConsumerState<ChartCard> {
   }
 
   void _openFullscreen() {
-    Navigator.push(
-      context,
+    // Push on the root navigator so the landscape fullscreen chart covers the
+    // sticky bottom nav bar (the only screen that hides it).
+    Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(
         builder: (_) => ChartFullscreenScreen(
           series: _series,

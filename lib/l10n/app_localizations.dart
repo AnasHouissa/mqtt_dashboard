@@ -104,6 +104,24 @@ abstract class AppLocalizations {
   /// **'TEKKIM Dash'**
   String get appTitle;
 
+  /// No description provided for @navData.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get navData;
+
+  /// No description provided for @navBoards.
+  ///
+  /// In en, this message translates to:
+  /// **'Boards'**
+  String get navBoards;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
   /// No description provided for @brokers.
   ///
   /// In en, this message translates to:

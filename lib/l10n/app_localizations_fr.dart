@@ -12,6 +12,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get appTitle => 'TEKKIM Dash';
 
   @override
+  String get navData => 'Données';
+
+  @override
+  String get navBoards => 'Tableaux';
+
+  @override
+  String get navSettings => 'Réglages';
+
+  @override
   String get brokers => 'Brokers';
 
   @override

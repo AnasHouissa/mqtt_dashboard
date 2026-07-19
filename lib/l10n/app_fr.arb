@@ -1,6 +1,9 @@
 {
   "@@locale": "fr",
   "appTitle": "TEKKIM Dash",
+  "navData": "Données",
+  "navBoards": "Tableaux",
+  "navSettings": "Réglages",
   "brokers": "Brokers",
   "noBrokers": "Aucun broker. Appuyez sur + pour en ajouter un.",
   "addBroker": "Ajouter un broker",
