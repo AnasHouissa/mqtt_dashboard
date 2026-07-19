@@ -617,7 +617,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cellPrefix => 'Cell label prefix';
 
   @override
-  String get cellPrefixHelper => 'e.g. IN → IN1, IN2, IN3';
+  String get cellPrefixHelper => 'e.g. IN > Door, Water';
 
   @override
   String get fillColor => 'Alert (fill) color';

@@ -623,7 +623,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cellPrefix => 'Préfixe des cellules';
 
   @override
-  String get cellPrefixHelper => 'ex. IN → IN1, IN2, IN3';
+  String get cellPrefixHelper => 'ex. IN > Door, Water';
 
   @override
   String get fillColor => 'Couleur d\'alerte';

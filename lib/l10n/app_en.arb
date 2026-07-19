@@ -244,7 +244,7 @@
   },
   "sensorCount": "Number of sensors",
   "cellPrefix": "Cell label prefix",
-  "cellPrefixHelper": "e.g. IN → IN1, IN2, IN3",
+  "cellPrefixHelper": "e.g. IN > Door, Water",
   "fillColor": "Alert (fill) color",
   "emptyColor": "Empty / OK color",
   "unit": "Unit",

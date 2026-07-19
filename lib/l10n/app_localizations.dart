@@ -1235,7 +1235,7 @@ abstract class AppLocalizations {
   /// No description provided for @cellPrefixHelper.
   ///
   /// In en, this message translates to:
-  /// **'e.g. IN → IN1, IN2, IN3'**
+  /// **'e.g. IN > Door, Water'**
   String get cellPrefixHelper;
 
   /// No description provided for @fillColor.
