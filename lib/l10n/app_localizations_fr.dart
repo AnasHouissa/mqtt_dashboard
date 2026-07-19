@@ -85,6 +85,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get disconnected => 'Déconnecté';
 
   @override
+  String get notConnectedTap => 'Non connecté — appuyez pour connecter';
+
+  @override
+  String get selectBrokerToConnect => 'Se connecter à un broker';
+
+  @override
   String get connecting => 'Connexion…';
 
   @override

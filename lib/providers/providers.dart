@@ -25,6 +25,12 @@ import '../services/sql_export_service.dart';
 
 // --- Infrastructure ---
 
+/// The app's root navigator key. Wired onto [MaterialApp.navigatorKey] so
+/// widgets living in `MaterialApp.builder` (which sit *above* the Navigator,
+/// e.g. the connection status bar) can still push routes/sheets by using this
+/// navigator's own context.
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
   ref.onDispose(db.close);

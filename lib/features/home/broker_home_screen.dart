@@ -6,8 +6,8 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../services/mqtt_service.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/app_snackbar.dart';
 import '../../widgets/labeled_add_button.dart';
+import '../brokers/connect_broker.dart';
 import '../metrics/metric_form.dart';
 import '../metrics/metric_list_view.dart';
 
@@ -48,22 +48,7 @@ class BrokerHomeScreen extends ConsumerWidget {
                   await controller.disconnect();
                   return;
                 }
-                final ok = await controller.connect(broker);
-                if (context.mounted && !ok) {
-                  final reason = switch (controller.lastFailureReason) {
-                    MqttFailureReason.badCredentials => l.reasonBadCredentials,
-                    MqttFailureReason.brokerUnavailable =>
-                      l.reasonBrokerUnavailable,
-                    MqttFailureReason.rejected => l.reasonRejected,
-                    MqttFailureReason.network => l.reasonNetwork,
-                    MqttFailureReason.unknown || null => l.reasonUnknown,
-                  };
-                  showAppSnackBar(
-                    context,
-                    l.unableToConnect(reason),
-                    isError: true,
-                  );
-                }
+                await connectBrokerWithFeedback(context, ref, broker);
               },
             ),
           ),

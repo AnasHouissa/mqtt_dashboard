@@ -242,6 +242,18 @@ abstract class AppLocalizations {
   /// **'Disconnected'**
   String get disconnected;
 
+  /// No description provided for @notConnectedTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected — tap to connect'**
+  String get notConnectedTap;
+
+  /// No description provided for @selectBrokerToConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to a broker'**
+  String get selectBrokerToConnect;
+
   /// No description provided for @connecting.
   ///
   /// In en, this message translates to:

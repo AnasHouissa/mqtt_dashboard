@@ -17,6 +17,7 @@ class MqttDashApp extends ConsumerWidget {
     // incoming messages (no-op on non-Android platforms).
     ref.watch(smsIngestionProvider);
     return MaterialApp(
+      navigatorKey: rootNavigatorKey,
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),

@@ -9,6 +9,7 @@ import '../../providers/providers.dart';
 import '../../services/background_service.dart';
 import '../../services/mqtt_service.dart';
 import '../../theme/app_theme.dart';
+import '../brokers/connect_broker.dart';
 
 /// App-wide shell that pins a "connected" banner to the very top of every
 /// screen whenever an MQTT connection is live. Wire it through
@@ -118,9 +119,6 @@ class _AppShellState extends ConsumerState<AppShell>
 
   @override
   Widget build(BuildContext context) {
-    final connected = ref.watch(connectionProvider) == MqttStatus.connected;
-    if (!connected) return widget.child;
-
     return Column(
       children: [
         const _ConnectionBanner(),
@@ -138,12 +136,16 @@ class _AppShellState extends ConsumerState<AppShell>
   }
 }
 
+/// Always-pinned connection status bar. Green when connected (shows the broker
+/// name), amber while connecting, and amber/tappable when not connected — a tap
+/// opens the connect sheet so the user can go live without leaving the screen.
 class _ConnectionBanner extends ConsumerWidget {
   const _ConnectionBanner();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    final status = ref.watch(connectionProvider);
     final brokerId = ref.read(connectionProvider.notifier).activeBrokerId;
     final brokers = ref.watch(brokersProvider).valueOrNull;
 
@@ -157,33 +159,58 @@ class _ConnectionBanner extends ConsumerWidget {
       }
     }
 
+    // Treat `failed` as "not connected" for this persistent bar; the specific
+    // failure reason is surfaced via the snackbar at connect time.
+    final connected = status == MqttStatus.connected;
+    final connecting = status == MqttStatus.connecting;
+
+    final (Color color, IconData icon, String label) = connected
+        ? (AppColors.success, Icons.wifi, name == null ? l.connected : l.connectedTo(name))
+        : connecting
+            ? (AppColors.warning, Icons.wifi_find, l.connecting)
+            : (AppColors.warning, Icons.wifi_off, l.notConnectedTap);
+
+    // Only the not-connected state is actionable (opens the connect sheet).
+    // This widget lives in `MaterialApp.builder`, above the Navigator, so use
+    // the root navigator's own context to show the sheet.
+    final onTap = (connected || connecting)
+        ? null
+        : () => showConnectBrokerSheet(rootNavigatorKey.currentContext!);
+
     return Material(
-      color: AppColors.success,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: 6,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.wifi, color: Colors.white, size: 16),
-              const SizedBox(width: AppSpacing.sm),
-              Flexible(
-                child: Text(
-                  name == null ? l.connected : l.connectedTo(name),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+      color: color,
+      child: InkWell(
+        onTap: onTap,
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: 6,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: Colors.white, size: 16),
+                const SizedBox(width: AppSpacing.sm),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                if (onTap != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  const Icon(Icons.chevron_right, color: Colors.white, size: 18),
+                ],
+              ],
+            ),
           ),
         ),
       ),

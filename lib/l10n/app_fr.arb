@@ -34,6 +34,8 @@
     }
   },
   "disconnected": "Déconnecté",
+  "notConnectedTap": "Non connecté — appuyez pour connecter",
+  "selectBrokerToConnect": "Se connecter à un broker",
   "connecting": "Connexion…",
   "connectionFailed": "Échec de la connexion",
   "unableToConnect": "Connexion impossible : {reason}",
