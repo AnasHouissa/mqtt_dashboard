@@ -72,6 +72,10 @@ class MetricListView extends ConsumerWidget {
                               brokerId: broker.id,
                               template: metric.copyWith(
                                   name: l.copyOf(metric.name)));
+                        } else if (value == 'csv') {
+                          await _exportCsv(context, ref, metric);
+                        } else if (value == 'pdf') {
+                          await _exportPdf(context, ref, metric);
                         } else if (value == 'deleteHistory') {
                           await _deleteHistory(context, ref, metric);
                         } else if (value == 'delete') {
@@ -90,6 +94,8 @@ class MetricListView extends ConsumerWidget {
                         PopupMenuItem(value: 'edit', child: Text(l.editMetric)),
                         PopupMenuItem(
                             value: 'duplicate', child: Text(l.duplicate)),
+                        PopupMenuItem(value: 'csv', child: Text(l.exportCsv)),
+                        PopupMenuItem(value: 'pdf', child: Text(l.exportPdf)),
                         PopupMenuItem(
                             value: 'deleteHistory',
                             child: Text(l.deleteHistory)),
@@ -108,6 +114,54 @@ class MetricListView extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  /// Asks the user for a date-time range, then fetches the metric's readings
+  /// within it. Returns null if the user cancelled the range picker.
+  Future<List<Reading>?> _pickRangeReadings(
+      BuildContext context, WidgetRef ref, Metric metric) async {
+    final l = AppLocalizations.of(context);
+    final range = await showDateTimeRangeSheet(
+      context,
+      title: l.exportRange,
+      confirmLabel: l.export,
+    );
+    if (range == null) return null;
+    return ref
+        .read(readingRepositoryProvider)
+        .rawForMetric(metric.id, start: range.start, end: range.end);
+  }
+
+  Future<void> _exportCsv(
+      BuildContext context, WidgetRef ref, Metric metric) async {
+    final l = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final readings = await _pickRangeReadings(context, ref, metric);
+    if (readings == null) return;
+    await ref.read(exportServiceProvider).exportCsv(
+          metricName: metric.name,
+          readings: readings,
+          dateHeader: l.csvDate,
+          timeHeader: l.csvTime,
+          valueHeader: l.value,
+          locale: locale,
+        );
+  }
+
+  Future<void> _exportPdf(
+      BuildContext context, WidgetRef ref, Metric metric) async {
+    final l = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final readings = await _pickRangeReadings(context, ref, metric);
+    if (readings == null) return;
+    await ref.read(exportServiceProvider).exportPdf(
+          metricName: metric.name,
+          title: l.exportTitle(metric.name),
+          readings: readings,
+          timestampHeader: l.timestamp,
+          valueHeader: l.value,
+          locale: locale,
+        );
   }
 
   /// Asks for a date-time range and deletes the metric's readings within it,

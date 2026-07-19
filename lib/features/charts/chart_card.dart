@@ -16,13 +16,12 @@ import '../dashboards/stat_tile_form.dart';
 import 'alert_duration_view.dart';
 import 'chart_fullscreen.dart';
 import 'chart_type_ui.dart';
-import 'date_time_range_sheet.dart';
 import 'chart_view.dart';
 import 'sensor_grid_view.dart';
 import 'stat_tile_view.dart';
 import 'time_filter.dart';
 
-/// A dashboard chart with its own time filter, fullscreen + export + edit/delete.
+/// A dashboard chart with its own time filter, fullscreen + edit/delete.
 class ChartCard extends ConsumerStatefulWidget {
   const ChartCard({
     super.key,
@@ -142,80 +141,6 @@ class _ChartCardState extends ConsumerState<ChartCard> {
     }
   }
 
-  /// Asks the user for a date-time range, then fetches the metric's readings
-  /// within it. Returns null if the user cancelled the range picker.
-  Future<List<Reading>?> _pickRangeReadings(Metric metric) async {
-    final l = AppLocalizations.of(context);
-    final range = await showDateTimeRangeSheet(
-      context,
-      title: l.exportRange,
-      confirmLabel: l.export,
-    );
-    if (range == null) return null;
-    return ref
-        .read(readingRepositoryProvider)
-        .rawForMetric(metric.id, start: range.start, end: range.end);
-  }
-
-  Future<void> _exportCsv(Metric metric) async {
-    final l = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final readings = await _pickRangeReadings(metric);
-    if (readings == null) return;
-    await ref
-        .read(exportServiceProvider)
-        .exportCsv(
-          metricName: metric.name,
-          readings: readings,
-          dateHeader: l.csvDate,
-          timeHeader: l.csvTime,
-          valueHeader: l.value,
-          locale: locale,
-        );
-  }
-
-  Future<void> _exportPdf(Metric metric) async {
-    final l = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final readings = await _pickRangeReadings(metric);
-    if (readings == null) return;
-    await ref
-        .read(exportServiceProvider)
-        .exportPdf(
-          metricName: metric.name,
-          title: l.exportTitle(metric.name),
-          readings: readings,
-          timestampHeader: l.timestamp,
-          valueHeader: l.value,
-          locale: locale,
-        );
-  }
-
-  /// With one series, export it directly; with several, ask which metric.
-  Future<Metric?> _resolveMetric() async {
-    if (_series.length == 1) return _series.first.metric;
-    return showModalBottomSheet<Metric>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final s in _series)
-              ListTile(
-                leading: CircleIcon(
-                  icon: s.series.type.icon,
-                  color: Color(s.series.color),
-                  size: 36,
-                ),
-                title: Text(s.metric.name),
-                onTap: () => Navigator.pop(context, s.metric),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _openFullscreen() {
     // Push on the root navigator so the landscape fullscreen chart covers the
     // sticky bottom nav bar (the only screen that hides it).
@@ -304,12 +229,6 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                   switch (value) {
                     case 'edit':
                       await _edit();
-                    case 'csv':
-                      final m = await _resolveMetric();
-                      if (m != null) await _exportCsv(m);
-                    case 'pdf':
-                      final m = await _resolveMetric();
-                      if (m != null) await _exportPdf(m);
                     case 'delete':
                       if (await confirmDelete(
                         context,
@@ -323,11 +242,6 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 },
                 itemBuilder: (context) => [
                   PopupMenuItem(value: 'edit', child: Text(l.editCurve)),
-                  // Export is time-series only; custom components have no series.
-                  if (!_isCustom) ...[
-                    PopupMenuItem(value: 'csv', child: Text(l.exportCsv)),
-                    PopupMenuItem(value: 'pdf', child: Text(l.exportPdf)),
-                  ],
                   PopupMenuItem(
                     value: 'delete',
                     child: Text(
