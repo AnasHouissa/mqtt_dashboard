@@ -1,6 +1,9 @@
 {
   "@@locale": "en",
   "appTitle": "TEKKIM Dash",
+  "navData": "Data",
+  "navBoards": "Boards",
+  "navSettings": "Settings",
   "brokers": "Brokers",
   "noBrokers": "No brokers yet. Tap + to add one.",
   "addBroker": "Add broker",
@@ -31,6 +34,8 @@
     }
   },
   "disconnected": "Disconnected",
+  "notConnectedTap": "Not connected — tap to connect",
+  "selectBrokerToConnect": "Connect to a broker",
   "connecting": "Connecting…",
   "connectionFailed": "Connection failed",
   "unableToConnect": "Unable to connect: {reason}",
@@ -239,7 +244,7 @@
   },
   "sensorCount": "Number of sensors",
   "cellPrefix": "Cell label prefix",
-  "cellPrefixHelper": "e.g. IN → IN1, IN2, IN3",
+  "cellPrefixHelper": "e.g. IN > Door, Water",
   "fillColor": "Alert (fill) color",
   "emptyColor": "Empty / OK color",
   "unit": "Unit",

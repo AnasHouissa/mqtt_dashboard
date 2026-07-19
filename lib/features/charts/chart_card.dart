@@ -16,13 +16,12 @@ import '../dashboards/stat_tile_form.dart';
 import 'alert_duration_view.dart';
 import 'chart_fullscreen.dart';
 import 'chart_type_ui.dart';
-import 'date_time_range_sheet.dart';
 import 'chart_view.dart';
 import 'sensor_grid_view.dart';
 import 'stat_tile_view.dart';
 import 'time_filter.dart';
 
-/// A dashboard chart with its own time filter, fullscreen + export + edit/delete.
+/// A dashboard chart with its own time filter, fullscreen + edit/delete.
 class ChartCard extends ConsumerStatefulWidget {
   const ChartCard({
     super.key,
@@ -142,83 +141,10 @@ class _ChartCardState extends ConsumerState<ChartCard> {
     }
   }
 
-  /// Asks the user for a date-time range, then fetches the metric's readings
-  /// within it. Returns null if the user cancelled the range picker.
-  Future<List<Reading>?> _pickRangeReadings(Metric metric) async {
-    final l = AppLocalizations.of(context);
-    final range = await showDateTimeRangeSheet(
-      context,
-      title: l.exportRange,
-      confirmLabel: l.export,
-    );
-    if (range == null) return null;
-    return ref
-        .read(readingRepositoryProvider)
-        .rawForMetric(metric.id, start: range.start, end: range.end);
-  }
-
-  Future<void> _exportCsv(Metric metric) async {
-    final l = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final readings = await _pickRangeReadings(metric);
-    if (readings == null) return;
-    await ref
-        .read(exportServiceProvider)
-        .exportCsv(
-          metricName: metric.name,
-          readings: readings,
-          dateHeader: l.csvDate,
-          timeHeader: l.csvTime,
-          valueHeader: l.value,
-          locale: locale,
-        );
-  }
-
-  Future<void> _exportPdf(Metric metric) async {
-    final l = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final readings = await _pickRangeReadings(metric);
-    if (readings == null) return;
-    await ref
-        .read(exportServiceProvider)
-        .exportPdf(
-          metricName: metric.name,
-          title: l.exportTitle(metric.name),
-          readings: readings,
-          timestampHeader: l.timestamp,
-          valueHeader: l.value,
-          locale: locale,
-        );
-  }
-
-  /// With one series, export it directly; with several, ask which metric.
-  Future<Metric?> _resolveMetric() async {
-    if (_series.length == 1) return _series.first.metric;
-    return showModalBottomSheet<Metric>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final s in _series)
-              ListTile(
-                leading: CircleIcon(
-                  icon: s.series.type.icon,
-                  color: Color(s.series.color),
-                  size: 36,
-                ),
-                title: Text(s.metric.name),
-                onTap: () => Navigator.pop(context, s.metric),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _openFullscreen() {
-    Navigator.push(
-      context,
+    // Push on the root navigator so the landscape fullscreen chart covers the
+    // sticky bottom nav bar (the only screen that hides it).
+    Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(
         builder: (_) => ChartFullscreenScreen(
           series: _series,
@@ -303,12 +229,6 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                   switch (value) {
                     case 'edit':
                       await _edit();
-                    case 'csv':
-                      final m = await _resolveMetric();
-                      if (m != null) await _exportCsv(m);
-                    case 'pdf':
-                      final m = await _resolveMetric();
-                      if (m != null) await _exportPdf(m);
                     case 'delete':
                       if (await confirmDelete(
                         context,
@@ -322,11 +242,6 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 },
                 itemBuilder: (context) => [
                   PopupMenuItem(value: 'edit', child: Text(l.editCurve)),
-                  // Export is time-series only; custom components have no series.
-                  if (!_isCustom) ...[
-                    PopupMenuItem(value: 'csv', child: Text(l.exportCsv)),
-                    PopupMenuItem(value: 'pdf', child: Text(l.exportPdf)),
-                  ],
                   PopupMenuItem(
                     value: 'delete',
                     child: Text(
@@ -349,33 +264,31 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                 value: _bucket,
                 onChanged: _selectBucket,
                 onPickPeriod: _pickPeriod,
+                // Time-of-day window only applies to a day-bucket time-series
+                // chart; the clock button sits next to the calendar button.
+                onPickTimeRange: !_isCustom && _bucket == TimeBucket.day
+                    ? _pickDayTimeRange
+                    : null,
+                timeRangeActive: _dayStart != null && _dayEnd != null,
               ),
             ),
-            if (!_isDefault) ...[
+            // Selected period and time-of-day window shown as resettable chips.
+            if (!_isDefault || (_dayStart != null && _dayEnd != null)) ...[
               const SizedBox(height: AppSpacing.sm),
               Align(
                 alignment: Alignment.centerLeft,
-                child: PeriodChip(
-                  label: formatPeriod(context, _bucket, _anchor),
-                  onReset: () =>
-                      setState(() => _anchor = defaultAnchor(_bucket)),
-                ),
-              ),
-            ],
-            // Time-of-day window: only meaningful for a day-bucket time-series
-            // chart. A tap opens start/end time pickers; a set window shows a
-            // resettable chip.
-            if (!_isCustom && _bucket == TimeBucket.day) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: _dayStart == null || _dayEnd == null
-                    ? ActionChip(
-                        avatar: const Icon(Icons.schedule, size: 18),
-                        label: Text(l.timeRange),
-                        onPressed: _pickDayTimeRange,
-                      )
-                    : PeriodChip(
+                child: Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    if (!_isDefault)
+                      PeriodChip(
+                        label: formatPeriod(context, _bucket, _anchor),
+                        onReset: () =>
+                            setState(() => _anchor = defaultAnchor(_bucket)),
+                      ),
+                    if (_dayStart != null && _dayEnd != null)
+                      PeriodChip(
                         label:
                             '${_dayStart!.format(context)} – ${_dayEnd!.format(context)}',
                         onReset: () => setState(() {
@@ -383,6 +296,8 @@ class _ChartCardState extends ConsumerState<ChartCard> {
                           _dayEnd = null;
                         }),
                       ),
+                  ],
+                ),
               ),
             ],
             const SizedBox(height: AppSpacing.md),

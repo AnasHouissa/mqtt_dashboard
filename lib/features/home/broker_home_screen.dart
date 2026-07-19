@@ -6,8 +6,8 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
 import '../../services/mqtt_service.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/app_snackbar.dart';
 import '../../widgets/labeled_add_button.dart';
+import '../brokers/connect_broker.dart';
 import '../metrics/metric_form.dart';
 import '../metrics/metric_list_view.dart';
 
@@ -48,22 +48,7 @@ class BrokerHomeScreen extends ConsumerWidget {
                   await controller.disconnect();
                   return;
                 }
-                final ok = await controller.connect(broker);
-                if (context.mounted && !ok) {
-                  final reason = switch (controller.lastFailureReason) {
-                    MqttFailureReason.badCredentials => l.reasonBadCredentials,
-                    MqttFailureReason.brokerUnavailable =>
-                      l.reasonBrokerUnavailable,
-                    MqttFailureReason.rejected => l.reasonRejected,
-                    MqttFailureReason.network => l.reasonNetwork,
-                    MqttFailureReason.unknown || null => l.reasonUnknown,
-                  };
-                  showAppSnackBar(
-                    context,
-                    l.unableToConnect(reason),
-                    isError: true,
-                  );
-                }
+                await connectBrokerWithFeedback(context, ref, broker);
               },
             ),
           ),
@@ -81,32 +66,18 @@ class BrokerHomeScreen extends ConsumerWidget {
   }
 }
 
-/// A large, tactile "3D" connect/disconnect button whose color reflects the
-/// MQTT status. Tapping it toggles the connection via [onPressed]; it is
-/// disabled (and shows a spinner) while connecting.
-class _ConnectionButton extends StatefulWidget {
+/// A flat connect/disconnect button whose color reflects the MQTT status.
+/// Tapping it toggles the connection via [onPressed]; it is disabled (and shows
+/// a spinner) while connecting.
+class _ConnectionButton extends StatelessWidget {
   const _ConnectionButton({required this.status, required this.onPressed});
 
   final MqttStatus status;
   final Future<void> Function() onPressed;
 
   @override
-  State<_ConnectionButton> createState() => _ConnectionButtonState();
-}
-
-class _ConnectionButtonState extends State<_ConnectionButton> {
-  /// Visual press depth of the 3D edge, in logical pixels.
-  static const double _depth = 6;
-
-  bool _pressed = false;
-
-  /// Darkens a color to render the shaded bottom "edge" of the 3D button.
-  Color _edge(Color c) => Color.lerp(c, Colors.black, 0.28)!;
-
-  @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final status = widget.status;
     final connecting = status == MqttStatus.connecting;
     final connected = status == MqttStatus.connected;
 
@@ -120,69 +91,28 @@ class _ConnectionButtonState extends State<_ConnectionButton> {
 
     // While connecting we neither toggle nor animate the press.
     final enabled = !connecting;
-    final down = _pressed && enabled;
 
-    void setPressed(bool v) {
-      if (enabled && _pressed != v) setState(() => _pressed = v);
-    }
-
-    return GestureDetector(
-      onTapDown: enabled ? (_) => setPressed(true) : null,
-      onTapUp: enabled ? (_) => setPressed(false) : null,
-      onTapCancel: enabled ? () => setPressed(false) : null,
-      onTap: enabled
-          ? () async {
-              setPressed(false);
-              await widget.onPressed();
-            }
-          : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 90),
-        curve: Curves.easeOut,
-        // Push the face down into its shaded edge when pressed.
-        transform: Matrix4.translationValues(0, down ? _depth : 0, 0),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(AppRadius.button),
-          boxShadow: [
-            // Solid offset = the 3D bottom edge; shrinks when pressed.
-            BoxShadow(
-              color: _edge(color),
-              offset: Offset(0, down ? 1 : _depth),
-              blurRadius: 0,
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.lg,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (connecting)
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.4,
-                    valueColor: AlwaysStoppedAnimation(Colors.white),
-                  ),
-                )
-              else
-                Icon(icon, color: Colors.white, size: 26),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                connected ? '$label · ${l.disconnect}' : label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: enabled ? onPressed : null,
+        icon: connecting
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  valueColor: AlwaysStoppedAnimation(Colors.white),
                 ),
-              ),
-            ],
-          ),
+              )
+            : Icon(icon, size: 22),
+        label: Text(connected ? '$label · ${l.disconnect}' : label),
+        style: FilledButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: color,
+          disabledForegroundColor: Colors.white,
+          minimumSize: const Size(0, 52),
         ),
       ),
     );

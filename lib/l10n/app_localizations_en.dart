@@ -12,6 +12,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'TEKKIM Dash';
 
   @override
+  String get navData => 'Data';
+
+  @override
+  String get navBoards => 'Boards';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
   String get brokers => 'Brokers';
 
   @override
@@ -74,6 +83,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disconnected => 'Disconnected';
+
+  @override
+  String get notConnectedTap => 'Not connected — tap to connect';
+
+  @override
+  String get selectBrokerToConnect => 'Connect to a broker';
 
   @override
   String get connecting => 'Connecting…';
@@ -602,7 +617,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cellPrefix => 'Cell label prefix';
 
   @override
-  String get cellPrefixHelper => 'e.g. IN → IN1, IN2, IN3';
+  String get cellPrefixHelper => 'e.g. IN > Door, Water';
 
   @override
   String get fillColor => 'Alert (fill) color';

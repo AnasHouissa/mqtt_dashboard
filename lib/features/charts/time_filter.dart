@@ -61,18 +61,28 @@ Future<DateTime?> pickPeriod(
 }
 
 /// Segmented Jour / Mois / Année selector with a trailing calendar button that
-/// opens the period picker for the active bucket.
+/// opens the period picker for the active bucket. When [onPickTimeRange] is
+/// provided, a second (clock) button sits next to the calendar to pick a
+/// time-of-day window; it is highlighted while [timeRangeActive].
 class TimeFilter extends StatelessWidget {
   const TimeFilter({
     super.key,
     required this.value,
     required this.onChanged,
     required this.onPickPeriod,
+    this.onPickTimeRange,
+    this.timeRangeActive = false,
   });
 
   final TimeBucket value;
   final ValueChanged<TimeBucket> onChanged;
   final VoidCallback onPickPeriod;
+
+  /// Opens the time-of-day window picker. Null hides the clock button.
+  final VoidCallback? onPickTimeRange;
+
+  /// Whether a time-of-day window is currently applied (highlights the button).
+  final bool timeRangeActive;
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +122,17 @@ class TimeFilter extends StatelessWidget {
           icon: const Icon(Icons.event, size: 20),
           onPressed: onPickPeriod,
         ),
+        if (onPickTimeRange != null)
+          IconButton(
+            tooltip: l.timeRange,
+            visualDensity: VisualDensity.compact,
+            icon: Icon(
+              Icons.schedule,
+              size: 20,
+              color: timeRangeActive ? AppColors.primary : null,
+            ),
+            onPressed: onPickTimeRange,
+          ),
       ],
     );
   }

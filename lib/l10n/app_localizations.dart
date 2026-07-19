@@ -104,6 +104,24 @@ abstract class AppLocalizations {
   /// **'TEKKIM Dash'**
   String get appTitle;
 
+  /// No description provided for @navData.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get navData;
+
+  /// No description provided for @navBoards.
+  ///
+  /// In en, this message translates to:
+  /// **'Boards'**
+  String get navBoards;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
   /// No description provided for @brokers.
   ///
   /// In en, this message translates to:
@@ -223,6 +241,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Disconnected'**
   String get disconnected;
+
+  /// No description provided for @notConnectedTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected — tap to connect'**
+  String get notConnectedTap;
+
+  /// No description provided for @selectBrokerToConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to a broker'**
+  String get selectBrokerToConnect;
 
   /// No description provided for @connecting.
   ///
@@ -1205,7 +1235,7 @@ abstract class AppLocalizations {
   /// No description provided for @cellPrefixHelper.
   ///
   /// In en, this message translates to:
-  /// **'e.g. IN → IN1, IN2, IN3'**
+  /// **'e.g. IN > Door, Water'**
   String get cellPrefixHelper;
 
   /// No description provided for @fillColor.
