@@ -36,6 +36,10 @@ Future<bool> connectBrokerWithFeedback(
 /// Bottom sheet listing the configured brokers, each with a Connect button, so
 /// the user can go live without leaving the current screen. Dismisses itself
 /// once a connection succeeds.
+///
+/// When a broker is already live, its tile offers Disconnect instead and the
+/// other tiles switch the connection over (the MQTT client drops the old
+/// session before opening the new one).
 Future<void> showConnectBrokerSheet(BuildContext context) {
   return showModalBottomSheet(
     context: context,
@@ -51,7 +55,20 @@ class _ConnectBrokerSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final brokers = ref.watch(brokersProvider).valueOrNull ?? const <Broker>[];
-    final connecting = ref.watch(connectionProvider) == MqttStatus.connecting;
+    final status = ref.watch(connectionProvider);
+    final connecting = status == MqttStatus.connecting;
+    final activeId = status == MqttStatus.connected
+        ? ref.read(connectionProvider.notifier).activeBrokerId
+        : null;
+    String? activeName;
+    if (activeId != null) {
+      for (final b in brokers) {
+        if (b.id == activeId) {
+          activeName = b.name;
+          break;
+        }
+      }
+    }
 
     return SafeArea(
       child: Column(
@@ -67,7 +84,9 @@ class _ConnectBrokerSheet extends ConsumerWidget {
             child: Row(
               children: [
                 Text(
-                  l.selectBrokerToConnect,
+                  activeName != null
+                      ? l.connectedTo(activeName)
+                      : l.selectBrokerToConnect,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
@@ -87,21 +106,38 @@ class _ConnectBrokerSheet extends ConsumerWidget {
                 children: [
                   for (final b in brokers)
                     ListTile(
-                      leading: const CircleIcon(icon: Icons.dns, size: 36),
+                      leading: CircleIcon(
+                        icon: b.id == activeId ? Icons.wifi : Icons.dns,
+                        color: b.id == activeId
+                            ? AppColors.success
+                            : AppColors.primary,
+                        size: 36,
+                      ),
                       title: Text(b.name),
                       subtitle: Text('${b.address}:${b.port}'),
-                      trailing: FilledButton(
-                        onPressed: connecting
-                            ? null
-                            : () async {
-                                final ok = await connectBrokerWithFeedback(
-                                    context, ref, b);
-                                if (ok && context.mounted) {
-                                  Navigator.pop(context);
-                                }
+                      trailing: b.id == activeId
+                          ? OutlinedButton(
+                              onPressed: () async {
+                                await ref
+                                    .read(connectionProvider.notifier)
+                                    .disconnect();
+                                if (context.mounted) Navigator.pop(context);
                               },
-                        child: Text(l.connect),
-                      ),
+                              child: Text(l.disconnect),
+                            )
+                          : FilledButton(
+                              onPressed: connecting
+                                  ? null
+                                  : () async {
+                                      final ok =
+                                          await connectBrokerWithFeedback(
+                                              context, ref, b);
+                                      if (ok && context.mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                              child: Text(l.connect),
+                            ),
                     ),
                 ],
               ),

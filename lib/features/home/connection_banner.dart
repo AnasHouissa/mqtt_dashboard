@@ -170,10 +170,11 @@ class _ConnectionBanner extends ConsumerWidget {
             ? (AppColors.warning, Icons.wifi_find, l.connecting)
             : (AppColors.warning, Icons.wifi_off, l.notConnectedTap);
 
-    // Only the not-connected state is actionable (opens the connect sheet).
+    // Every state except `connecting` opens the connect sheet: when offline to
+    // go live, when connected to disconnect or switch broker.
     // This widget lives in `MaterialApp.builder`, above the Navigator, so use
     // the root navigator's own context to show the sheet.
-    final onTap = (connected || connecting)
+    final onTap = connecting
         ? null
         : () => showConnectBrokerSheet(rootNavigatorKey.currentContext!);
 

@@ -202,8 +202,6 @@ class MetricListView extends ConsumerWidget {
         content: TextField(
           controller: controller,
           autofocus: true,
-          keyboardType:
-              const TextInputType.numberWithOptions(decimal: true, signed: true),
           decoration: InputDecoration(labelText: l.valueToPublish),
         ),
         actions: [
