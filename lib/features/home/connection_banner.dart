@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
+import '../../services/alert_notifications.dart';
 import '../../services/background_service.dart';
 import '../../services/mqtt_service.dart';
 import '../../theme/app_theme.dart';
@@ -115,6 +116,33 @@ class _AppShellState extends ConsumerState<AppShell>
     ref.invalidate(aggregatedProvider);
     ref.invalidate(latestReadingProvider);
     ref.invalidate(alertDurationProvider);
+    // Alerts fired by another isolate land in the same tables, and are equally
+    // invisible to this isolate's `.watch()` streams until refreshed.
+    ref.invalidate(alertEventsProvider);
+    ref.invalidate(unacknowledgedAlertCountProvider);
+  }
+
+  /// Mirror the localized alert-notification strings into SharedPreferences so
+  /// the background service isolate — which has no BuildContext — can build
+  /// translated notifications. Runs on first build and on every locale change.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final l = AppLocalizations.of(context);
+    writeAlertNotificationStrings(
+      ref.read(sharedPreferencesProvider),
+      locale: Localizations.localeOf(context).toString(),
+      info: l.alertLevelInfo,
+      warning: l.alertLevelWarning,
+      critical: l.alertLevelCritical,
+      // The engine substitutes the placeholders; passing sentinel values keeps
+      // the ICU message the single source of the sentence's shape.
+      bodyTemplate:
+          l.alertValueVsThreshold('{metric}', '{value}', '{op}', '{threshold}'),
+      stateBodyTemplate: l.alertValueState('{metric}', '{state}'),
+      stateYes: l.stateYes,
+      stateNo: l.stateNo,
+    );
   }
 
   @override

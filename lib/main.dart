@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'features/home/root_scaffold.dart';
 import 'providers/providers.dart';
+import 'services/alert_notifications.dart';
 import 'services/background_service.dart';
 
 Future<void> main() async {
@@ -35,9 +37,24 @@ Future<void> main() async {
     }
   }
 
+  final container = ProviderContainer(
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+  );
+
+  // Alert notifications: one channel per severity, plus the tap handler that
+  // jumps to the alerts tab. Registered before the first alert can fire.
+  await registerAlertChannels();
+  await initAlertNotifications(
+    onTapAlert: () => container.read(navIndexProvider.notifier).state =
+        kAlertsNavIndex,
+  );
+  if (Platform.isAndroid) {
+    await requestNotificationPermission();
+  }
+
   runApp(
-    ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    UncontrolledProviderScope(
+      container: container,
       child: const MqttDashApp(),
     ),
   );

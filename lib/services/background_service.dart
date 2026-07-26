@@ -9,6 +9,8 @@ import '../data/db/database.dart';
 import '../data/repositories/broker_repository.dart';
 import '../data/repositories/metric_repository.dart';
 import '../data/repositories/reading_repository.dart';
+import 'alert_engine.dart';
+import 'alert_notifications.dart';
 import 'mqtt_service.dart';
 
 /// SharedPreferences keys used to hand state across the isolate boundary. The
@@ -92,6 +94,7 @@ class BackgroundMqttRunner {
   MqttService? _mqtt;
   StreamSubscription? _msgSub;
   final Map<String, int> _topicToMetric = {};
+  final Map<int, String> _metricNames = {};
 
   Future<void> start() async {
     final prefs = await SharedPreferences.getInstance();
@@ -131,10 +134,29 @@ class BackgroundMqttRunner {
 
     final mqtt = MqttService();
     _mqtt = mqtt;
-    _msgSub = mqtt.messages.listen((msg) {
+    // Alert channels are created by the UI isolate's main(), but this isolate
+    // has its own plugin instance — register them here too so notifications
+    // posted from the service always have a channel to land on.
+    await registerAlertChannels();
+
+    _msgSub = mqtt.messages.listen((msg) async {
       final metricId = _topicToMetric[msg.topic];
       if (metricId == null) return;
-      readingRepo.insert(metricId, msg.value, msg.timestamp, raw: msg.raw);
+      await readingRepo.insert(metricId, msg.value, msg.timestamp,
+          raw: msg.raw);
+      // Same evaluation the foreground path runs — the crossing state lives in
+      // the shared database, so handing the connection back and forth between
+      // isolates never double-fires an alert.
+      final fired = await evaluateAlerts(
+        db,
+        metricId: metricId,
+        metricName: _metricNames[metricId] ?? msg.topic,
+        value: msg.value,
+        timestamp: msg.timestamp,
+      );
+      for (final event in fired) {
+        await showAlertNotification(event);
+      }
     });
 
     final ok = await mqtt.connect(broker, clientIdSuffix: 'bg');
@@ -148,6 +170,9 @@ class BackgroundMqttRunner {
     _topicToMetric
       ..clear()
       ..addEntries(metrics.map((m) => MapEntry(m.topic, m.id)));
+    _metricNames
+      ..clear()
+      ..addEntries(metrics.map((m) => MapEntry(m.id, m.name)));
     for (final m in metrics) {
       mqtt.subscribe(m.topic);
     }
@@ -164,6 +189,7 @@ class BackgroundMqttRunner {
     await _msgSub?.cancel();
     _msgSub = null;
     _topicToMetric.clear();
+    _metricNames.clear();
     await _mqtt?.disconnect();
     _mqtt?.dispose();
     _mqtt = null;

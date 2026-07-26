@@ -5,6 +5,8 @@ import '../data/repositories/metric_repository.dart';
 import '../data/repositories/reading_repository.dart';
 import '../data/repositories/sms_message_repository.dart';
 import '../data/repositories/sms_source_repository.dart';
+import 'alert_engine.dart';
+import 'alert_notifications.dart';
 import 'sms_parser.dart';
 import 'tn_phone.dart';
 
@@ -46,6 +48,19 @@ Future<int> ingestSms(
       await readingRepo.insert(metric.id, value, timestamp, raw: line.rawValue);
       readingsCreated++;
       await _maybeSeedRange(metricRepo, metric, line);
+
+      // SMS metrics are alert sources too — evaluate this value against the
+      // metric's rules and notify for whatever fired.
+      final fired = await evaluateAlerts(
+        db,
+        metricId: metric.id,
+        metricName: metric.name,
+        value: value,
+        timestamp: timestamp,
+      );
+      for (final event in fired) {
+        await showAlertNotification(event);
+      }
     }
     status = readingsCreated > 0
         ? SmsParseStatus.matched
