@@ -8,6 +8,7 @@ import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/status_chip.dart';
 
 /// Per-source raw SMS log (debug inbox): every received message with its parse
 /// outcome, newest first.
@@ -69,7 +70,7 @@ class _LogCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              _StatusChip(color: color, label: label),
+              StatusChip(color: color, label: label),
               const Spacer(),
               if (message.readingsCreated > 0)
                 Text(
@@ -92,32 +93,6 @@ class _LogCard extends StatelessWidget {
             style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.color, required this.label});
-
-  final Color color;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
       ),
     );
   }
