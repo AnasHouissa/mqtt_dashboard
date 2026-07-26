@@ -49,6 +49,37 @@ enum SmsValueMode { number, activeCount, presence }
 /// Outcome of parsing/matching a received SMS, recorded on the raw-log row.
 enum SmsParseStatus { matched, unmatched, error }
 
+/// Severity of an alert condition. Drives the notification channel importance
+/// and the color used throughout the alerts UI. Stored as an int index, so
+/// values are only ever appended (never reordered).
+///
+/// A fourth `error` level sat between [warning] and [critical] in schema v12;
+/// removing it renumbered `critical` from 3 to 2, so the v13 migration folds
+/// both old indices onto the new [critical] (upgrading rather than downgrading
+/// the severity of existing rows).
+enum AlertLevel { info, warning, critical }
+
+/// How an incoming reading is compared against a condition's threshold.
+///
+/// Analog (a temperature, a level — the threshold is meaningful):
+/// - [above]: fires while `value >= threshold`.
+/// - [below]: fires while `value <= threshold`.
+/// - [equals]: fires while `value == threshold`.
+///
+/// Boolean (a door, a leak — the metric is on/off and the threshold is unused):
+/// - [isTrue]: fires while the metric is active, i.e. `value != 0`.
+/// - [isFalse]: fires while it is cleared, i.e. `value == 0`.
+///
+/// Non-zero (rather than exactly 1) is what "active" means everywhere else in
+/// the app — [ChartType.alertDuration] counts `value > 0` as in-alert, the
+/// sensor grid fills on the same rule, and [SmsValueMode.activeCount] reports
+/// *how many* inputs are active (`[IN1, IN2, IN4]` → 3). An `== 1` test would
+/// silently miss those.
+///
+/// Stored as an int index; `above` must stay first (index 0) — it is the
+/// column default — and values are only ever appended.
+enum AlertComparison { above, below, equals, isTrue, isFalse }
+
 @DataClassName('Broker')
 class Brokers extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -254,6 +285,78 @@ class SmsTopicPresets extends Table {
       ];
 }
 
+/// A user-defined alert on a metric: a name plus one or more severity-graded
+/// [AlertConditions]. Disabling the rule ([enabled] false) stops evaluation
+/// without deleting it or its history.
+@DataClassName('AlertRule')
+class AlertRules extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
+
+  /// The watched metric — any source kind (MQTT or SMS).
+  IntColumn get metricId =>
+      integer().references(Metrics, #id, onDelete: KeyAction.cascade)();
+  BoolColumn get enabled => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// One threshold of an [AlertRules] rule. The effective threshold is
+/// `setpoint + offsetValue` (the offset is the `+10 / -20 / …` adjustment
+/// entered in the form), compared using [comparison].
+@DataClassName('AlertCondition')
+class AlertConditions extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get ruleId =>
+      integer().references(AlertRules, #id, onDelete: KeyAction.cascade)();
+
+  /// Reference value ("valeur consigne").
+  RealColumn get setpoint => real()();
+
+  /// Signed adjustment added to [setpoint]. Named `offsetValue` rather than
+  /// `offset` because `offset` collides with drift's query-builder API.
+  RealColumn get offsetValue => real().withDefault(const Constant(0))();
+  IntColumn get comparison =>
+      intEnum<AlertComparison>().withDefault(const Constant(0))();
+  IntColumn get level => intEnum<AlertLevel>()();
+
+  /// Display order within the rule.
+  IntColumn get position => integer().withDefault(const Constant(0))();
+
+  /// Crossing state: true while the value is *outside* the alert zone, so the
+  /// next entry into the zone fires exactly once. Persisted (not held in
+  /// memory) because the foreground isolate and the background service isolate
+  /// both evaluate against this same database file and must not double-fire.
+  BoolColumn get armed => boolean().withDefault(const Constant(true))();
+}
+
+/// A fired alert, shown in the alerts inbox until the user acknowledges it.
+/// [ruleName] and [metricName] are denormalized snapshots so past events stay
+/// readable after the rule or metric is renamed.
+@DataClassName('AlertEvent')
+class AlertEvents extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get ruleId =>
+      integer().references(AlertRules, #id, onDelete: KeyAction.cascade)();
+  IntColumn get conditionId =>
+      integer().references(AlertConditions, #id, onDelete: KeyAction.cascade)();
+  IntColumn get metricId =>
+      integer().references(Metrics, #id, onDelete: KeyAction.cascade)();
+  TextColumn get ruleName => text()();
+  TextColumn get metricName => text()();
+  IntColumn get level => intEnum<AlertLevel>()();
+  IntColumn get comparison => intEnum<AlertComparison>()();
+
+  /// The effective threshold (`setpoint + offsetValue`) at trigger time.
+  RealColumn get threshold => real()();
+
+  /// The reading value that crossed it.
+  RealColumn get value => real()();
+  DateTimeColumn get triggeredAt => dateTime()();
+
+  /// Null while unacknowledged; set to the acknowledgement time on tap.
+  DateTimeColumn get acknowledgedAt => dateTime().nullable()();
+}
+
 /// A single aggregated point: a time bucket label and the average value in it.
 class AggregatedPoint {
   final DateTime time;
@@ -271,13 +374,16 @@ class AggregatedPoint {
   SmsSources,
   SmsMessages,
   SmsTopicPresets,
+  AlertRules,
+  AlertConditions,
+  AlertEvents,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ?? driftDatabase(name: 'mqtt_dash'));
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -294,6 +400,10 @@ class AppDatabase extends _$AppDatabase {
           await customStatement(
             'CREATE INDEX IF NOT EXISTS idx_sms_messages_source_time '
             'ON sms_messages (sms_source_id, received_at)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_alert_events_ack_time '
+            'ON alert_events (acknowledged_at, triggered_at)',
           );
         },
         onUpgrade: (m, from, to) async {
@@ -390,6 +500,30 @@ class AppDatabase extends _$AppDatabase {
             // Stat tile: show the day's min/max received value, toggled on.
             await m.addColumn(chartSeries, chartSeries.showDailyMin);
             await m.addColumn(chartSeries, chartSeries.showDailyMax);
+          }
+          if (from < 12) {
+            // Threshold alerts: rules, their severity conditions, and the
+            // fired-event inbox. All three tables are new, so nothing existing
+            // is touched.
+            await m.createTable(alertRules);
+            await m.createTable(alertConditions);
+            await m.createTable(alertEvents);
+            await customStatement(
+              'CREATE INDEX IF NOT EXISTS idx_alert_events_ack_time '
+              'ON alert_events (acknowledged_at, triggered_at)',
+            );
+          }
+          if (from < 13) {
+            // AlertLevel dropped its `error` member, renumbering critical from
+            // 3 to 2. Fold both old indices onto the new critical (2) in one
+            // statement — mapping them separately would collide, and rounding
+            // an old `error` *up* to critical is safer than silently
+            // downgrading it to a warning.
+            for (final table in ['alert_conditions', 'alert_events']) {
+              await customStatement(
+                'UPDATE $table SET level = 2 WHERE level IN (2, 3)',
+              );
+            }
           }
         },
       );

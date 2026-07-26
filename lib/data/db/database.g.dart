@@ -4383,6 +4383,1629 @@ class SmsTopicPresetsCompanion extends UpdateCompanion<SmsTopicPreset> {
   }
 }
 
+class $AlertRulesTable extends AlertRules
+    with TableInfo<$AlertRulesTable, AlertRule> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AlertRulesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _metricIdMeta = const VerificationMeta(
+    'metricId',
+  );
+  @override
+  late final GeneratedColumn<int> metricId = GeneratedColumn<int>(
+    'metric_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES metrics (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _enabledMeta = const VerificationMeta(
+    'enabled',
+  );
+  @override
+  late final GeneratedColumn<bool> enabled = GeneratedColumn<bool>(
+    'enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    metricId,
+    enabled,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'alert_rules';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AlertRule> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('metric_id')) {
+      context.handle(
+        _metricIdMeta,
+        metricId.isAcceptableOrUnknown(data['metric_id']!, _metricIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_metricIdMeta);
+    }
+    if (data.containsKey('enabled')) {
+      context.handle(
+        _enabledMeta,
+        enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AlertRule map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AlertRule(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      metricId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}metric_id'],
+      )!,
+      enabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}enabled'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AlertRulesTable createAlias(String alias) {
+    return $AlertRulesTable(attachedDatabase, alias);
+  }
+}
+
+class AlertRule extends DataClass implements Insertable<AlertRule> {
+  final int id;
+  final String name;
+
+  /// The watched metric — any source kind (MQTT or SMS).
+  final int metricId;
+  final bool enabled;
+  final DateTime createdAt;
+  const AlertRule({
+    required this.id,
+    required this.name,
+    required this.metricId,
+    required this.enabled,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['metric_id'] = Variable<int>(metricId);
+    map['enabled'] = Variable<bool>(enabled);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  AlertRulesCompanion toCompanion(bool nullToAbsent) {
+    return AlertRulesCompanion(
+      id: Value(id),
+      name: Value(name),
+      metricId: Value(metricId),
+      enabled: Value(enabled),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory AlertRule.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AlertRule(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      metricId: serializer.fromJson<int>(json['metricId']),
+      enabled: serializer.fromJson<bool>(json['enabled']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'metricId': serializer.toJson<int>(metricId),
+      'enabled': serializer.toJson<bool>(enabled),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  AlertRule copyWith({
+    int? id,
+    String? name,
+    int? metricId,
+    bool? enabled,
+    DateTime? createdAt,
+  }) => AlertRule(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    metricId: metricId ?? this.metricId,
+    enabled: enabled ?? this.enabled,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  AlertRule copyWithCompanion(AlertRulesCompanion data) {
+    return AlertRule(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      metricId: data.metricId.present ? data.metricId.value : this.metricId,
+      enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlertRule(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('metricId: $metricId, ')
+          ..write('enabled: $enabled, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, metricId, enabled, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AlertRule &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.metricId == this.metricId &&
+          other.enabled == this.enabled &&
+          other.createdAt == this.createdAt);
+}
+
+class AlertRulesCompanion extends UpdateCompanion<AlertRule> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int> metricId;
+  final Value<bool> enabled;
+  final Value<DateTime> createdAt;
+  const AlertRulesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.metricId = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  AlertRulesCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required int metricId,
+    this.enabled = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : name = Value(name),
+       metricId = Value(metricId);
+  static Insertable<AlertRule> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? metricId,
+    Expression<bool>? enabled,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (metricId != null) 'metric_id': metricId,
+      if (enabled != null) 'enabled': enabled,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  AlertRulesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<int>? metricId,
+    Value<bool>? enabled,
+    Value<DateTime>? createdAt,
+  }) {
+    return AlertRulesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      metricId: metricId ?? this.metricId,
+      enabled: enabled ?? this.enabled,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (metricId.present) {
+      map['metric_id'] = Variable<int>(metricId.value);
+    }
+    if (enabled.present) {
+      map['enabled'] = Variable<bool>(enabled.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlertRulesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('metricId: $metricId, ')
+          ..write('enabled: $enabled, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AlertConditionsTable extends AlertConditions
+    with TableInfo<$AlertConditionsTable, AlertCondition> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AlertConditionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _ruleIdMeta = const VerificationMeta('ruleId');
+  @override
+  late final GeneratedColumn<int> ruleId = GeneratedColumn<int>(
+    'rule_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES alert_rules (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _setpointMeta = const VerificationMeta(
+    'setpoint',
+  );
+  @override
+  late final GeneratedColumn<double> setpoint = GeneratedColumn<double>(
+    'setpoint',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _offsetValueMeta = const VerificationMeta(
+    'offsetValue',
+  );
+  @override
+  late final GeneratedColumn<double> offsetValue = GeneratedColumn<double>(
+    'offset_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<AlertComparison, int> comparison =
+      GeneratedColumn<int>(
+        'comparison',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<AlertComparison>(
+        $AlertConditionsTable.$convertercomparison,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<AlertLevel, int> level =
+      GeneratedColumn<int>(
+        'level',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<AlertLevel>($AlertConditionsTable.$converterlevel);
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _armedMeta = const VerificationMeta('armed');
+  @override
+  late final GeneratedColumn<bool> armed = GeneratedColumn<bool>(
+    'armed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("armed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ruleId,
+    setpoint,
+    offsetValue,
+    comparison,
+    level,
+    position,
+    armed,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'alert_conditions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AlertCondition> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('rule_id')) {
+      context.handle(
+        _ruleIdMeta,
+        ruleId.isAcceptableOrUnknown(data['rule_id']!, _ruleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ruleIdMeta);
+    }
+    if (data.containsKey('setpoint')) {
+      context.handle(
+        _setpointMeta,
+        setpoint.isAcceptableOrUnknown(data['setpoint']!, _setpointMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_setpointMeta);
+    }
+    if (data.containsKey('offset_value')) {
+      context.handle(
+        _offsetValueMeta,
+        offsetValue.isAcceptableOrUnknown(
+          data['offset_value']!,
+          _offsetValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    }
+    if (data.containsKey('armed')) {
+      context.handle(
+        _armedMeta,
+        armed.isAcceptableOrUnknown(data['armed']!, _armedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AlertCondition map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AlertCondition(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      ruleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rule_id'],
+      )!,
+      setpoint: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}setpoint'],
+      )!,
+      offsetValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}offset_value'],
+      )!,
+      comparison: $AlertConditionsTable.$convertercomparison.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}comparison'],
+        )!,
+      ),
+      level: $AlertConditionsTable.$converterlevel.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}level'],
+        )!,
+      ),
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+      armed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}armed'],
+      )!,
+    );
+  }
+
+  @override
+  $AlertConditionsTable createAlias(String alias) {
+    return $AlertConditionsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<AlertComparison, int, int> $convertercomparison =
+      const EnumIndexConverter<AlertComparison>(AlertComparison.values);
+  static JsonTypeConverter2<AlertLevel, int, int> $converterlevel =
+      const EnumIndexConverter<AlertLevel>(AlertLevel.values);
+}
+
+class AlertCondition extends DataClass implements Insertable<AlertCondition> {
+  final int id;
+  final int ruleId;
+
+  /// Reference value ("valeur consigne").
+  final double setpoint;
+
+  /// Signed adjustment added to [setpoint]. Named `offsetValue` rather than
+  /// `offset` because `offset` collides with drift's query-builder API.
+  final double offsetValue;
+  final AlertComparison comparison;
+  final AlertLevel level;
+
+  /// Display order within the rule.
+  final int position;
+
+  /// Crossing state: true while the value is *outside* the alert zone, so the
+  /// next entry into the zone fires exactly once. Persisted (not held in
+  /// memory) because the foreground isolate and the background service isolate
+  /// both evaluate against this same database file and must not double-fire.
+  final bool armed;
+  const AlertCondition({
+    required this.id,
+    required this.ruleId,
+    required this.setpoint,
+    required this.offsetValue,
+    required this.comparison,
+    required this.level,
+    required this.position,
+    required this.armed,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['rule_id'] = Variable<int>(ruleId);
+    map['setpoint'] = Variable<double>(setpoint);
+    map['offset_value'] = Variable<double>(offsetValue);
+    {
+      map['comparison'] = Variable<int>(
+        $AlertConditionsTable.$convertercomparison.toSql(comparison),
+      );
+    }
+    {
+      map['level'] = Variable<int>(
+        $AlertConditionsTable.$converterlevel.toSql(level),
+      );
+    }
+    map['position'] = Variable<int>(position);
+    map['armed'] = Variable<bool>(armed);
+    return map;
+  }
+
+  AlertConditionsCompanion toCompanion(bool nullToAbsent) {
+    return AlertConditionsCompanion(
+      id: Value(id),
+      ruleId: Value(ruleId),
+      setpoint: Value(setpoint),
+      offsetValue: Value(offsetValue),
+      comparison: Value(comparison),
+      level: Value(level),
+      position: Value(position),
+      armed: Value(armed),
+    );
+  }
+
+  factory AlertCondition.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AlertCondition(
+      id: serializer.fromJson<int>(json['id']),
+      ruleId: serializer.fromJson<int>(json['ruleId']),
+      setpoint: serializer.fromJson<double>(json['setpoint']),
+      offsetValue: serializer.fromJson<double>(json['offsetValue']),
+      comparison: $AlertConditionsTable.$convertercomparison.fromJson(
+        serializer.fromJson<int>(json['comparison']),
+      ),
+      level: $AlertConditionsTable.$converterlevel.fromJson(
+        serializer.fromJson<int>(json['level']),
+      ),
+      position: serializer.fromJson<int>(json['position']),
+      armed: serializer.fromJson<bool>(json['armed']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'ruleId': serializer.toJson<int>(ruleId),
+      'setpoint': serializer.toJson<double>(setpoint),
+      'offsetValue': serializer.toJson<double>(offsetValue),
+      'comparison': serializer.toJson<int>(
+        $AlertConditionsTable.$convertercomparison.toJson(comparison),
+      ),
+      'level': serializer.toJson<int>(
+        $AlertConditionsTable.$converterlevel.toJson(level),
+      ),
+      'position': serializer.toJson<int>(position),
+      'armed': serializer.toJson<bool>(armed),
+    };
+  }
+
+  AlertCondition copyWith({
+    int? id,
+    int? ruleId,
+    double? setpoint,
+    double? offsetValue,
+    AlertComparison? comparison,
+    AlertLevel? level,
+    int? position,
+    bool? armed,
+  }) => AlertCondition(
+    id: id ?? this.id,
+    ruleId: ruleId ?? this.ruleId,
+    setpoint: setpoint ?? this.setpoint,
+    offsetValue: offsetValue ?? this.offsetValue,
+    comparison: comparison ?? this.comparison,
+    level: level ?? this.level,
+    position: position ?? this.position,
+    armed: armed ?? this.armed,
+  );
+  AlertCondition copyWithCompanion(AlertConditionsCompanion data) {
+    return AlertCondition(
+      id: data.id.present ? data.id.value : this.id,
+      ruleId: data.ruleId.present ? data.ruleId.value : this.ruleId,
+      setpoint: data.setpoint.present ? data.setpoint.value : this.setpoint,
+      offsetValue: data.offsetValue.present
+          ? data.offsetValue.value
+          : this.offsetValue,
+      comparison: data.comparison.present
+          ? data.comparison.value
+          : this.comparison,
+      level: data.level.present ? data.level.value : this.level,
+      position: data.position.present ? data.position.value : this.position,
+      armed: data.armed.present ? data.armed.value : this.armed,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlertCondition(')
+          ..write('id: $id, ')
+          ..write('ruleId: $ruleId, ')
+          ..write('setpoint: $setpoint, ')
+          ..write('offsetValue: $offsetValue, ')
+          ..write('comparison: $comparison, ')
+          ..write('level: $level, ')
+          ..write('position: $position, ')
+          ..write('armed: $armed')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ruleId,
+    setpoint,
+    offsetValue,
+    comparison,
+    level,
+    position,
+    armed,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AlertCondition &&
+          other.id == this.id &&
+          other.ruleId == this.ruleId &&
+          other.setpoint == this.setpoint &&
+          other.offsetValue == this.offsetValue &&
+          other.comparison == this.comparison &&
+          other.level == this.level &&
+          other.position == this.position &&
+          other.armed == this.armed);
+}
+
+class AlertConditionsCompanion extends UpdateCompanion<AlertCondition> {
+  final Value<int> id;
+  final Value<int> ruleId;
+  final Value<double> setpoint;
+  final Value<double> offsetValue;
+  final Value<AlertComparison> comparison;
+  final Value<AlertLevel> level;
+  final Value<int> position;
+  final Value<bool> armed;
+  const AlertConditionsCompanion({
+    this.id = const Value.absent(),
+    this.ruleId = const Value.absent(),
+    this.setpoint = const Value.absent(),
+    this.offsetValue = const Value.absent(),
+    this.comparison = const Value.absent(),
+    this.level = const Value.absent(),
+    this.position = const Value.absent(),
+    this.armed = const Value.absent(),
+  });
+  AlertConditionsCompanion.insert({
+    this.id = const Value.absent(),
+    required int ruleId,
+    required double setpoint,
+    this.offsetValue = const Value.absent(),
+    this.comparison = const Value.absent(),
+    required AlertLevel level,
+    this.position = const Value.absent(),
+    this.armed = const Value.absent(),
+  }) : ruleId = Value(ruleId),
+       setpoint = Value(setpoint),
+       level = Value(level);
+  static Insertable<AlertCondition> custom({
+    Expression<int>? id,
+    Expression<int>? ruleId,
+    Expression<double>? setpoint,
+    Expression<double>? offsetValue,
+    Expression<int>? comparison,
+    Expression<int>? level,
+    Expression<int>? position,
+    Expression<bool>? armed,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ruleId != null) 'rule_id': ruleId,
+      if (setpoint != null) 'setpoint': setpoint,
+      if (offsetValue != null) 'offset_value': offsetValue,
+      if (comparison != null) 'comparison': comparison,
+      if (level != null) 'level': level,
+      if (position != null) 'position': position,
+      if (armed != null) 'armed': armed,
+    });
+  }
+
+  AlertConditionsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? ruleId,
+    Value<double>? setpoint,
+    Value<double>? offsetValue,
+    Value<AlertComparison>? comparison,
+    Value<AlertLevel>? level,
+    Value<int>? position,
+    Value<bool>? armed,
+  }) {
+    return AlertConditionsCompanion(
+      id: id ?? this.id,
+      ruleId: ruleId ?? this.ruleId,
+      setpoint: setpoint ?? this.setpoint,
+      offsetValue: offsetValue ?? this.offsetValue,
+      comparison: comparison ?? this.comparison,
+      level: level ?? this.level,
+      position: position ?? this.position,
+      armed: armed ?? this.armed,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (ruleId.present) {
+      map['rule_id'] = Variable<int>(ruleId.value);
+    }
+    if (setpoint.present) {
+      map['setpoint'] = Variable<double>(setpoint.value);
+    }
+    if (offsetValue.present) {
+      map['offset_value'] = Variable<double>(offsetValue.value);
+    }
+    if (comparison.present) {
+      map['comparison'] = Variable<int>(
+        $AlertConditionsTable.$convertercomparison.toSql(comparison.value),
+      );
+    }
+    if (level.present) {
+      map['level'] = Variable<int>(
+        $AlertConditionsTable.$converterlevel.toSql(level.value),
+      );
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (armed.present) {
+      map['armed'] = Variable<bool>(armed.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlertConditionsCompanion(')
+          ..write('id: $id, ')
+          ..write('ruleId: $ruleId, ')
+          ..write('setpoint: $setpoint, ')
+          ..write('offsetValue: $offsetValue, ')
+          ..write('comparison: $comparison, ')
+          ..write('level: $level, ')
+          ..write('position: $position, ')
+          ..write('armed: $armed')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AlertEventsTable extends AlertEvents
+    with TableInfo<$AlertEventsTable, AlertEvent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AlertEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _ruleIdMeta = const VerificationMeta('ruleId');
+  @override
+  late final GeneratedColumn<int> ruleId = GeneratedColumn<int>(
+    'rule_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES alert_rules (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _conditionIdMeta = const VerificationMeta(
+    'conditionId',
+  );
+  @override
+  late final GeneratedColumn<int> conditionId = GeneratedColumn<int>(
+    'condition_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES alert_conditions (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _metricIdMeta = const VerificationMeta(
+    'metricId',
+  );
+  @override
+  late final GeneratedColumn<int> metricId = GeneratedColumn<int>(
+    'metric_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES metrics (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _ruleNameMeta = const VerificationMeta(
+    'ruleName',
+  );
+  @override
+  late final GeneratedColumn<String> ruleName = GeneratedColumn<String>(
+    'rule_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _metricNameMeta = const VerificationMeta(
+    'metricName',
+  );
+  @override
+  late final GeneratedColumn<String> metricName = GeneratedColumn<String>(
+    'metric_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<AlertLevel, int> level =
+      GeneratedColumn<int>(
+        'level',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<AlertLevel>($AlertEventsTable.$converterlevel);
+  @override
+  late final GeneratedColumnWithTypeConverter<AlertComparison, int> comparison =
+      GeneratedColumn<int>(
+        'comparison',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<AlertComparison>($AlertEventsTable.$convertercomparison);
+  static const VerificationMeta _thresholdMeta = const VerificationMeta(
+    'threshold',
+  );
+  @override
+  late final GeneratedColumn<double> threshold = GeneratedColumn<double>(
+    'threshold',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<double> value = GeneratedColumn<double>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _triggeredAtMeta = const VerificationMeta(
+    'triggeredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> triggeredAt = GeneratedColumn<DateTime>(
+    'triggered_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _acknowledgedAtMeta = const VerificationMeta(
+    'acknowledgedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> acknowledgedAt =
+      GeneratedColumn<DateTime>(
+        'acknowledged_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ruleId,
+    conditionId,
+    metricId,
+    ruleName,
+    metricName,
+    level,
+    comparison,
+    threshold,
+    value,
+    triggeredAt,
+    acknowledgedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'alert_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AlertEvent> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('rule_id')) {
+      context.handle(
+        _ruleIdMeta,
+        ruleId.isAcceptableOrUnknown(data['rule_id']!, _ruleIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ruleIdMeta);
+    }
+    if (data.containsKey('condition_id')) {
+      context.handle(
+        _conditionIdMeta,
+        conditionId.isAcceptableOrUnknown(
+          data['condition_id']!,
+          _conditionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_conditionIdMeta);
+    }
+    if (data.containsKey('metric_id')) {
+      context.handle(
+        _metricIdMeta,
+        metricId.isAcceptableOrUnknown(data['metric_id']!, _metricIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_metricIdMeta);
+    }
+    if (data.containsKey('rule_name')) {
+      context.handle(
+        _ruleNameMeta,
+        ruleName.isAcceptableOrUnknown(data['rule_name']!, _ruleNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ruleNameMeta);
+    }
+    if (data.containsKey('metric_name')) {
+      context.handle(
+        _metricNameMeta,
+        metricName.isAcceptableOrUnknown(data['metric_name']!, _metricNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_metricNameMeta);
+    }
+    if (data.containsKey('threshold')) {
+      context.handle(
+        _thresholdMeta,
+        threshold.isAcceptableOrUnknown(data['threshold']!, _thresholdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_thresholdMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (data.containsKey('triggered_at')) {
+      context.handle(
+        _triggeredAtMeta,
+        triggeredAt.isAcceptableOrUnknown(
+          data['triggered_at']!,
+          _triggeredAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_triggeredAtMeta);
+    }
+    if (data.containsKey('acknowledged_at')) {
+      context.handle(
+        _acknowledgedAtMeta,
+        acknowledgedAt.isAcceptableOrUnknown(
+          data['acknowledged_at']!,
+          _acknowledgedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AlertEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AlertEvent(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      ruleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rule_id'],
+      )!,
+      conditionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}condition_id'],
+      )!,
+      metricId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}metric_id'],
+      )!,
+      ruleName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rule_name'],
+      )!,
+      metricName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metric_name'],
+      )!,
+      level: $AlertEventsTable.$converterlevel.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}level'],
+        )!,
+      ),
+      comparison: $AlertEventsTable.$convertercomparison.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}comparison'],
+        )!,
+      ),
+      threshold: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}threshold'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}value'],
+      )!,
+      triggeredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}triggered_at'],
+      )!,
+      acknowledgedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}acknowledged_at'],
+      ),
+    );
+  }
+
+  @override
+  $AlertEventsTable createAlias(String alias) {
+    return $AlertEventsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<AlertLevel, int, int> $converterlevel =
+      const EnumIndexConverter<AlertLevel>(AlertLevel.values);
+  static JsonTypeConverter2<AlertComparison, int, int> $convertercomparison =
+      const EnumIndexConverter<AlertComparison>(AlertComparison.values);
+}
+
+class AlertEvent extends DataClass implements Insertable<AlertEvent> {
+  final int id;
+  final int ruleId;
+  final int conditionId;
+  final int metricId;
+  final String ruleName;
+  final String metricName;
+  final AlertLevel level;
+  final AlertComparison comparison;
+
+  /// The effective threshold (`setpoint + offsetValue`) at trigger time.
+  final double threshold;
+
+  /// The reading value that crossed it.
+  final double value;
+  final DateTime triggeredAt;
+
+  /// Null while unacknowledged; set to the acknowledgement time on tap.
+  final DateTime? acknowledgedAt;
+  const AlertEvent({
+    required this.id,
+    required this.ruleId,
+    required this.conditionId,
+    required this.metricId,
+    required this.ruleName,
+    required this.metricName,
+    required this.level,
+    required this.comparison,
+    required this.threshold,
+    required this.value,
+    required this.triggeredAt,
+    this.acknowledgedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['rule_id'] = Variable<int>(ruleId);
+    map['condition_id'] = Variable<int>(conditionId);
+    map['metric_id'] = Variable<int>(metricId);
+    map['rule_name'] = Variable<String>(ruleName);
+    map['metric_name'] = Variable<String>(metricName);
+    {
+      map['level'] = Variable<int>(
+        $AlertEventsTable.$converterlevel.toSql(level),
+      );
+    }
+    {
+      map['comparison'] = Variable<int>(
+        $AlertEventsTable.$convertercomparison.toSql(comparison),
+      );
+    }
+    map['threshold'] = Variable<double>(threshold);
+    map['value'] = Variable<double>(value);
+    map['triggered_at'] = Variable<DateTime>(triggeredAt);
+    if (!nullToAbsent || acknowledgedAt != null) {
+      map['acknowledged_at'] = Variable<DateTime>(acknowledgedAt);
+    }
+    return map;
+  }
+
+  AlertEventsCompanion toCompanion(bool nullToAbsent) {
+    return AlertEventsCompanion(
+      id: Value(id),
+      ruleId: Value(ruleId),
+      conditionId: Value(conditionId),
+      metricId: Value(metricId),
+      ruleName: Value(ruleName),
+      metricName: Value(metricName),
+      level: Value(level),
+      comparison: Value(comparison),
+      threshold: Value(threshold),
+      value: Value(value),
+      triggeredAt: Value(triggeredAt),
+      acknowledgedAt: acknowledgedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(acknowledgedAt),
+    );
+  }
+
+  factory AlertEvent.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AlertEvent(
+      id: serializer.fromJson<int>(json['id']),
+      ruleId: serializer.fromJson<int>(json['ruleId']),
+      conditionId: serializer.fromJson<int>(json['conditionId']),
+      metricId: serializer.fromJson<int>(json['metricId']),
+      ruleName: serializer.fromJson<String>(json['ruleName']),
+      metricName: serializer.fromJson<String>(json['metricName']),
+      level: $AlertEventsTable.$converterlevel.fromJson(
+        serializer.fromJson<int>(json['level']),
+      ),
+      comparison: $AlertEventsTable.$convertercomparison.fromJson(
+        serializer.fromJson<int>(json['comparison']),
+      ),
+      threshold: serializer.fromJson<double>(json['threshold']),
+      value: serializer.fromJson<double>(json['value']),
+      triggeredAt: serializer.fromJson<DateTime>(json['triggeredAt']),
+      acknowledgedAt: serializer.fromJson<DateTime?>(json['acknowledgedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'ruleId': serializer.toJson<int>(ruleId),
+      'conditionId': serializer.toJson<int>(conditionId),
+      'metricId': serializer.toJson<int>(metricId),
+      'ruleName': serializer.toJson<String>(ruleName),
+      'metricName': serializer.toJson<String>(metricName),
+      'level': serializer.toJson<int>(
+        $AlertEventsTable.$converterlevel.toJson(level),
+      ),
+      'comparison': serializer.toJson<int>(
+        $AlertEventsTable.$convertercomparison.toJson(comparison),
+      ),
+      'threshold': serializer.toJson<double>(threshold),
+      'value': serializer.toJson<double>(value),
+      'triggeredAt': serializer.toJson<DateTime>(triggeredAt),
+      'acknowledgedAt': serializer.toJson<DateTime?>(acknowledgedAt),
+    };
+  }
+
+  AlertEvent copyWith({
+    int? id,
+    int? ruleId,
+    int? conditionId,
+    int? metricId,
+    String? ruleName,
+    String? metricName,
+    AlertLevel? level,
+    AlertComparison? comparison,
+    double? threshold,
+    double? value,
+    DateTime? triggeredAt,
+    Value<DateTime?> acknowledgedAt = const Value.absent(),
+  }) => AlertEvent(
+    id: id ?? this.id,
+    ruleId: ruleId ?? this.ruleId,
+    conditionId: conditionId ?? this.conditionId,
+    metricId: metricId ?? this.metricId,
+    ruleName: ruleName ?? this.ruleName,
+    metricName: metricName ?? this.metricName,
+    level: level ?? this.level,
+    comparison: comparison ?? this.comparison,
+    threshold: threshold ?? this.threshold,
+    value: value ?? this.value,
+    triggeredAt: triggeredAt ?? this.triggeredAt,
+    acknowledgedAt: acknowledgedAt.present
+        ? acknowledgedAt.value
+        : this.acknowledgedAt,
+  );
+  AlertEvent copyWithCompanion(AlertEventsCompanion data) {
+    return AlertEvent(
+      id: data.id.present ? data.id.value : this.id,
+      ruleId: data.ruleId.present ? data.ruleId.value : this.ruleId,
+      conditionId: data.conditionId.present
+          ? data.conditionId.value
+          : this.conditionId,
+      metricId: data.metricId.present ? data.metricId.value : this.metricId,
+      ruleName: data.ruleName.present ? data.ruleName.value : this.ruleName,
+      metricName: data.metricName.present
+          ? data.metricName.value
+          : this.metricName,
+      level: data.level.present ? data.level.value : this.level,
+      comparison: data.comparison.present
+          ? data.comparison.value
+          : this.comparison,
+      threshold: data.threshold.present ? data.threshold.value : this.threshold,
+      value: data.value.present ? data.value.value : this.value,
+      triggeredAt: data.triggeredAt.present
+          ? data.triggeredAt.value
+          : this.triggeredAt,
+      acknowledgedAt: data.acknowledgedAt.present
+          ? data.acknowledgedAt.value
+          : this.acknowledgedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlertEvent(')
+          ..write('id: $id, ')
+          ..write('ruleId: $ruleId, ')
+          ..write('conditionId: $conditionId, ')
+          ..write('metricId: $metricId, ')
+          ..write('ruleName: $ruleName, ')
+          ..write('metricName: $metricName, ')
+          ..write('level: $level, ')
+          ..write('comparison: $comparison, ')
+          ..write('threshold: $threshold, ')
+          ..write('value: $value, ')
+          ..write('triggeredAt: $triggeredAt, ')
+          ..write('acknowledgedAt: $acknowledgedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ruleId,
+    conditionId,
+    metricId,
+    ruleName,
+    metricName,
+    level,
+    comparison,
+    threshold,
+    value,
+    triggeredAt,
+    acknowledgedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AlertEvent &&
+          other.id == this.id &&
+          other.ruleId == this.ruleId &&
+          other.conditionId == this.conditionId &&
+          other.metricId == this.metricId &&
+          other.ruleName == this.ruleName &&
+          other.metricName == this.metricName &&
+          other.level == this.level &&
+          other.comparison == this.comparison &&
+          other.threshold == this.threshold &&
+          other.value == this.value &&
+          other.triggeredAt == this.triggeredAt &&
+          other.acknowledgedAt == this.acknowledgedAt);
+}
+
+class AlertEventsCompanion extends UpdateCompanion<AlertEvent> {
+  final Value<int> id;
+  final Value<int> ruleId;
+  final Value<int> conditionId;
+  final Value<int> metricId;
+  final Value<String> ruleName;
+  final Value<String> metricName;
+  final Value<AlertLevel> level;
+  final Value<AlertComparison> comparison;
+  final Value<double> threshold;
+  final Value<double> value;
+  final Value<DateTime> triggeredAt;
+  final Value<DateTime?> acknowledgedAt;
+  const AlertEventsCompanion({
+    this.id = const Value.absent(),
+    this.ruleId = const Value.absent(),
+    this.conditionId = const Value.absent(),
+    this.metricId = const Value.absent(),
+    this.ruleName = const Value.absent(),
+    this.metricName = const Value.absent(),
+    this.level = const Value.absent(),
+    this.comparison = const Value.absent(),
+    this.threshold = const Value.absent(),
+    this.value = const Value.absent(),
+    this.triggeredAt = const Value.absent(),
+    this.acknowledgedAt = const Value.absent(),
+  });
+  AlertEventsCompanion.insert({
+    this.id = const Value.absent(),
+    required int ruleId,
+    required int conditionId,
+    required int metricId,
+    required String ruleName,
+    required String metricName,
+    required AlertLevel level,
+    required AlertComparison comparison,
+    required double threshold,
+    required double value,
+    required DateTime triggeredAt,
+    this.acknowledgedAt = const Value.absent(),
+  }) : ruleId = Value(ruleId),
+       conditionId = Value(conditionId),
+       metricId = Value(metricId),
+       ruleName = Value(ruleName),
+       metricName = Value(metricName),
+       level = Value(level),
+       comparison = Value(comparison),
+       threshold = Value(threshold),
+       value = Value(value),
+       triggeredAt = Value(triggeredAt);
+  static Insertable<AlertEvent> custom({
+    Expression<int>? id,
+    Expression<int>? ruleId,
+    Expression<int>? conditionId,
+    Expression<int>? metricId,
+    Expression<String>? ruleName,
+    Expression<String>? metricName,
+    Expression<int>? level,
+    Expression<int>? comparison,
+    Expression<double>? threshold,
+    Expression<double>? value,
+    Expression<DateTime>? triggeredAt,
+    Expression<DateTime>? acknowledgedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ruleId != null) 'rule_id': ruleId,
+      if (conditionId != null) 'condition_id': conditionId,
+      if (metricId != null) 'metric_id': metricId,
+      if (ruleName != null) 'rule_name': ruleName,
+      if (metricName != null) 'metric_name': metricName,
+      if (level != null) 'level': level,
+      if (comparison != null) 'comparison': comparison,
+      if (threshold != null) 'threshold': threshold,
+      if (value != null) 'value': value,
+      if (triggeredAt != null) 'triggered_at': triggeredAt,
+      if (acknowledgedAt != null) 'acknowledged_at': acknowledgedAt,
+    });
+  }
+
+  AlertEventsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? ruleId,
+    Value<int>? conditionId,
+    Value<int>? metricId,
+    Value<String>? ruleName,
+    Value<String>? metricName,
+    Value<AlertLevel>? level,
+    Value<AlertComparison>? comparison,
+    Value<double>? threshold,
+    Value<double>? value,
+    Value<DateTime>? triggeredAt,
+    Value<DateTime?>? acknowledgedAt,
+  }) {
+    return AlertEventsCompanion(
+      id: id ?? this.id,
+      ruleId: ruleId ?? this.ruleId,
+      conditionId: conditionId ?? this.conditionId,
+      metricId: metricId ?? this.metricId,
+      ruleName: ruleName ?? this.ruleName,
+      metricName: metricName ?? this.metricName,
+      level: level ?? this.level,
+      comparison: comparison ?? this.comparison,
+      threshold: threshold ?? this.threshold,
+      value: value ?? this.value,
+      triggeredAt: triggeredAt ?? this.triggeredAt,
+      acknowledgedAt: acknowledgedAt ?? this.acknowledgedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (ruleId.present) {
+      map['rule_id'] = Variable<int>(ruleId.value);
+    }
+    if (conditionId.present) {
+      map['condition_id'] = Variable<int>(conditionId.value);
+    }
+    if (metricId.present) {
+      map['metric_id'] = Variable<int>(metricId.value);
+    }
+    if (ruleName.present) {
+      map['rule_name'] = Variable<String>(ruleName.value);
+    }
+    if (metricName.present) {
+      map['metric_name'] = Variable<String>(metricName.value);
+    }
+    if (level.present) {
+      map['level'] = Variable<int>(
+        $AlertEventsTable.$converterlevel.toSql(level.value),
+      );
+    }
+    if (comparison.present) {
+      map['comparison'] = Variable<int>(
+        $AlertEventsTable.$convertercomparison.toSql(comparison.value),
+      );
+    }
+    if (threshold.present) {
+      map['threshold'] = Variable<double>(threshold.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<double>(value.value);
+    }
+    if (triggeredAt.present) {
+      map['triggered_at'] = Variable<DateTime>(triggeredAt.value);
+    }
+    if (acknowledgedAt.present) {
+      map['acknowledged_at'] = Variable<DateTime>(acknowledgedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AlertEventsCompanion(')
+          ..write('id: $id, ')
+          ..write('ruleId: $ruleId, ')
+          ..write('conditionId: $conditionId, ')
+          ..write('metricId: $metricId, ')
+          ..write('ruleName: $ruleName, ')
+          ..write('metricName: $metricName, ')
+          ..write('level: $level, ')
+          ..write('comparison: $comparison, ')
+          ..write('threshold: $threshold, ')
+          ..write('value: $value, ')
+          ..write('triggeredAt: $triggeredAt, ')
+          ..write('acknowledgedAt: $acknowledgedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4397,6 +6020,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SmsTopicPresetsTable smsTopicPresets = $SmsTopicPresetsTable(
     this,
   );
+  late final $AlertRulesTable alertRules = $AlertRulesTable(this);
+  late final $AlertConditionsTable alertConditions = $AlertConditionsTable(
+    this,
+  );
+  late final $AlertEventsTable alertEvents = $AlertEventsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4411,6 +6039,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     readings,
     smsMessages,
     smsTopicPresets,
+    alertRules,
+    alertConditions,
+    alertEvents,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -4462,6 +6093,41 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('sms_messages', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'metrics',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('alert_rules', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'alert_rules',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('alert_conditions', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'alert_rules',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('alert_events', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'alert_conditions',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('alert_events', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'metrics',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('alert_events', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -5371,6 +7037,42 @@ final class $$MetricsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$AlertRulesTable, List<AlertRule>>
+  _alertRulesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.alertRules,
+    aliasName: $_aliasNameGenerator(db.metrics.id, db.alertRules.metricId),
+  );
+
+  $$AlertRulesTableProcessedTableManager get alertRulesRefs {
+    final manager = $$AlertRulesTableTableManager(
+      $_db,
+      $_db.alertRules,
+    ).filter((f) => f.metricId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_alertRulesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$AlertEventsTable, List<AlertEvent>>
+  _alertEventsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.alertEvents,
+    aliasName: $_aliasNameGenerator(db.metrics.id, db.alertEvents.metricId),
+  );
+
+  $$AlertEventsTableProcessedTableManager get alertEventsRefs {
+    final manager = $$AlertEventsTableTableManager(
+      $_db,
+      $_db.alertEvents,
+    ).filter((f) => f.metricId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_alertEventsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$MetricsTableFilterComposer
@@ -5516,6 +7218,56 @@ class $$MetricsTableFilterComposer
           }) => $$ReadingsTableFilterComposer(
             $db: $db,
             $table: $db.readings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> alertRulesRefs(
+    Expression<bool> Function($$AlertRulesTableFilterComposer f) f,
+  ) {
+    final $$AlertRulesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.alertRules,
+      getReferencedColumn: (t) => t.metricId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertRulesTableFilterComposer(
+            $db: $db,
+            $table: $db.alertRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> alertEventsRefs(
+    Expression<bool> Function($$AlertEventsTableFilterComposer f) f,
+  ) {
+    final $$AlertEventsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.alertEvents,
+      getReferencedColumn: (t) => t.metricId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertEventsTableFilterComposer(
+            $db: $db,
+            $table: $db.alertEvents,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5768,6 +7520,56 @@ class $$MetricsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> alertRulesRefs<T extends Object>(
+    Expression<T> Function($$AlertRulesTableAnnotationComposer a) f,
+  ) {
+    final $$AlertRulesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.alertRules,
+      getReferencedColumn: (t) => t.metricId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertRulesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.alertRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> alertEventsRefs<T extends Object>(
+    Expression<T> Function($$AlertEventsTableAnnotationComposer a) f,
+  ) {
+    final $$AlertEventsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.alertEvents,
+      getReferencedColumn: (t) => t.metricId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertEventsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.alertEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$MetricsTableTableManager
@@ -5788,6 +7590,8 @@ class $$MetricsTableTableManager
             bool smsSourceId,
             bool chartSeriesRefs,
             bool readingsRefs,
+            bool alertRulesRefs,
+            bool alertEventsRefs,
           })
         > {
   $$MetricsTableTableManager(_$AppDatabase db, $MetricsTable table)
@@ -5867,12 +7671,16 @@ class $$MetricsTableTableManager
                 smsSourceId = false,
                 chartSeriesRefs = false,
                 readingsRefs = false,
+                alertRulesRefs = false,
+                alertEventsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (chartSeriesRefs) db.chartSeries,
                     if (readingsRefs) db.readings,
+                    if (alertRulesRefs) db.alertRules,
+                    if (alertEventsRefs) db.alertEvents,
                   ],
                   addJoins:
                       <
@@ -5963,6 +7771,48 @@ class $$MetricsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (alertRulesRefs)
+                        await $_getPrefetchedData<
+                          Metric,
+                          $MetricsTable,
+                          AlertRule
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MetricsTableReferences
+                              ._alertRulesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MetricsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).alertRulesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.metricId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (alertEventsRefs)
+                        await $_getPrefetchedData<
+                          Metric,
+                          $MetricsTable,
+                          AlertEvent
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MetricsTableReferences
+                              ._alertEventsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MetricsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).alertEventsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.metricId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -5988,6 +7838,8 @@ typedef $$MetricsTableProcessedTableManager =
         bool smsSourceId,
         bool chartSeriesRefs,
         bool readingsRefs,
+        bool alertRulesRefs,
+        bool alertEventsRefs,
       })
     >;
 typedef $$DashboardsTableCreateCompanionBuilder =
@@ -8106,6 +9958,1637 @@ typedef $$SmsTopicPresetsTableProcessedTableManager =
       SmsTopicPreset,
       PrefetchHooks Function()
     >;
+typedef $$AlertRulesTableCreateCompanionBuilder =
+    AlertRulesCompanion Function({
+      Value<int> id,
+      required String name,
+      required int metricId,
+      Value<bool> enabled,
+      Value<DateTime> createdAt,
+    });
+typedef $$AlertRulesTableUpdateCompanionBuilder =
+    AlertRulesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<int> metricId,
+      Value<bool> enabled,
+      Value<DateTime> createdAt,
+    });
+
+final class $$AlertRulesTableReferences
+    extends BaseReferences<_$AppDatabase, $AlertRulesTable, AlertRule> {
+  $$AlertRulesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $MetricsTable _metricIdTable(_$AppDatabase db) => db.metrics
+      .createAlias($_aliasNameGenerator(db.alertRules.metricId, db.metrics.id));
+
+  $$MetricsTableProcessedTableManager get metricId {
+    final $_column = $_itemColumn<int>('metric_id')!;
+
+    final manager = $$MetricsTableTableManager(
+      $_db,
+      $_db.metrics,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_metricIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$AlertConditionsTable, List<AlertCondition>>
+  _alertConditionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.alertConditions,
+    aliasName: $_aliasNameGenerator(
+      db.alertRules.id,
+      db.alertConditions.ruleId,
+    ),
+  );
+
+  $$AlertConditionsTableProcessedTableManager get alertConditionsRefs {
+    final manager = $$AlertConditionsTableTableManager(
+      $_db,
+      $_db.alertConditions,
+    ).filter((f) => f.ruleId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _alertConditionsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$AlertEventsTable, List<AlertEvent>>
+  _alertEventsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.alertEvents,
+    aliasName: $_aliasNameGenerator(db.alertRules.id, db.alertEvents.ruleId),
+  );
+
+  $$AlertEventsTableProcessedTableManager get alertEventsRefs {
+    final manager = $$AlertEventsTableTableManager(
+      $_db,
+      $_db.alertEvents,
+    ).filter((f) => f.ruleId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_alertEventsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AlertRulesTableFilterComposer
+    extends Composer<_$AppDatabase, $AlertRulesTable> {
+  $$AlertRulesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$MetricsTableFilterComposer get metricId {
+    final $$MetricsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.metricId,
+      referencedTable: $db.metrics,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MetricsTableFilterComposer(
+            $db: $db,
+            $table: $db.metrics,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> alertConditionsRefs(
+    Expression<bool> Function($$AlertConditionsTableFilterComposer f) f,
+  ) {
+    final $$AlertConditionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.alertConditions,
+      getReferencedColumn: (t) => t.ruleId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertConditionsTableFilterComposer(
+            $db: $db,
+            $table: $db.alertConditions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> alertEventsRefs(
+    Expression<bool> Function($$AlertEventsTableFilterComposer f) f,
+  ) {
+    final $$AlertEventsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.alertEvents,
+      getReferencedColumn: (t) => t.ruleId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertEventsTableFilterComposer(
+            $db: $db,
+            $table: $db.alertEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AlertRulesTableOrderingComposer
+    extends Composer<_$AppDatabase, $AlertRulesTable> {
+  $$AlertRulesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$MetricsTableOrderingComposer get metricId {
+    final $$MetricsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.metricId,
+      referencedTable: $db.metrics,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MetricsTableOrderingComposer(
+            $db: $db,
+            $table: $db.metrics,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AlertRulesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AlertRulesTable> {
+  $$AlertRulesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<bool> get enabled =>
+      $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$MetricsTableAnnotationComposer get metricId {
+    final $$MetricsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.metricId,
+      referencedTable: $db.metrics,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MetricsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.metrics,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> alertConditionsRefs<T extends Object>(
+    Expression<T> Function($$AlertConditionsTableAnnotationComposer a) f,
+  ) {
+    final $$AlertConditionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.alertConditions,
+      getReferencedColumn: (t) => t.ruleId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertConditionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.alertConditions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> alertEventsRefs<T extends Object>(
+    Expression<T> Function($$AlertEventsTableAnnotationComposer a) f,
+  ) {
+    final $$AlertEventsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.alertEvents,
+      getReferencedColumn: (t) => t.ruleId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertEventsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.alertEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AlertRulesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AlertRulesTable,
+          AlertRule,
+          $$AlertRulesTableFilterComposer,
+          $$AlertRulesTableOrderingComposer,
+          $$AlertRulesTableAnnotationComposer,
+          $$AlertRulesTableCreateCompanionBuilder,
+          $$AlertRulesTableUpdateCompanionBuilder,
+          (AlertRule, $$AlertRulesTableReferences),
+          AlertRule,
+          PrefetchHooks Function({
+            bool metricId,
+            bool alertConditionsRefs,
+            bool alertEventsRefs,
+          })
+        > {
+  $$AlertRulesTableTableManager(_$AppDatabase db, $AlertRulesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AlertRulesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AlertRulesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AlertRulesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> metricId = const Value.absent(),
+                Value<bool> enabled = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => AlertRulesCompanion(
+                id: id,
+                name: name,
+                metricId: metricId,
+                enabled: enabled,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required int metricId,
+                Value<bool> enabled = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => AlertRulesCompanion.insert(
+                id: id,
+                name: name,
+                metricId: metricId,
+                enabled: enabled,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AlertRulesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                metricId = false,
+                alertConditionsRefs = false,
+                alertEventsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (alertConditionsRefs) db.alertConditions,
+                    if (alertEventsRefs) db.alertEvents,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (metricId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.metricId,
+                                    referencedTable: $$AlertRulesTableReferences
+                                        ._metricIdTable(db),
+                                    referencedColumn:
+                                        $$AlertRulesTableReferences
+                                            ._metricIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (alertConditionsRefs)
+                        await $_getPrefetchedData<
+                          AlertRule,
+                          $AlertRulesTable,
+                          AlertCondition
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AlertRulesTableReferences
+                              ._alertConditionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AlertRulesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).alertConditionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.ruleId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (alertEventsRefs)
+                        await $_getPrefetchedData<
+                          AlertRule,
+                          $AlertRulesTable,
+                          AlertEvent
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AlertRulesTableReferences
+                              ._alertEventsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AlertRulesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).alertEventsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.ruleId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$AlertRulesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AlertRulesTable,
+      AlertRule,
+      $$AlertRulesTableFilterComposer,
+      $$AlertRulesTableOrderingComposer,
+      $$AlertRulesTableAnnotationComposer,
+      $$AlertRulesTableCreateCompanionBuilder,
+      $$AlertRulesTableUpdateCompanionBuilder,
+      (AlertRule, $$AlertRulesTableReferences),
+      AlertRule,
+      PrefetchHooks Function({
+        bool metricId,
+        bool alertConditionsRefs,
+        bool alertEventsRefs,
+      })
+    >;
+typedef $$AlertConditionsTableCreateCompanionBuilder =
+    AlertConditionsCompanion Function({
+      Value<int> id,
+      required int ruleId,
+      required double setpoint,
+      Value<double> offsetValue,
+      Value<AlertComparison> comparison,
+      required AlertLevel level,
+      Value<int> position,
+      Value<bool> armed,
+    });
+typedef $$AlertConditionsTableUpdateCompanionBuilder =
+    AlertConditionsCompanion Function({
+      Value<int> id,
+      Value<int> ruleId,
+      Value<double> setpoint,
+      Value<double> offsetValue,
+      Value<AlertComparison> comparison,
+      Value<AlertLevel> level,
+      Value<int> position,
+      Value<bool> armed,
+    });
+
+final class $$AlertConditionsTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $AlertConditionsTable, AlertCondition> {
+  $$AlertConditionsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AlertRulesTable _ruleIdTable(_$AppDatabase db) =>
+      db.alertRules.createAlias(
+        $_aliasNameGenerator(db.alertConditions.ruleId, db.alertRules.id),
+      );
+
+  $$AlertRulesTableProcessedTableManager get ruleId {
+    final $_column = $_itemColumn<int>('rule_id')!;
+
+    final manager = $$AlertRulesTableTableManager(
+      $_db,
+      $_db.alertRules,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ruleIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$AlertEventsTable, List<AlertEvent>>
+  _alertEventsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.alertEvents,
+    aliasName: $_aliasNameGenerator(
+      db.alertConditions.id,
+      db.alertEvents.conditionId,
+    ),
+  );
+
+  $$AlertEventsTableProcessedTableManager get alertEventsRefs {
+    final manager = $$AlertEventsTableTableManager(
+      $_db,
+      $_db.alertEvents,
+    ).filter((f) => f.conditionId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_alertEventsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AlertConditionsTableFilterComposer
+    extends Composer<_$AppDatabase, $AlertConditionsTable> {
+  $$AlertConditionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get setpoint => $composableBuilder(
+    column: $table.setpoint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get offsetValue => $composableBuilder(
+    column: $table.offsetValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<AlertComparison, AlertComparison, int>
+  get comparison => $composableBuilder(
+    column: $table.comparison,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<AlertLevel, AlertLevel, int> get level =>
+      $composableBuilder(
+        column: $table.level,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get armed => $composableBuilder(
+    column: $table.armed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AlertRulesTableFilterComposer get ruleId {
+    final $$AlertRulesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ruleId,
+      referencedTable: $db.alertRules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertRulesTableFilterComposer(
+            $db: $db,
+            $table: $db.alertRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> alertEventsRefs(
+    Expression<bool> Function($$AlertEventsTableFilterComposer f) f,
+  ) {
+    final $$AlertEventsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.alertEvents,
+      getReferencedColumn: (t) => t.conditionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertEventsTableFilterComposer(
+            $db: $db,
+            $table: $db.alertEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AlertConditionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AlertConditionsTable> {
+  $$AlertConditionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get setpoint => $composableBuilder(
+    column: $table.setpoint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get offsetValue => $composableBuilder(
+    column: $table.offsetValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get comparison => $composableBuilder(
+    column: $table.comparison,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get armed => $composableBuilder(
+    column: $table.armed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AlertRulesTableOrderingComposer get ruleId {
+    final $$AlertRulesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ruleId,
+      referencedTable: $db.alertRules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertRulesTableOrderingComposer(
+            $db: $db,
+            $table: $db.alertRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AlertConditionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AlertConditionsTable> {
+  $$AlertConditionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get setpoint =>
+      $composableBuilder(column: $table.setpoint, builder: (column) => column);
+
+  GeneratedColumn<double> get offsetValue => $composableBuilder(
+    column: $table.offsetValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<AlertComparison, int> get comparison =>
+      $composableBuilder(
+        column: $table.comparison,
+        builder: (column) => column,
+      );
+
+  GeneratedColumnWithTypeConverter<AlertLevel, int> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<bool> get armed =>
+      $composableBuilder(column: $table.armed, builder: (column) => column);
+
+  $$AlertRulesTableAnnotationComposer get ruleId {
+    final $$AlertRulesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ruleId,
+      referencedTable: $db.alertRules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertRulesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.alertRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> alertEventsRefs<T extends Object>(
+    Expression<T> Function($$AlertEventsTableAnnotationComposer a) f,
+  ) {
+    final $$AlertEventsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.alertEvents,
+      getReferencedColumn: (t) => t.conditionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertEventsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.alertEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AlertConditionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AlertConditionsTable,
+          AlertCondition,
+          $$AlertConditionsTableFilterComposer,
+          $$AlertConditionsTableOrderingComposer,
+          $$AlertConditionsTableAnnotationComposer,
+          $$AlertConditionsTableCreateCompanionBuilder,
+          $$AlertConditionsTableUpdateCompanionBuilder,
+          (AlertCondition, $$AlertConditionsTableReferences),
+          AlertCondition,
+          PrefetchHooks Function({bool ruleId, bool alertEventsRefs})
+        > {
+  $$AlertConditionsTableTableManager(
+    _$AppDatabase db,
+    $AlertConditionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AlertConditionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AlertConditionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AlertConditionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> ruleId = const Value.absent(),
+                Value<double> setpoint = const Value.absent(),
+                Value<double> offsetValue = const Value.absent(),
+                Value<AlertComparison> comparison = const Value.absent(),
+                Value<AlertLevel> level = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<bool> armed = const Value.absent(),
+              }) => AlertConditionsCompanion(
+                id: id,
+                ruleId: ruleId,
+                setpoint: setpoint,
+                offsetValue: offsetValue,
+                comparison: comparison,
+                level: level,
+                position: position,
+                armed: armed,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int ruleId,
+                required double setpoint,
+                Value<double> offsetValue = const Value.absent(),
+                Value<AlertComparison> comparison = const Value.absent(),
+                required AlertLevel level,
+                Value<int> position = const Value.absent(),
+                Value<bool> armed = const Value.absent(),
+              }) => AlertConditionsCompanion.insert(
+                id: id,
+                ruleId: ruleId,
+                setpoint: setpoint,
+                offsetValue: offsetValue,
+                comparison: comparison,
+                level: level,
+                position: position,
+                armed: armed,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AlertConditionsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({ruleId = false, alertEventsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (alertEventsRefs) db.alertEvents],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (ruleId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.ruleId,
+                                referencedTable:
+                                    $$AlertConditionsTableReferences
+                                        ._ruleIdTable(db),
+                                referencedColumn:
+                                    $$AlertConditionsTableReferences
+                                        ._ruleIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (alertEventsRefs)
+                    await $_getPrefetchedData<
+                      AlertCondition,
+                      $AlertConditionsTable,
+                      AlertEvent
+                    >(
+                      currentTable: table,
+                      referencedTable: $$AlertConditionsTableReferences
+                          ._alertEventsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$AlertConditionsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).alertEventsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.conditionId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AlertConditionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AlertConditionsTable,
+      AlertCondition,
+      $$AlertConditionsTableFilterComposer,
+      $$AlertConditionsTableOrderingComposer,
+      $$AlertConditionsTableAnnotationComposer,
+      $$AlertConditionsTableCreateCompanionBuilder,
+      $$AlertConditionsTableUpdateCompanionBuilder,
+      (AlertCondition, $$AlertConditionsTableReferences),
+      AlertCondition,
+      PrefetchHooks Function({bool ruleId, bool alertEventsRefs})
+    >;
+typedef $$AlertEventsTableCreateCompanionBuilder =
+    AlertEventsCompanion Function({
+      Value<int> id,
+      required int ruleId,
+      required int conditionId,
+      required int metricId,
+      required String ruleName,
+      required String metricName,
+      required AlertLevel level,
+      required AlertComparison comparison,
+      required double threshold,
+      required double value,
+      required DateTime triggeredAt,
+      Value<DateTime?> acknowledgedAt,
+    });
+typedef $$AlertEventsTableUpdateCompanionBuilder =
+    AlertEventsCompanion Function({
+      Value<int> id,
+      Value<int> ruleId,
+      Value<int> conditionId,
+      Value<int> metricId,
+      Value<String> ruleName,
+      Value<String> metricName,
+      Value<AlertLevel> level,
+      Value<AlertComparison> comparison,
+      Value<double> threshold,
+      Value<double> value,
+      Value<DateTime> triggeredAt,
+      Value<DateTime?> acknowledgedAt,
+    });
+
+final class $$AlertEventsTableReferences
+    extends BaseReferences<_$AppDatabase, $AlertEventsTable, AlertEvent> {
+  $$AlertEventsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $AlertRulesTable _ruleIdTable(_$AppDatabase db) =>
+      db.alertRules.createAlias(
+        $_aliasNameGenerator(db.alertEvents.ruleId, db.alertRules.id),
+      );
+
+  $$AlertRulesTableProcessedTableManager get ruleId {
+    final $_column = $_itemColumn<int>('rule_id')!;
+
+    final manager = $$AlertRulesTableTableManager(
+      $_db,
+      $_db.alertRules,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ruleIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AlertConditionsTable _conditionIdTable(_$AppDatabase db) =>
+      db.alertConditions.createAlias(
+        $_aliasNameGenerator(db.alertEvents.conditionId, db.alertConditions.id),
+      );
+
+  $$AlertConditionsTableProcessedTableManager get conditionId {
+    final $_column = $_itemColumn<int>('condition_id')!;
+
+    final manager = $$AlertConditionsTableTableManager(
+      $_db,
+      $_db.alertConditions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_conditionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MetricsTable _metricIdTable(_$AppDatabase db) =>
+      db.metrics.createAlias(
+        $_aliasNameGenerator(db.alertEvents.metricId, db.metrics.id),
+      );
+
+  $$MetricsTableProcessedTableManager get metricId {
+    final $_column = $_itemColumn<int>('metric_id')!;
+
+    final manager = $$MetricsTableTableManager(
+      $_db,
+      $_db.metrics,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_metricIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AlertEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $AlertEventsTable> {
+  $$AlertEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ruleName => $composableBuilder(
+    column: $table.ruleName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metricName => $composableBuilder(
+    column: $table.metricName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<AlertLevel, AlertLevel, int> get level =>
+      $composableBuilder(
+        column: $table.level,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<AlertComparison, AlertComparison, int>
+  get comparison => $composableBuilder(
+    column: $table.comparison,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<double> get threshold => $composableBuilder(
+    column: $table.threshold,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get triggeredAt => $composableBuilder(
+    column: $table.triggeredAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get acknowledgedAt => $composableBuilder(
+    column: $table.acknowledgedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AlertRulesTableFilterComposer get ruleId {
+    final $$AlertRulesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ruleId,
+      referencedTable: $db.alertRules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertRulesTableFilterComposer(
+            $db: $db,
+            $table: $db.alertRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AlertConditionsTableFilterComposer get conditionId {
+    final $$AlertConditionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.conditionId,
+      referencedTable: $db.alertConditions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertConditionsTableFilterComposer(
+            $db: $db,
+            $table: $db.alertConditions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MetricsTableFilterComposer get metricId {
+    final $$MetricsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.metricId,
+      referencedTable: $db.metrics,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MetricsTableFilterComposer(
+            $db: $db,
+            $table: $db.metrics,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AlertEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AlertEventsTable> {
+  $$AlertEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ruleName => $composableBuilder(
+    column: $table.ruleName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metricName => $composableBuilder(
+    column: $table.metricName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get comparison => $composableBuilder(
+    column: $table.comparison,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get threshold => $composableBuilder(
+    column: $table.threshold,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get triggeredAt => $composableBuilder(
+    column: $table.triggeredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get acknowledgedAt => $composableBuilder(
+    column: $table.acknowledgedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AlertRulesTableOrderingComposer get ruleId {
+    final $$AlertRulesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ruleId,
+      referencedTable: $db.alertRules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertRulesTableOrderingComposer(
+            $db: $db,
+            $table: $db.alertRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AlertConditionsTableOrderingComposer get conditionId {
+    final $$AlertConditionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.conditionId,
+      referencedTable: $db.alertConditions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertConditionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.alertConditions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MetricsTableOrderingComposer get metricId {
+    final $$MetricsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.metricId,
+      referencedTable: $db.metrics,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MetricsTableOrderingComposer(
+            $db: $db,
+            $table: $db.metrics,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AlertEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AlertEventsTable> {
+  $$AlertEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ruleName =>
+      $composableBuilder(column: $table.ruleName, builder: (column) => column);
+
+  GeneratedColumn<String> get metricName => $composableBuilder(
+    column: $table.metricName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<AlertLevel, int> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<AlertComparison, int> get comparison =>
+      $composableBuilder(
+        column: $table.comparison,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<double> get threshold =>
+      $composableBuilder(column: $table.threshold, builder: (column) => column);
+
+  GeneratedColumn<double> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get triggeredAt => $composableBuilder(
+    column: $table.triggeredAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get acknowledgedAt => $composableBuilder(
+    column: $table.acknowledgedAt,
+    builder: (column) => column,
+  );
+
+  $$AlertRulesTableAnnotationComposer get ruleId {
+    final $$AlertRulesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ruleId,
+      referencedTable: $db.alertRules,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertRulesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.alertRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AlertConditionsTableAnnotationComposer get conditionId {
+    final $$AlertConditionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.conditionId,
+      referencedTable: $db.alertConditions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AlertConditionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.alertConditions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MetricsTableAnnotationComposer get metricId {
+    final $$MetricsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.metricId,
+      referencedTable: $db.metrics,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MetricsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.metrics,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AlertEventsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AlertEventsTable,
+          AlertEvent,
+          $$AlertEventsTableFilterComposer,
+          $$AlertEventsTableOrderingComposer,
+          $$AlertEventsTableAnnotationComposer,
+          $$AlertEventsTableCreateCompanionBuilder,
+          $$AlertEventsTableUpdateCompanionBuilder,
+          (AlertEvent, $$AlertEventsTableReferences),
+          AlertEvent,
+          PrefetchHooks Function({bool ruleId, bool conditionId, bool metricId})
+        > {
+  $$AlertEventsTableTableManager(_$AppDatabase db, $AlertEventsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AlertEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AlertEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AlertEventsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> ruleId = const Value.absent(),
+                Value<int> conditionId = const Value.absent(),
+                Value<int> metricId = const Value.absent(),
+                Value<String> ruleName = const Value.absent(),
+                Value<String> metricName = const Value.absent(),
+                Value<AlertLevel> level = const Value.absent(),
+                Value<AlertComparison> comparison = const Value.absent(),
+                Value<double> threshold = const Value.absent(),
+                Value<double> value = const Value.absent(),
+                Value<DateTime> triggeredAt = const Value.absent(),
+                Value<DateTime?> acknowledgedAt = const Value.absent(),
+              }) => AlertEventsCompanion(
+                id: id,
+                ruleId: ruleId,
+                conditionId: conditionId,
+                metricId: metricId,
+                ruleName: ruleName,
+                metricName: metricName,
+                level: level,
+                comparison: comparison,
+                threshold: threshold,
+                value: value,
+                triggeredAt: triggeredAt,
+                acknowledgedAt: acknowledgedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int ruleId,
+                required int conditionId,
+                required int metricId,
+                required String ruleName,
+                required String metricName,
+                required AlertLevel level,
+                required AlertComparison comparison,
+                required double threshold,
+                required double value,
+                required DateTime triggeredAt,
+                Value<DateTime?> acknowledgedAt = const Value.absent(),
+              }) => AlertEventsCompanion.insert(
+                id: id,
+                ruleId: ruleId,
+                conditionId: conditionId,
+                metricId: metricId,
+                ruleName: ruleName,
+                metricName: metricName,
+                level: level,
+                comparison: comparison,
+                threshold: threshold,
+                value: value,
+                triggeredAt: triggeredAt,
+                acknowledgedAt: acknowledgedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AlertEventsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({ruleId = false, conditionId = false, metricId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (ruleId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.ruleId,
+                                    referencedTable:
+                                        $$AlertEventsTableReferences
+                                            ._ruleIdTable(db),
+                                    referencedColumn:
+                                        $$AlertEventsTableReferences
+                                            ._ruleIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (conditionId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.conditionId,
+                                    referencedTable:
+                                        $$AlertEventsTableReferences
+                                            ._conditionIdTable(db),
+                                    referencedColumn:
+                                        $$AlertEventsTableReferences
+                                            ._conditionIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (metricId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.metricId,
+                                    referencedTable:
+                                        $$AlertEventsTableReferences
+                                            ._metricIdTable(db),
+                                    referencedColumn:
+                                        $$AlertEventsTableReferences
+                                            ._metricIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$AlertEventsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AlertEventsTable,
+      AlertEvent,
+      $$AlertEventsTableFilterComposer,
+      $$AlertEventsTableOrderingComposer,
+      $$AlertEventsTableAnnotationComposer,
+      $$AlertEventsTableCreateCompanionBuilder,
+      $$AlertEventsTableUpdateCompanionBuilder,
+      (AlertEvent, $$AlertEventsTableReferences),
+      AlertEvent,
+      PrefetchHooks Function({bool ruleId, bool conditionId, bool metricId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8128,4 +11611,10 @@ class $AppDatabaseManager {
       $$SmsMessagesTableTableManager(_db, _db.smsMessages);
   $$SmsTopicPresetsTableTableManager get smsTopicPresets =>
       $$SmsTopicPresetsTableTableManager(_db, _db.smsTopicPresets);
+  $$AlertRulesTableTableManager get alertRules =>
+      $$AlertRulesTableTableManager(_db, _db.alertRules);
+  $$AlertConditionsTableTableManager get alertConditions =>
+      $$AlertConditionsTableTableManager(_db, _db.alertConditions);
+  $$AlertEventsTableTableManager get alertEvents =>
+      $$AlertEventsTableTableManager(_db, _db.alertEvents);
 }
