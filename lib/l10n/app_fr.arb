@@ -268,5 +268,97 @@
     "placeholders": {
       "broker": { "type": "String" }
     }
+  },
+  "navAlerts": "Alertes",
+  "alertTabRules": "Alertes",
+  "alertTabReceived": "Reçues",
+  "alertTabNew": "Nouvelles",
+  "alertTabAcknowledged": "Acquittées",
+  "addAlert": "Ajouter une alerte",
+  "editAlert": "Modifier l’alerte",
+  "alertName": "Nom de l’alerte",
+  "alertConditions": "Niveaux d’alarme",
+  "addCondition": "Ajouter un niveau",
+  "alertSetpoint": "Valeur consigne",
+  "alertOffset": "Écart",
+  "alertComparison": "Déclenchement",
+  "comparisonAbove": "Supérieur ou égal",
+  "comparisonBelow": "Inférieur ou égal",
+  "comparisonEquals": "Égal à",
+  "alertLevel": "Niveau d’alarme",
+  "alertLevelInfo": "Info",
+  "alertLevelWarning": "Avertissement",
+  "alertLevelCritical": "Critique",
+  "alertTriggersWhen": "Déclenche quand la valeur est {op} {threshold}",
+  "@alertTriggersWhen": {
+    "placeholders": {
+      "op": { "type": "String" },
+      "threshold": { "type": "String" }
+    }
+  },
+  "alertEnabled": "Alarme activée",
+  "alertNeedsCondition": "Ajoutez au moins un niveau d’alarme",
+  "noAlertRules": "Aucune alerte. Touchez Ajouter une alerte pour en créer une.",
+  "noAlertsReceived": "Aucune nouvelle alerte.",
+  "noAlertsAcknowledged": "Aucune alerte acquittée.",
+  "acknowledge": "Acquitter",
+  "acknowledgeAll": "Tout acquitter",
+  "alertAcknowledged": "Alerte acquittée",
+  "alertAllAcknowledged": "Toutes les alertes ont été acquittées",
+  "alertTapToAcknowledge": "Touchez pour acquitter",
+  "alertValueVsThreshold": "{metric} = {value} ({op} {threshold})",
+  "@alertValueVsThreshold": {
+    "placeholders": {
+      "metric": { "type": "String" },
+      "value": { "type": "String" },
+      "op": { "type": "String" },
+      "threshold": { "type": "String" }
+    }
+  },
+  "alertRuleCount": "{count, plural, =1{1 alarme} other{{count} alarmes}}",
+  "@alertRuleCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "alertLevelCount": "{count, plural, =1{1 niveau} other{{count} niveaux}}",
+  "@alertLevelCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "csvAlert": "Alerte",
+  "csvMetric": "Métrique",
+  "csvThreshold": "Seuil",
+  "csvAcknowledgedAt": "Acquittée le",
+  "alertsExportTitle": "Export des alertes acquittées",
+  "deleteAlertsRange": "Supprimer les alertes par intervalle",
+  "deleteAllAlerts": "Tout supprimer",
+  "deleteAllAlertsBody": "Supprimer toutes les alertes acquittées ? Cette action est irréversible.",
+  "alertsDeleted": "{count, plural, =0{Aucune alerte supprimée} =1{1 alerte supprimée} other{{count} alertes supprimées}}",
+  "@alertsDeleted": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "valueKind": "Type de valeur",
+  "valueKindNumeric": "Grandeur mesurable",
+  "valueKindBoolean": "Oui / non",
+  "valueKindBooleanHint": "Pas une grandeur mesurable — la métrique vaut simplement oui ou non. Toute valeur non nulle vaut Oui (ex. IN1, IN2 actifs) ; OK ou 0 vaut Non.",
+  "alertState": "Déclenche quand",
+  "stateYes": "Oui",
+  "stateNo": "Non",
+  "alertTriggersWhenState": "Déclenche quand la métrique est {state}",
+  "@alertTriggersWhenState": {
+    "placeholders": {
+      "state": { "type": "String" }
+    }
+  },
+  "alertValueState": "{metric} = {state}",
+  "@alertValueState": {
+    "placeholders": {
+      "metric": { "type": "String" },
+      "state": { "type": "String" }
+    }
   }
 }

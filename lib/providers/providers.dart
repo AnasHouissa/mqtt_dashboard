@@ -8,6 +8,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/db/database.dart';
+import '../data/repositories/alert_repository.dart';
 import '../data/repositories/broker_repository.dart';
 import '../data/repositories/dashboard_repository.dart';
 import '../data/repositories/metric_repository.dart';
@@ -15,6 +16,8 @@ import '../data/repositories/reading_repository.dart';
 import '../data/repositories/sms_message_repository.dart';
 import '../data/repositories/sms_source_repository.dart';
 import '../data/repositories/sms_topic_preset_repository.dart';
+import '../services/alert_engine.dart';
+import '../services/alert_notifications.dart';
 import '../services/alert_stats.dart';
 import '../services/background_service.dart';
 import '../services/export_service.dart';
@@ -51,6 +54,8 @@ final smsMessageRepositoryProvider = Provider(
     (ref) => SmsMessageRepository(ref.watch(databaseProvider)));
 final smsTopicPresetRepositoryProvider = Provider(
     (ref) => SmsTopicPresetRepository(ref.watch(databaseProvider)));
+final alertRepositoryProvider = Provider(
+    (ref) => AlertRepository(ref.watch(databaseProvider)));
 
 final exportServiceProvider = Provider((ref) => ExportService());
 
@@ -172,6 +177,28 @@ final alertDurationProvider = StreamProvider.autoDispose
 /// Whether the device currently has a network connection. Drives the global
 /// "no internet" overlay. Emits the current state immediately, then updates as
 /// connectivity changes. Defaults to online while the first check is pending.
+// --- Alerts ---
+
+final alertRulesProvider =
+    StreamProvider.autoDispose<List<AlertRuleWithConditions>>((ref) =>
+        ref.watch(alertRepositoryProvider).watchRulesWithConditions());
+
+/// Inbox events, keyed by whether they have been acknowledged.
+final alertEventsProvider =
+    StreamProvider.autoDispose.family<List<AlertEvent>, bool>(
+        (ref, acknowledged) => ref
+            .watch(alertRepositoryProvider)
+            .watchEvents(acknowledged: acknowledged));
+
+/// Not autoDispose: the bottom-nav badge watches this from the app shell, which
+/// must keep counting even while no alerts screen is mounted.
+final unacknowledgedAlertCountProvider = StreamProvider<int>(
+    (ref) => ref.watch(alertRepositoryProvider).watchUnacknowledgedCount());
+
+/// Selected bottom-nav destination. Lifted out of [RootScaffold] state so a
+/// tapped alert notification can jump straight to the alerts tab.
+final navIndexProvider = StateProvider<int>((ref) => 0);
+
 final connectivityProvider = StreamProvider<bool>((ref) async* {
   final connectivity = Connectivity();
   bool isOnline(List<ConnectivityResult> results) =>
@@ -199,6 +226,10 @@ class ConnectionController extends StateNotifier<MqttStatus> {
   /// topic -> metricId, for routing incoming messages to the right metric.
   final Map<String, int> _topicToMetric = {};
 
+  /// metricId -> name, so fired alerts can be labelled without a second query
+  /// on every message.
+  final Map<int, String> _metricNames = {};
+
   /// Why the last [connect] failed; null when not in a failed state.
   MqttFailureReason? get lastFailureReason =>
       _ref.read(mqttServiceProvider).lastFailureReason;
@@ -223,6 +254,9 @@ class ConnectionController extends StateNotifier<MqttStatus> {
     _topicToMetric
       ..clear()
       ..addEntries(metrics.map((m) => MapEntry(m.topic, m.id)));
+    _metricNames
+      ..clear()
+      ..addEntries(metrics.map((m) => MapEntry(m.id, m.name)));
     for (final m in metrics) {
       service.subscribe(m.topic);
     }
@@ -249,23 +283,41 @@ class ConnectionController extends StateNotifier<MqttStatus> {
     _topicToMetric
       ..clear()
       ..addAll(newTopics);
+    _metricNames
+      ..clear()
+      ..addEntries(metrics.map((m) => MapEntry(m.id, m.name)));
   }
 
   void publish(String topic, String value) =>
       _ref.read(mqttServiceProvider).publish(topic, value);
 
-  void _onMessage(TopicMessage msg) {
+  Future<void> _onMessage(TopicMessage msg) async {
     final metricId = _topicToMetric[msg.topic];
     if (metricId == null) return;
-    _ref
+    await _ref
         .read(readingRepositoryProvider)
         .insert(metricId, msg.value, msg.timestamp, raw: msg.raw);
+
+    // Evaluate the metric's alert rules against this value, then notify for
+    // each rule that fired. Persisting first keeps readings the single source
+    // of truth even if alert evaluation throws.
+    final fired = await evaluateAlerts(
+      _ref.read(databaseProvider),
+      metricId: metricId,
+      metricName: _metricNames[metricId] ?? msg.topic,
+      value: msg.value,
+      timestamp: msg.timestamp,
+    );
+    for (final event in fired) {
+      await showAlertNotification(event);
+    }
   }
 
   Future<void> disconnect() async {
     await _ref.read(mqttServiceProvider).disconnect();
     activeBrokerId = null;
     _topicToMetric.clear();
+    _metricNames.clear();
   }
 
   @override

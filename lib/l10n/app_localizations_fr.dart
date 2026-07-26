@@ -684,4 +684,201 @@ class AppLocalizationsFr extends AppLocalizations {
   String bgNotificationBody(String broker) {
     return 'Connexion à $broker maintenue';
   }
+
+  @override
+  String get navAlerts => 'Alertes';
+
+  @override
+  String get alertTabRules => 'Alertes';
+
+  @override
+  String get alertTabReceived => 'Reçues';
+
+  @override
+  String get alertTabNew => 'Nouvelles';
+
+  @override
+  String get alertTabAcknowledged => 'Acquittées';
+
+  @override
+  String get addAlert => 'Ajouter une alerte';
+
+  @override
+  String get editAlert => 'Modifier l’alerte';
+
+  @override
+  String get alertName => 'Nom de l’alerte';
+
+  @override
+  String get alertConditions => 'Niveaux d’alarme';
+
+  @override
+  String get addCondition => 'Ajouter un niveau';
+
+  @override
+  String get alertSetpoint => 'Valeur consigne';
+
+  @override
+  String get alertOffset => 'Écart';
+
+  @override
+  String get alertComparison => 'Déclenchement';
+
+  @override
+  String get comparisonAbove => 'Supérieur ou égal';
+
+  @override
+  String get comparisonBelow => 'Inférieur ou égal';
+
+  @override
+  String get comparisonEquals => 'Égal à';
+
+  @override
+  String get alertLevel => 'Niveau d’alarme';
+
+  @override
+  String get alertLevelInfo => 'Info';
+
+  @override
+  String get alertLevelWarning => 'Avertissement';
+
+  @override
+  String get alertLevelCritical => 'Critique';
+
+  @override
+  String alertTriggersWhen(String op, String threshold) {
+    return 'Déclenche quand la valeur est $op $threshold';
+  }
+
+  @override
+  String get alertEnabled => 'Alarme activée';
+
+  @override
+  String get alertNeedsCondition => 'Ajoutez au moins un niveau d’alarme';
+
+  @override
+  String get noAlertRules =>
+      'Aucune alerte. Touchez Ajouter une alerte pour en créer une.';
+
+  @override
+  String get noAlertsReceived => 'Aucune nouvelle alerte.';
+
+  @override
+  String get noAlertsAcknowledged => 'Aucune alerte acquittée.';
+
+  @override
+  String get acknowledge => 'Acquitter';
+
+  @override
+  String get acknowledgeAll => 'Tout acquitter';
+
+  @override
+  String get alertAcknowledged => 'Alerte acquittée';
+
+  @override
+  String get alertAllAcknowledged => 'Toutes les alertes ont été acquittées';
+
+  @override
+  String get alertTapToAcknowledge => 'Touchez pour acquitter';
+
+  @override
+  String alertValueVsThreshold(
+    String metric,
+    String value,
+    String op,
+    String threshold,
+  ) {
+    return '$metric = $value ($op $threshold)';
+  }
+
+  @override
+  String alertRuleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count alarmes',
+      one: '1 alarme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String alertLevelCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count niveaux',
+      one: '1 niveau',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get csvAlert => 'Alerte';
+
+  @override
+  String get csvMetric => 'Métrique';
+
+  @override
+  String get csvThreshold => 'Seuil';
+
+  @override
+  String get csvAcknowledgedAt => 'Acquittée le';
+
+  @override
+  String get alertsExportTitle => 'Export des alertes acquittées';
+
+  @override
+  String get deleteAlertsRange => 'Supprimer les alertes par intervalle';
+
+  @override
+  String get deleteAllAlerts => 'Tout supprimer';
+
+  @override
+  String get deleteAllAlertsBody =>
+      'Supprimer toutes les alertes acquittées ? Cette action est irréversible.';
+
+  @override
+  String alertsDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count alertes supprimées',
+      one: '1 alerte supprimée',
+      zero: 'Aucune alerte supprimée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get valueKind => 'Type de valeur';
+
+  @override
+  String get valueKindNumeric => 'Grandeur mesurable';
+
+  @override
+  String get valueKindBoolean => 'Oui / non';
+
+  @override
+  String get valueKindBooleanHint =>
+      'Pas une grandeur mesurable — la métrique vaut simplement oui ou non. Toute valeur non nulle vaut Oui (ex. IN1, IN2 actifs) ; OK ou 0 vaut Non.';
+
+  @override
+  String get alertState => 'Déclenche quand';
+
+  @override
+  String get stateYes => 'Oui';
+
+  @override
+  String get stateNo => 'Non';
+
+  @override
+  String alertTriggersWhenState(String state) {
+    return 'Déclenche quand la métrique est $state';
+  }
+
+  @override
+  String alertValueState(String metric, String state) {
+    return '$metric = $state';
+  }
 }

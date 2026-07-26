@@ -268,5 +268,97 @@
     "placeholders": {
       "broker": { "type": "String" }
     }
+  },
+  "navAlerts": "Alerts",
+  "alertTabRules": "Alerts",
+  "alertTabReceived": "Received",
+  "alertTabNew": "New",
+  "alertTabAcknowledged": "Acknowledged",
+  "addAlert": "Add alert",
+  "editAlert": "Edit alert",
+  "alertName": "Alert name",
+  "alertConditions": "Alarm levels",
+  "addCondition": "Add level",
+  "alertSetpoint": "Setpoint",
+  "alertOffset": "Offset",
+  "alertComparison": "Trigger",
+  "comparisonAbove": "At or above",
+  "comparisonBelow": "At or below",
+  "comparisonEquals": "Equal to",
+  "alertLevel": "Alarm level",
+  "alertLevelInfo": "Info",
+  "alertLevelWarning": "Warning",
+  "alertLevelCritical": "Critical",
+  "alertTriggersWhen": "Triggers when value {op} {threshold}",
+  "@alertTriggersWhen": {
+    "placeholders": {
+      "op": { "type": "String" },
+      "threshold": { "type": "String" }
+    }
+  },
+  "alertEnabled": "Alarm enabled",
+  "alertNeedsCondition": "Add at least one alarm level",
+  "noAlertRules": "No alerts yet. Tap Add alert to create one.",
+  "noAlertsReceived": "No new alerts.",
+  "noAlertsAcknowledged": "No acknowledged alerts yet.",
+  "acknowledge": "Acknowledge",
+  "acknowledgeAll": "Acknowledge all",
+  "alertAcknowledged": "Alert acknowledged",
+  "alertAllAcknowledged": "All alerts acknowledged",
+  "alertTapToAcknowledge": "Tap to acknowledge",
+  "alertValueVsThreshold": "{metric} = {value} ({op} {threshold})",
+  "@alertValueVsThreshold": {
+    "placeholders": {
+      "metric": { "type": "String" },
+      "value": { "type": "String" },
+      "op": { "type": "String" },
+      "threshold": { "type": "String" }
+    }
+  },
+  "alertRuleCount": "{count, plural, =1{1 alarm} other{{count} alarms}}",
+  "@alertRuleCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "alertLevelCount": "{count, plural, =1{1 level} other{{count} levels}}",
+  "@alertLevelCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "csvAlert": "Alert",
+  "csvMetric": "Metric",
+  "csvThreshold": "Threshold",
+  "csvAcknowledgedAt": "Acknowledged at",
+  "alertsExportTitle": "Acknowledged alerts export",
+  "deleteAlertsRange": "Delete alerts by interval",
+  "deleteAllAlerts": "Delete all",
+  "deleteAllAlertsBody": "Delete every acknowledged alert? This action cannot be undone.",
+  "alertsDeleted": "{count, plural, =0{No alerts deleted} =1{1 alert deleted} other{{count} alerts deleted}}",
+  "@alertsDeleted": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "valueKind": "Value type",
+  "valueKindNumeric": "Measured value",
+  "valueKindBoolean": "Yes / no",
+  "valueKindBooleanHint": "Not a measurable quantity — the metric is simply yes or no. Any non-zero reading is Yes (e.g. IN1, IN2 active); OK or 0 is No.",
+  "alertState": "Trigger when",
+  "stateYes": "Yes",
+  "stateNo": "No",
+  "alertTriggersWhenState": "Triggers when the metric is {state}",
+  "@alertTriggersWhenState": {
+    "placeholders": {
+      "state": { "type": "String" }
+    }
+  },
+  "alertValueState": "{metric} = {state}",
+  "@alertValueState": {
+    "placeholders": {
+      "metric": { "type": "String" },
+      "state": { "type": "String" }
+    }
   }
 }

@@ -678,4 +678,200 @@ class AppLocalizationsEn extends AppLocalizations {
   String bgNotificationBody(String broker) {
     return 'Keeping $broker connected';
   }
+
+  @override
+  String get navAlerts => 'Alerts';
+
+  @override
+  String get alertTabRules => 'Alerts';
+
+  @override
+  String get alertTabReceived => 'Received';
+
+  @override
+  String get alertTabNew => 'New';
+
+  @override
+  String get alertTabAcknowledged => 'Acknowledged';
+
+  @override
+  String get addAlert => 'Add alert';
+
+  @override
+  String get editAlert => 'Edit alert';
+
+  @override
+  String get alertName => 'Alert name';
+
+  @override
+  String get alertConditions => 'Alarm levels';
+
+  @override
+  String get addCondition => 'Add level';
+
+  @override
+  String get alertSetpoint => 'Setpoint';
+
+  @override
+  String get alertOffset => 'Offset';
+
+  @override
+  String get alertComparison => 'Trigger';
+
+  @override
+  String get comparisonAbove => 'At or above';
+
+  @override
+  String get comparisonBelow => 'At or below';
+
+  @override
+  String get comparisonEquals => 'Equal to';
+
+  @override
+  String get alertLevel => 'Alarm level';
+
+  @override
+  String get alertLevelInfo => 'Info';
+
+  @override
+  String get alertLevelWarning => 'Warning';
+
+  @override
+  String get alertLevelCritical => 'Critical';
+
+  @override
+  String alertTriggersWhen(String op, String threshold) {
+    return 'Triggers when value $op $threshold';
+  }
+
+  @override
+  String get alertEnabled => 'Alarm enabled';
+
+  @override
+  String get alertNeedsCondition => 'Add at least one alarm level';
+
+  @override
+  String get noAlertRules => 'No alerts yet. Tap Add alert to create one.';
+
+  @override
+  String get noAlertsReceived => 'No new alerts.';
+
+  @override
+  String get noAlertsAcknowledged => 'No acknowledged alerts yet.';
+
+  @override
+  String get acknowledge => 'Acknowledge';
+
+  @override
+  String get acknowledgeAll => 'Acknowledge all';
+
+  @override
+  String get alertAcknowledged => 'Alert acknowledged';
+
+  @override
+  String get alertAllAcknowledged => 'All alerts acknowledged';
+
+  @override
+  String get alertTapToAcknowledge => 'Tap to acknowledge';
+
+  @override
+  String alertValueVsThreshold(
+    String metric,
+    String value,
+    String op,
+    String threshold,
+  ) {
+    return '$metric = $value ($op $threshold)';
+  }
+
+  @override
+  String alertRuleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count alarms',
+      one: '1 alarm',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String alertLevelCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count levels',
+      one: '1 level',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get csvAlert => 'Alert';
+
+  @override
+  String get csvMetric => 'Metric';
+
+  @override
+  String get csvThreshold => 'Threshold';
+
+  @override
+  String get csvAcknowledgedAt => 'Acknowledged at';
+
+  @override
+  String get alertsExportTitle => 'Acknowledged alerts export';
+
+  @override
+  String get deleteAlertsRange => 'Delete alerts by interval';
+
+  @override
+  String get deleteAllAlerts => 'Delete all';
+
+  @override
+  String get deleteAllAlertsBody =>
+      'Delete every acknowledged alert? This action cannot be undone.';
+
+  @override
+  String alertsDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count alerts deleted',
+      one: '1 alert deleted',
+      zero: 'No alerts deleted',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get valueKind => 'Value type';
+
+  @override
+  String get valueKindNumeric => 'Measured value';
+
+  @override
+  String get valueKindBoolean => 'Yes / no';
+
+  @override
+  String get valueKindBooleanHint =>
+      'Not a measurable quantity — the metric is simply yes or no. Any non-zero reading is Yes (e.g. IN1, IN2 active); OK or 0 is No.';
+
+  @override
+  String get alertState => 'Trigger when';
+
+  @override
+  String get stateYes => 'Yes';
+
+  @override
+  String get stateNo => 'No';
+
+  @override
+  String alertTriggersWhenState(String state) {
+    return 'Triggers when the metric is $state';
+  }
+
+  @override
+  String alertValueState(String metric, String state) {
+    return '$metric = $state';
+  }
 }

@@ -1351,6 +1351,323 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keeping {broker} connected'**
   String bgNotificationBody(String broker);
+
+  /// No description provided for @navAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts'**
+  String get navAlerts;
+
+  /// No description provided for @alertTabRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts'**
+  String get alertTabRules;
+
+  /// No description provided for @alertTabReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get alertTabReceived;
+
+  /// No description provided for @alertTabNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get alertTabNew;
+
+  /// No description provided for @alertTabAcknowledged.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged'**
+  String get alertTabAcknowledged;
+
+  /// No description provided for @addAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Add alert'**
+  String get addAlert;
+
+  /// No description provided for @editAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit alert'**
+  String get editAlert;
+
+  /// No description provided for @alertName.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert name'**
+  String get alertName;
+
+  /// No description provided for @alertConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm levels'**
+  String get alertConditions;
+
+  /// No description provided for @addCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Add level'**
+  String get addCondition;
+
+  /// No description provided for @alertSetpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint'**
+  String get alertSetpoint;
+
+  /// No description provided for @alertOffset.
+  ///
+  /// In en, this message translates to:
+  /// **'Offset'**
+  String get alertOffset;
+
+  /// No description provided for @alertComparison.
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger'**
+  String get alertComparison;
+
+  /// No description provided for @comparisonAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'At or above'**
+  String get comparisonAbove;
+
+  /// No description provided for @comparisonBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'At or below'**
+  String get comparisonBelow;
+
+  /// No description provided for @comparisonEquals.
+  ///
+  /// In en, this message translates to:
+  /// **'Equal to'**
+  String get comparisonEquals;
+
+  /// No description provided for @alertLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm level'**
+  String get alertLevel;
+
+  /// No description provided for @alertLevelInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get alertLevelInfo;
+
+  /// No description provided for @alertLevelWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get alertLevelWarning;
+
+  /// No description provided for @alertLevelCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get alertLevelCritical;
+
+  /// No description provided for @alertTriggersWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggers when value {op} {threshold}'**
+  String alertTriggersWhen(String op, String threshold);
+
+  /// No description provided for @alertEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm enabled'**
+  String get alertEnabled;
+
+  /// No description provided for @alertNeedsCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one alarm level'**
+  String get alertNeedsCondition;
+
+  /// No description provided for @noAlertRules.
+  ///
+  /// In en, this message translates to:
+  /// **'No alerts yet. Tap Add alert to create one.'**
+  String get noAlertRules;
+
+  /// No description provided for @noAlertsReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'No new alerts.'**
+  String get noAlertsReceived;
+
+  /// No description provided for @noAlertsAcknowledged.
+  ///
+  /// In en, this message translates to:
+  /// **'No acknowledged alerts yet.'**
+  String get noAlertsAcknowledged;
+
+  /// No description provided for @acknowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge'**
+  String get acknowledge;
+
+  /// No description provided for @acknowledgeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge all'**
+  String get acknowledgeAll;
+
+  /// No description provided for @alertAcknowledged.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert acknowledged'**
+  String get alertAcknowledged;
+
+  /// No description provided for @alertAllAcknowledged.
+  ///
+  /// In en, this message translates to:
+  /// **'All alerts acknowledged'**
+  String get alertAllAcknowledged;
+
+  /// No description provided for @alertTapToAcknowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to acknowledge'**
+  String get alertTapToAcknowledge;
+
+  /// No description provided for @alertValueVsThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'{metric} = {value} ({op} {threshold})'**
+  String alertValueVsThreshold(
+    String metric,
+    String value,
+    String op,
+    String threshold,
+  );
+
+  /// No description provided for @alertRuleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 alarm} other{{count} alarms}}'**
+  String alertRuleCount(int count);
+
+  /// No description provided for @alertLevelCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 level} other{{count} levels}}'**
+  String alertLevelCount(int count);
+
+  /// No description provided for @csvAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert'**
+  String get csvAlert;
+
+  /// No description provided for @csvMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Metric'**
+  String get csvMetric;
+
+  /// No description provided for @csvThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold'**
+  String get csvThreshold;
+
+  /// No description provided for @csvAcknowledgedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged at'**
+  String get csvAcknowledgedAt;
+
+  /// No description provided for @alertsExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged alerts export'**
+  String get alertsExportTitle;
+
+  /// No description provided for @deleteAlertsRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete alerts by interval'**
+  String get deleteAlertsRange;
+
+  /// No description provided for @deleteAllAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all'**
+  String get deleteAllAlerts;
+
+  /// No description provided for @deleteAllAlertsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete every acknowledged alert? This action cannot be undone.'**
+  String get deleteAllAlertsBody;
+
+  /// No description provided for @alertsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No alerts deleted} =1{1 alert deleted} other{{count} alerts deleted}}'**
+  String alertsDeleted(int count);
+
+  /// No description provided for @valueKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Value type'**
+  String get valueKind;
+
+  /// No description provided for @valueKindNumeric.
+  ///
+  /// In en, this message translates to:
+  /// **'Measured value'**
+  String get valueKindNumeric;
+
+  /// No description provided for @valueKindBoolean.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes / no'**
+  String get valueKindBoolean;
+
+  /// No description provided for @valueKindBooleanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a measurable quantity — the metric is simply yes or no. Any non-zero reading is Yes (e.g. IN1, IN2 active); OK or 0 is No.'**
+  String get valueKindBooleanHint;
+
+  /// No description provided for @alertState.
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger when'**
+  String get alertState;
+
+  /// No description provided for @stateYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get stateYes;
+
+  /// No description provided for @stateNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get stateNo;
+
+  /// No description provided for @alertTriggersWhenState.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggers when the metric is {state}'**
+  String alertTriggersWhenState(String state);
+
+  /// No description provided for @alertValueState.
+  ///
+  /// In en, this message translates to:
+  /// **'{metric} = {state}'**
+  String alertValueState(String metric, String state);
 }
 
 class _AppLocalizationsDelegate
