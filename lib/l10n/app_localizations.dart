@@ -236,6 +236,12 @@ abstract class AppLocalizations {
   /// **'Connected to {broker}'**
   String connectedTo(String broker);
 
+  /// No description provided for @lastUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: {date}'**
+  String lastUpdate(String date);
+
   /// No description provided for @disconnected.
   ///
   /// In en, this message translates to:

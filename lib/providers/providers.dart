@@ -147,23 +147,32 @@ final latestReadingProvider = StreamProvider.autoDispose
     .family<Reading?, int>((ref, metricId) =>
         ref.watch(readingRepositoryProvider).watchLatest(metricId));
 
-/// Average of today's readings for a metric, shown on the stat tile. Null until
-/// the first reading of the day arrives.
+/// Keys a daily stat (avg/min/max) by metric + the calendar day to aggregate.
+/// [day] should be the metric's most recent reading date (normalized to the
+/// day start by the caller) so the stat tile keeps showing the last active
+/// day's figures instead of resetting once a new day has no data yet.
+typedef DailyStatKey = ({int metricId, DateTime day});
+
+/// Average of [DailyStatKey.day]'s readings for a metric, shown on the stat
+/// tile. Null when that day has no readings.
 final dailyAverageProvider = StreamProvider.autoDispose
-    .family<double?, int>((ref, metricId) =>
-        ref.watch(readingRepositoryProvider).watchDailyAverage(metricId));
+    .family<double?, DailyStatKey>((ref, key) => ref
+        .watch(readingRepositoryProvider)
+        .watchDailyAverage(key.metricId, key.day));
 
-/// Minimum of today's readings for a metric, shown on the stat tile when
-/// enabled. Null until the first reading of the day arrives.
+/// Minimum of [DailyStatKey.day]'s readings for a metric, shown on the stat
+/// tile when enabled. Null when that day has no readings.
 final dailyMinProvider = StreamProvider.autoDispose
-    .family<double?, int>((ref, metricId) =>
-        ref.watch(readingRepositoryProvider).watchDailyMin(metricId));
+    .family<double?, DailyStatKey>((ref, key) => ref
+        .watch(readingRepositoryProvider)
+        .watchDailyMin(key.metricId, key.day));
 
-/// Maximum of today's readings for a metric, shown on the stat tile when
-/// enabled. Null until the first reading of the day arrives.
+/// Maximum of [DailyStatKey.day]'s readings for a metric, shown on the stat
+/// tile when enabled. Null when that day has no readings.
 final dailyMaxProvider = StreamProvider.autoDispose
-    .family<double?, int>((ref, metricId) =>
-        ref.watch(readingRepositoryProvider).watchDailyMax(metricId));
+    .family<double?, DailyStatKey>((ref, key) => ref
+        .watch(readingRepositoryProvider)
+        .watchDailyMax(key.metricId, key.day));
 
 /// Alert-duration stats for a metric over the selected period, used by the
 /// alert-duration component. Keyed like [aggregatedProvider].

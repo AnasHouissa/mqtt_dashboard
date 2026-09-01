@@ -42,11 +42,12 @@ class ReadingRepository {
         .watchSingleOrNull();
   }
 
-  /// Reactive average of today's readings for a metric (local calendar day), or
-  /// null when there are none yet. Used by the stat tile's "average per day".
-  Stream<double?> watchDailyAverage(int metricId) {
-    final now = DateTime.now();
-    final range = _range(TimeBucket.day, now);
+  /// Reactive average of [day]'s readings for a metric (local calendar day), or
+  /// null when there are none. Used by the stat tile's "average per day",
+  /// anchored to the metric's most recent reading so the stat keeps showing the
+  /// last active day's figures instead of resetting once a new day has no data.
+  Stream<double?> watchDailyAverage(int metricId, DateTime day) {
+    final range = _range(TimeBucket.day, day);
     final query = _db.customSelect(
       "SELECT AVG(value) AS avg FROM readings "
       "WHERE metric_id = ?1 AND timestamp >= ?2 AND timestamp < ?3",
@@ -60,19 +61,18 @@ class ReadingRepository {
     return query.watch().map((rows) => rows.first.read<double?>('avg'));
   }
 
-  /// Reactive minimum of today's readings for a metric (local calendar day), or
-  /// null when there are none yet. Used by the stat tile's "daily min".
-  Stream<double?> watchDailyMin(int metricId) =>
-      _watchDailyAgg(metricId, 'MIN');
+  /// Reactive minimum of [day]'s readings for a metric (local calendar day), or
+  /// null when there are none. Used by the stat tile's "daily min".
+  Stream<double?> watchDailyMin(int metricId, DateTime day) =>
+      _watchDailyAgg(metricId, 'MIN', day);
 
-  /// Reactive maximum of today's readings for a metric (local calendar day), or
-  /// null when there are none yet. Used by the stat tile's "daily max".
-  Stream<double?> watchDailyMax(int metricId) =>
-      _watchDailyAgg(metricId, 'MAX');
+  /// Reactive maximum of [day]'s readings for a metric (local calendar day), or
+  /// null when there are none. Used by the stat tile's "daily max".
+  Stream<double?> watchDailyMax(int metricId, DateTime day) =>
+      _watchDailyAgg(metricId, 'MAX', day);
 
-  Stream<double?> _watchDailyAgg(int metricId, String fn) {
-    final now = DateTime.now();
-    final range = _range(TimeBucket.day, now);
+  Stream<double?> _watchDailyAgg(int metricId, String fn, DateTime day) {
+    final range = _range(TimeBucket.day, day);
     final query = _db.customSelect(
       "SELECT $fn(value) AS v FROM readings "
       "WHERE metric_id = ?1 AND timestamp >= ?2 AND timestamp < ?3",

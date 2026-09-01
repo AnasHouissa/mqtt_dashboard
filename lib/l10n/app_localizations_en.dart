@@ -82,6 +82,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String lastUpdate(String date) {
+    return 'Last updated: $date';
+  }
+
+  @override
   String get disconnected => 'Disconnected';
 
   @override

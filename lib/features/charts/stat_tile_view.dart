@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../data/repositories/dashboard_repository.dart';
 import '../../l10n/app_localizations.dart';
@@ -27,22 +28,32 @@ class StatTileView extends ConsumerWidget {
     final unit = config.unit ?? '';
 
     final reading = ref.watch(latestReadingProvider(item.metric.id));
-    final text = reading.maybeWhen(
-      data: (latest) => latest == null ? '—' : fmt(latest.value),
-      orElse: () => '—',
-    );
+    final latest = reading.maybeWhen(data: (v) => v, orElse: () => null);
+    final text = latest == null ? '—' : fmt(latest.value);
+
+    // Anchor the daily stats to the metric's last active day (the latest
+    // reading's calendar day) rather than today, so avg/min/max keep showing
+    // that day's figures instead of resetting once a new day has no data yet.
+    final anchorDay = latest == null
+        ? DateTime.now()
+        : DateTime(
+            latest.timestamp.year,
+            latest.timestamp.month,
+            latest.timestamp.day,
+          );
+    final dailyKey = (metricId: item.metric.id, day: anchorDay);
 
     final dailyAvg = ref
-        .watch(dailyAverageProvider(item.metric.id))
+        .watch(dailyAverageProvider(dailyKey))
         .maybeWhen(data: (v) => v, orElse: () => null);
     final dailyMin = config.showDailyMin
         ? ref
-            .watch(dailyMinProvider(item.metric.id))
+            .watch(dailyMinProvider(dailyKey))
             .maybeWhen(data: (v) => v, orElse: () => null)
         : null;
     final dailyMax = config.showDailyMax
         ? ref
-            .watch(dailyMaxProvider(item.metric.id))
+            .watch(dailyMaxProvider(dailyKey))
             .maybeWhen(data: (v) => v, orElse: () => null)
         : null;
 
@@ -112,6 +123,26 @@ class StatTileView extends ConsumerWidget {
                 Expanded(child: _Stat(label: label, value: value, color: fg)),
             ],
           ),
+          if (latest != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                l.lastUpdate(
+                  DateFormat.yMMMMEEEEd(locale)
+                      .add_Hm()
+                      .format(latest.timestamp),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: fg.withValues(alpha: 0.45),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

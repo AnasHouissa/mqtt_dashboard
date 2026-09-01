@@ -33,6 +33,12 @@
       "broker": { "type": "String" }
     }
   },
+  "lastUpdate": "Dernière mise à jour : {date}",
+  "@lastUpdate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
   "disconnected": "Déconnecté",
   "notConnectedTap": "Non connecté — appuyez pour connecter",
   "selectBrokerToConnect": "Se connecter à un broker",
